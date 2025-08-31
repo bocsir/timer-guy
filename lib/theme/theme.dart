@@ -44,7 +44,7 @@ FThemeData get blueDark {
 
 FTypography _typography({
   required FColors colors,
-  String defaultFontFamily = 'packages/forui/Inter',
+  String defaultFontFamily = 'IBM Plex Mono',
 }) => FTypography(
   xs: TextStyle(
     color: colors.foreground,
