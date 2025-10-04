@@ -2,7 +2,7 @@
 import 'package:flutter/material.dart';
 import 'package:forui/forui.dart';
 import 'package:proj/header.dart';
-import 'package:proj/timer_page.dart';
+import 'package:proj/workout_auth.dart';
 
 void main() {
   runApp(const MyApp());
@@ -36,8 +36,8 @@ class HomePageState extends State<HomePage> {
   @override
   Widget build(context) {
     return FScaffold(
-      header: Header(titleText: 'title'),
-      child: TimerPage(),
+      header: Header(titleText: 'Timer'),
+      child: WorkoutAuth(),
     );
   }
 }
