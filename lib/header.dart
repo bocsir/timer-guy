@@ -15,7 +15,7 @@ class Header extends StatelessWidget {
   Widget build(BuildContext context) {
     final title = titleText;
 
-    final colors = context.theme.colors;
+    final colors = FTheme.of(context).colors;
 
     return SafeArea(
       child: Padding(

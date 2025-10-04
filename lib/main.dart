@@ -35,9 +35,6 @@ class HomePage extends StatefulWidget {
 class HomePageState extends State<HomePage> {
   @override
   Widget build(context) {
-    return FScaffold(
-      header: Header(titleText: 'Timer'),
-      child: WorkoutAuth(),
-    );
+    return FScaffold(header: Header(), child: WorkoutAuth());
   }
 }
