@@ -22,7 +22,8 @@ class _WorkoutAuthState extends State<WorkoutAuth> {
   final _formKey = GlobalKey<FormState>();
 
   bool _validateForm() {
-    if (!_formKey.currentState!.validate()) {
+    final state = _formKey.currentState;
+    if (state != null && state.validate()) {
       return false;
     }
 
