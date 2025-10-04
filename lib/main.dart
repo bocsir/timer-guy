@@ -1,6 +1,7 @@
 // main.dart
 import 'package:flutter/material.dart';
 import 'package:forui/forui.dart';
+import 'package:proj/header.dart';
 import 'package:proj/timer_page.dart';
 
 void main() {
@@ -13,12 +14,12 @@ class MyApp extends StatelessWidget {
   // root widget
   @override
   Widget build(BuildContext context) {
+    final theme = FThemes.zinc.dark;
+
     return MaterialApp(
-      // wrap entire app widget tree `child` with FTheme
-      builder: (context, child) {
-        return FTheme(data: FThemes.yellow.dark, child: child!);
-      },
-      home: HomePage(),
+      builder: (_, child) => FTheme(data: theme, child: child!),
+      theme: theme.toApproximateMaterialTheme(),
+      home: const FScaffold(child: HomePage()),
       debugShowCheckedModeBanner: false,
     );
   }
@@ -35,8 +36,8 @@ class HomePageState extends State<HomePage> {
   @override
   Widget build(context) {
     return FScaffold(
-      header: const Row(children: [Text('timer app')]),
-      child: TimerPage(time: 3),
+      header: Header(titleText: 'title'),
+      child: TimerPage(),
     );
   }
 }

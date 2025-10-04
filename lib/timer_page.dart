@@ -3,37 +3,27 @@ import 'package:flutter/material.dart';
 import 'package:forui/forui.dart';
 import 'dart:async';
 
-class TimerPage extends StatefulWidget {
-  final int time;
+import 'package:proj/timer_auth.dart';
 
-  const TimerPage({required this.time, super.key});
+class TimerPage extends StatefulWidget {
+  const TimerPage({super.key});
 
   @override
   TimerPageState createState() => TimerPageState();
 }
 
 class TimerPageState extends State<TimerPage> {
+  final TextEditingController _timerController = TextEditingController();
+
   Timer? timer;
   int currTime = 0;
-  bool timeUp = false;
-
   @override
   void initState() {
     super.initState();
-    currTime = widget.time;
-  }
-
-  void startTimer() {
-    timeUp = false;
-    const s = Duration(seconds: 1);
-    timer = Timer.periodic(s, (Timer timer) {
-      currTime == 0
-          ? setState(() {
-              timer.cancel();
-              print('time up');
-              timeUp = true;
-            })
-          : setState(() => currTime--);
+    _timerController.addListener(() {
+      setState(() {
+        currTime = int.tryParse(_timerController.text) ?? 0;
+      });
     });
   }
 
@@ -45,8 +35,9 @@ class TimerPageState extends State<TimerPage> {
       mainAxisAlignment: MainAxisAlignment.center,
       spacing: 32,
       children: [
+        TimerAuth(timerController: _timerController),
         Text(
-          timeUp ? 'times up' : '$currTime',
+          currTime == 0 ? 'times up' : '$currTime',
           style: typography.xl3.copyWith(fontWeight: FontWeight.bold),
         ),
         Row(
@@ -62,8 +53,7 @@ class TimerPageState extends State<TimerPage> {
               style: FButtonStyle.ghost(),
               onPress: () {
                 setState(() {
-                  currTime = widget.time;
-                  timeUp = false;
+                  currTime = int.parse(_timerController.text);
                 });
               },
               child: Icon(FIcons.refreshCw),
@@ -74,9 +64,21 @@ class TimerPageState extends State<TimerPage> {
     );
   }
 
+  void startTimer() {
+    const s = Duration(seconds: 1);
+    timer = Timer.periodic(s, (Timer timer) {
+      currTime == 0
+          ? setState(() {
+              timer.cancel();
+            })
+          : setState(() => currTime--);
+    });
+  }
+
   @override
   void dispose() {
     timer?.cancel();
+    _timerController.dispose();
     super.dispose();
   }
 }
