@@ -1,6 +1,7 @@
 // workout_auth.dart
 import 'package:flutter/material.dart';
 import 'package:forui/forui.dart';
+import 'package:proj/theme/theme.dart';
 
 class WorkoutAuth extends StatefulWidget {
   const WorkoutAuth({super.key});
@@ -22,16 +23,16 @@ class _WorkoutAuthState extends State<WorkoutAuth> {
   @override
   Widget build(BuildContext context) {
     return Form(
-      child: Row(
-        mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        spacing: 16,
         children: [
-          // Rep Duration Picker
           Column(
             crossAxisAlignment: CrossAxisAlignment.center,
             children: [
-              Text('On Duration'),
+              Text('On'),
               ConstrainedBox(
-                constraints: BoxConstraints(maxHeight: 150, maxWidth: 120),
+                constraints: BoxConstraints(maxHeight: 150, maxWidth: 150),
                 child: FPicker(
                   controller: _controllers['repDuration'],
                   children: [
@@ -44,24 +45,33 @@ class _WorkoutAuthState extends State<WorkoutAuth> {
                       builder: (context, index) =>
                           Text((index % 60).toString().padLeft(2, '0')),
                     ),
+                    const Text(':'),
+                    FPickerWheel.builder(
+                      builder: (context, index) =>
+                          Text((index % 60).toString().padLeft(2, '0')),
+                    ),
                   ],
                 ),
               ),
             ],
           ),
-          // Rest Duration Picker
           Column(
             crossAxisAlignment: CrossAxisAlignment.center,
             children: [
-              Text('Off Duration'),
+              Text('Off'),
               ConstrainedBox(
-                constraints: BoxConstraints(maxHeight: 150, maxWidth: 120),
+                constraints: BoxConstraints(maxHeight: 150, maxWidth: 150),
                 child: FPicker(
                   controller: _controllers['restDuration'],
                   children: [
                     FPickerWheel.builder(
                       builder: (context, index) =>
                           Text((index % 12).toString().padLeft(2, '0')),
+                    ),
+                    const Text(':'),
+                    FPickerWheel.builder(
+                      builder: (context, index) =>
+                          Text((index % 60).toString().padLeft(2, '0')),
                     ),
                     const Text(':'),
                     FPickerWheel.builder(

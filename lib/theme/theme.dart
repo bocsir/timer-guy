@@ -15,6 +15,11 @@ extension TextExtension on FTypography {
         fontFamily: 'IBMPlexMono',
         height: 0,
       );
+  TextStyle get smGrey => sm.copyWith(
+    fontFamily: 'IBMPlexMono',
+    height: 0,
+    color: Color(0xFFa8a29e),
+  );
 }
 
 /// See https://forui.dev/docs/themes#customize-themes for more information.
@@ -28,7 +33,7 @@ FThemeData get zincDark {
     primary: Color(0xFFFAFAF9), // stone-100
     primaryForeground: Color(0xFF1C1917), // stone-800
     secondary: Color(0xFF1C1917), // stone-800
-    secondaryForeground: Color(0xFFFAFAFA), //
+    secondaryForeground: Color(0xFFa8a29e), // stone-400
     muted: Color(0xFF27272A), //
     mutedForeground: Color(0xFFA1A1AA), //
     destructive: Color(0xFF7F1D1D), //
