@@ -6,13 +6,15 @@ import 'package:proj/theme/theme.dart';
 
 class Header extends StatelessWidget {
   final String? backBtnText;
-  final String titleText;
+  final String? titleText;
   //maybe add settings stuff too
 
-  const Header({super.key, this.backBtnText, required this.titleText});
+  const Header({super.key, this.backBtnText, this.titleText});
 
   @override
   Widget build(BuildContext context) {
+    final title = titleText;
+
     final colors = context.theme.colors;
 
     return SafeArea(
@@ -49,13 +51,11 @@ class Header extends StatelessWidget {
                       ),
               ),
             ),
-            Align(
-              alignment: Alignment.center,
-              child: Text(
-                titleText,
-                style: context.theme.typography.lgSemibold,
+            if (title != null && title.isNotEmpty)
+              Align(
+                alignment: Alignment.center,
+                child: Text(title, style: context.theme.typography.lgSemibold),
               ),
-            ),
             Align(
               alignment: Alignment.centerRight,
               child: FButton.icon(
