@@ -21,63 +21,60 @@ class _WorkoutAuthState extends State<WorkoutAuth> {
 
   @override
   Widget build(BuildContext context) {
-    return Stack(
-      children: [
-        // Invisible overlay to detect clicks outside
-        Row(
-          mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-          children: [
-            // Rep Duration Picker
-            Column(
-              crossAxisAlignment: CrossAxisAlignment.center,
-              children: [
-                Text('On Duration'),
-                ConstrainedBox(
-                  constraints: BoxConstraints(maxHeight: 150, maxWidth: 120),
-                  child: FPicker(
-                    controller: _controllers['repDuration'],
-                    children: [
-                      FPickerWheel.builder(
-                        builder: (context, index) =>
-                            Text((index % 12).toString().padLeft(2, '0')),
-                      ),
-                      const Text(':'),
-                      FPickerWheel.builder(
-                        builder: (context, index) =>
-                            Text((index % 60).toString().padLeft(2, '0')),
-                      ),
-                    ],
-                  ),
+    return Form(
+      child: Row(
+        mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+        children: [
+          // Rep Duration Picker
+          Column(
+            crossAxisAlignment: CrossAxisAlignment.center,
+            children: [
+              Text('On Duration'),
+              ConstrainedBox(
+                constraints: BoxConstraints(maxHeight: 150, maxWidth: 120),
+                child: FPicker(
+                  controller: _controllers['repDuration'],
+                  children: [
+                    FPickerWheel.builder(
+                      builder: (context, index) =>
+                          Text((index % 12).toString().padLeft(2, '0')),
+                    ),
+                    const Text(':'),
+                    FPickerWheel.builder(
+                      builder: (context, index) =>
+                          Text((index % 60).toString().padLeft(2, '0')),
+                    ),
+                  ],
                 ),
-              ],
-            ),
-            // Rest Duration Picker
-            Column(
-              crossAxisAlignment: CrossAxisAlignment.center,
-              children: [
-                Text('Off Duration'),
-                ConstrainedBox(
-                  constraints: BoxConstraints(maxHeight: 150, maxWidth: 120),
-                  child: FPicker(
-                    controller: _controllers['restDuration'],
-                    children: [
-                      FPickerWheel.builder(
-                        builder: (context, index) =>
-                            Text((index % 12).toString().padLeft(2, '0')),
-                      ),
-                      const Text(':'),
-                      FPickerWheel.builder(
-                        builder: (context, index) =>
-                            Text((index % 60).toString().padLeft(2, '0')),
-                      ),
-                    ],
-                  ),
+              ),
+            ],
+          ),
+          // Rest Duration Picker
+          Column(
+            crossAxisAlignment: CrossAxisAlignment.center,
+            children: [
+              Text('Off Duration'),
+              ConstrainedBox(
+                constraints: BoxConstraints(maxHeight: 150, maxWidth: 120),
+                child: FPicker(
+                  controller: _controllers['restDuration'],
+                  children: [
+                    FPickerWheel.builder(
+                      builder: (context, index) =>
+                          Text((index % 12).toString().padLeft(2, '0')),
+                    ),
+                    const Text(':'),
+                    FPickerWheel.builder(
+                      builder: (context, index) =>
+                          Text((index % 60).toString().padLeft(2, '0')),
+                    ),
+                  ],
                 ),
-              ],
-            ),
-          ],
-        ),
-      ],
+              ),
+            ],
+          ),
+        ],
+      ),
     );
   }
 }
