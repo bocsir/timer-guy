@@ -1,7 +1,6 @@
 // workout_auth.dart
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
-import 'package:forui/widgets/text_field.dart';
+import 'package:forui/forui.dart';
 
 class WorkoutAuth extends StatefulWidget {
   const WorkoutAuth({super.key});
@@ -11,10 +10,10 @@ class WorkoutAuth extends StatefulWidget {
 }
 
 class _WorkoutAuthState extends State<WorkoutAuth> {
-  final Map<String, TextEditingController> _controllers = {
+  final Map<String, dynamic> _controllers = {
     'repCount': TextEditingController(),
-    'repDuration': TextEditingController(),
-    'restDuration': TextEditingController(),
+    'repDuration': FPickerController(initialIndexes: [0, 0, 0]),
+    'restDuration': FPickerController(initialIndexes: [0, 0, 0]),
     'setCount': TextEditingController(),
   };
 
@@ -22,17 +21,63 @@ class _WorkoutAuthState extends State<WorkoutAuth> {
 
   @override
   Widget build(BuildContext context) {
-    return Form(
-      key: _formKey,
-      child: ConstrainedBox(
-        constraints: BoxConstraints(maxWidth: 60),
-        child: FTextField(
-          label: Text('Time (s):'),
-          controller: _controllers['repDuration'],
-          keyboardType: TextInputType.number,
-          inputFormatters: [FilteringTextInputFormatter.digitsOnly],
+    return Stack(
+      children: [
+        // Invisible overlay to detect clicks outside
+        Row(
+          mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+          children: [
+            // Rep Duration Picker
+            Column(
+              crossAxisAlignment: CrossAxisAlignment.center,
+              children: [
+                Text('On Duration'),
+                ConstrainedBox(
+                  constraints: BoxConstraints(maxHeight: 150, maxWidth: 120),
+                  child: FPicker(
+                    controller: _controllers['repDuration'],
+                    children: [
+                      FPickerWheel.builder(
+                        builder: (context, index) =>
+                            Text((index % 12).toString().padLeft(2, '0')),
+                      ),
+                      const Text(':'),
+                      FPickerWheel.builder(
+                        builder: (context, index) =>
+                            Text((index % 60).toString().padLeft(2, '0')),
+                      ),
+                    ],
+                  ),
+                ),
+              ],
+            ),
+            // Rest Duration Picker
+            Column(
+              crossAxisAlignment: CrossAxisAlignment.center,
+              children: [
+                Text('Off Duration'),
+                ConstrainedBox(
+                  constraints: BoxConstraints(maxHeight: 150, maxWidth: 120),
+                  child: FPicker(
+                    controller: _controllers['restDuration'],
+                    children: [
+                      FPickerWheel.builder(
+                        builder: (context, index) =>
+                            Text((index % 12).toString().padLeft(2, '0')),
+                      ),
+                      const Text(':'),
+                      FPickerWheel.builder(
+                        builder: (context, index) =>
+                            Text((index % 60).toString().padLeft(2, '0')),
+                      ),
+                    ],
+                  ),
+                ),
+              ],
+            ),
+          ],
         ),
-      ),
+      ],
     );
   }
 }
