@@ -20,6 +20,7 @@ class _WorkoutAuthState extends State<WorkoutAuth> {
   };
 
   final _formKey = GlobalKey<FormState>();
+  bool _formSubmitted = false;
 
   bool _validateForm() {
     final state = _formKey.currentState;
@@ -34,8 +35,11 @@ class _WorkoutAuthState extends State<WorkoutAuth> {
       return false;
     }
 
-    final repDuration = _controllers['repDuration'].selectedIndexes;
-    final restDuration = _controllers['restDuration'].selectedIndexes;
+    final repController = _controllers['repDuration'] as FPickerController;
+    final restController = _controllers['restDuration'] as FPickerController;
+
+    final repDuration = repController.value;
+    final restDuration = restController.value;
 
     if (!_isTimeGreaterThanZero(repDuration) ||
         !_isTimeGreaterThanZero(restDuration)) {
@@ -52,7 +56,21 @@ class _WorkoutAuthState extends State<WorkoutAuth> {
     return hours > 0 || minutes > 0 || seconds > 0;
   }
 
+  bool _shouldShowRepDurationError() {
+    final controller = _controllers['repDuration'] as FPickerController;
+    return _formSubmitted && !_isTimeGreaterThanZero(controller.value);
+  }
+
+  bool _shouldShowRestDurationError() {
+    final controller = _controllers['restDuration'] as FPickerController;
+    return _formSubmitted && !_isTimeGreaterThanZero(controller.value);
+  }
+
   void _onDonePressed() {
+    setState(() {
+      _formSubmitted = true;
+    });
+
     if (_validateForm()) {
       // do stuff
     }
@@ -82,26 +100,26 @@ class _WorkoutAuthState extends State<WorkoutAuth> {
                   Expanded(
                     child: SizedBox(
                       height: 90,
-                    child: FTextFormField(
-                      label: Text(
-                        'Reps',
-                        style: FTheme.of(context).typography.lgSemibold,
-                      ),
-                      controller: _controllers['repCount'],
-                      keyboardType: TextInputType.numberWithOptions(),
+                      child: FTextFormField(
+                        label: Text(
+                          'Reps',
+                          style: FTheme.of(context).typography.lgSemibold,
+                        ),
+                        controller: _controllers['repCount'],
+                        keyboardType: TextInputType.numberWithOptions(),
                         inputFormatters: [
                           FilteringTextInputFormatter.digitsOnly,
                         ],
-                      validator: (value) {
-                        if (value == null || value.trim().isEmpty) {
-                          return 'Required';
-                        }
-                        final intValue = int.tryParse(value);
-                        if (intValue == 0) {
-                          return '0 reps?';
-                        }
-                        return null;
-                      },
+                        validator: (value) {
+                          if (value == null || value.trim().isEmpty) {
+                            return 'Required';
+                          }
+                          final intValue = int.tryParse(value);
+                          if (intValue == 0) {
+                            return '0 reps?';
+                          }
+                          return null;
+                        },
                       ),
                     ),
                   ),
@@ -109,26 +127,26 @@ class _WorkoutAuthState extends State<WorkoutAuth> {
                   Expanded(
                     child: SizedBox(
                       height: 90,
-                    child: FTextFormField(
-                      label: Text(
-                        'Sets',
-                        style: FTheme.of(context).typography.lgSemibold,
-                      ),
-                      controller: _controllers['setCount'],
-                      keyboardType: TextInputType.numberWithOptions(),
+                      child: FTextFormField(
+                        label: Text(
+                          'Sets',
+                          style: FTheme.of(context).typography.lgSemibold,
+                        ),
+                        controller: _controllers['setCount'],
+                        keyboardType: TextInputType.numberWithOptions(),
                         inputFormatters: [
                           FilteringTextInputFormatter.digitsOnly,
                         ],
-                      validator: (value) {
-                        if (value == null || value.trim().isEmpty) {
-                          return 'Required';
-                        }
-                        final intValue = int.tryParse(value);
-                        if (intValue == 0) {
-                          return '0 sets?';
-                        }
-                        return null;
-                      },
+                        validator: (value) {
+                          if (value == null || value.trim().isEmpty) {
+                            return 'Required';
+                          }
+                          final intValue = int.tryParse(value);
+                          if (intValue == 0) {
+                            return '0 sets?';
+                          }
+                          return null;
+                        },
                       ),
                     ),
                   ),
@@ -163,6 +181,11 @@ class _WorkoutAuthState extends State<WorkoutAuth> {
                       ],
                     ),
                   ),
+                  if (_shouldShowRepDurationError())
+                    Text(
+                      'Enter a time > 0 seconds',
+                      style: FTheme.of(context).typography.smError,
+                    ),
                 ],
               ),
               Column(
@@ -194,6 +217,11 @@ class _WorkoutAuthState extends State<WorkoutAuth> {
                       ],
                     ),
                   ),
+                  if (_shouldShowRestDurationError())
+                    Text(
+                      'Enter a time > 0 seconds',
+                      style: FTheme.of(context).typography.smError,
+                    ),
                 ],
               ),
               // Done button
