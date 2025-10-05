@@ -11,6 +11,7 @@ class WorkoutAuth extends StatefulWidget {
   State<WorkoutAuth> createState() => _WorkoutAuthState();
 }
 
+///TODO: better validation setup for FPickers
 class _WorkoutAuthState extends State<WorkoutAuth> {
   final Map<String, dynamic> _controllers = {
     'repCount': TextEditingController(),
