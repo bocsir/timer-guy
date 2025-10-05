@@ -14,6 +14,7 @@ class WorkoutAuth extends StatefulWidget {
 ///TODO: better validation setup for FPickers
 class _WorkoutAuthState extends State<WorkoutAuth> {
   final Map<String, dynamic> _controllers = {
+    'name': TextEditingController(),
     'repCount': TextEditingController(),
     'repDuration': FPickerController(initialIndexes: [0, 0, 0]),
     'restDuration': FPickerController(initialIndexes: [0, 0, 0]),
@@ -23,31 +24,52 @@ class _WorkoutAuthState extends State<WorkoutAuth> {
   final _formKey = GlobalKey<FormState>();
   bool _formSubmitted = false;
 
+  // Validation functions to eliminate duplication
+  String? _validateRequired(String? value) {
+    if (value == null || value.trim().isEmpty) {
+      return 'Required';
+    }
+    return null;
+  }
+
+  String? _validatePositiveNumber(String? value, String fieldName) {
+    final requiredError = _validateRequired(value);
+    if (requiredError != null) return requiredError;
+
+    final intValue = int.tryParse(value!.trim());
+    if (intValue == null) {
+      return 'Enter a valid number';
+    }
+    if (intValue <= 0) {
+      return '0 ${fieldName.toLowerCase()}?';
+    }
+    return null;
+  }
+
+  String? _validateTimeSelection(List<int> timeIndexes) {
+    if (!_isTimeGreaterThanZero(timeIndexes)) {
+      return 'Enter a time > 0 seconds';
+    }
+    return null;
+  }
+
   bool _validateForm() {
+    // First validate the form fields
     final state = _formKey.currentState;
-    if (state != null && state.validate()) {
+    bool isFormValid = state?.validate() ?? false;
+
+    if (!isFormValid) {
       return false;
     }
 
-    final repCount = _controllers['repCount'].text.trim();
-    final setCount = _controllers['setCount'].text.trim();
-
-    if (repCount.isEmpty || setCount.isEmpty) {
-      return false;
-    }
-
+    // Then validate the picker values (which aren't part of the form)
     final repController = _controllers['repDuration'] as FPickerController;
     final restController = _controllers['restDuration'] as FPickerController;
 
-    final repDuration = repController.value;
-    final restDuration = restController.value;
+    final repDurationError = _validateTimeSelection(repController.value);
+    final restDurationError = _validateTimeSelection(restController.value);
 
-    if (!_isTimeGreaterThanZero(repDuration) ||
-        !_isTimeGreaterThanZero(restDuration)) {
-      return false;
-    }
-
-    return true;
+    return repDurationError == null && restDurationError == null;
   }
 
   bool _isTimeGreaterThanZero(List<int> timeIndexes) {
@@ -59,12 +81,12 @@ class _WorkoutAuthState extends State<WorkoutAuth> {
 
   bool _shouldShowRepDurationError() {
     final controller = _controllers['repDuration'] as FPickerController;
-    return _formSubmitted && !_isTimeGreaterThanZero(controller.value);
+    return _formSubmitted && _validateTimeSelection(controller.value) != null;
   }
 
   bool _shouldShowRestDurationError() {
     final controller = _controllers['restDuration'] as FPickerController;
-    return _formSubmitted && !_isTimeGreaterThanZero(controller.value);
+    return _formSubmitted && _validateTimeSelection(controller.value) != null;
   }
 
   void _onDonePressed() {
@@ -73,14 +95,14 @@ class _WorkoutAuthState extends State<WorkoutAuth> {
     });
 
     if (_validateForm()) {
-      // do stuff
+      Navigator.of(context).pop(); // go back to list of workouts
     }
   }
 
   @override
   Widget build(BuildContext context) {
     return Column(
-      spacing: 32,
+      spacing: 16,
       children: [
         Text(
           'Create Workout',
@@ -93,8 +115,19 @@ class _WorkoutAuthState extends State<WorkoutAuth> {
         Form(
           key: _formKey,
           child: Column(
-            spacing: 32,
+            spacing: 8,
             children: [
+              SizedBox(
+                height: 90,
+                child: FTextFormField(
+                  label: Text(
+                    'Name',
+                    style: FTheme.of(context).typography.lgSemibold,
+                  ),
+                  controller: _controllers['name'],
+                  validator: _validateRequired,
+                ),
+              ),
               Row(
                 mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                 children: [
@@ -111,16 +144,8 @@ class _WorkoutAuthState extends State<WorkoutAuth> {
                         inputFormatters: [
                           FilteringTextInputFormatter.digitsOnly,
                         ],
-                        validator: (value) {
-                          if (value == null || value.trim().isEmpty) {
-                            return 'Required';
-                          }
-                          final intValue = int.tryParse(value);
-                          if (intValue == 0) {
-                            return '0 reps?';
-                          }
-                          return null;
-                        },
+                        validator: (value) =>
+                            _validatePositiveNumber(value, 'reps'),
                       ),
                     ),
                   ),
@@ -138,16 +163,8 @@ class _WorkoutAuthState extends State<WorkoutAuth> {
                         inputFormatters: [
                           FilteringTextInputFormatter.digitsOnly,
                         ],
-                        validator: (value) {
-                          if (value == null || value.trim().isEmpty) {
-                            return 'Required';
-                          }
-                          final intValue = int.tryParse(value);
-                          if (intValue == 0) {
-                            return '0 sets?';
-                          }
-                          return null;
-                        },
+                        validator: (value) =>
+                            _validatePositiveNumber(value, 'sets'),
                       ),
                     ),
                   ),
@@ -160,33 +177,46 @@ class _WorkoutAuthState extends State<WorkoutAuth> {
                     style: FTheme.of(context).typography.lgSemibold,
                   ),
                   Text('hh:mm:ss', style: FTheme.of(context).typography.smGrey),
-                  ConstrainedBox(
-                    constraints: BoxConstraints(maxHeight: 150),
-                    child: FPicker(
-                      controller: _controllers['repDuration'],
+                  SizedBox(
+                    height: 150,
+                    child: Column(
                       children: [
-                        FPickerWheel.builder(
-                          builder: (context, index) =>
-                              Text((index % 12).toString().padLeft(2, '0')),
+                        Expanded(
+                          child: FPicker(
+                            controller: _controllers['repDuration'],
+                            children: [
+                              FPickerWheel.builder(
+                                builder: (context, index) => Text(
+                                  (index % 12).toString().padLeft(2, '0'),
+                                ),
+                              ),
+                              const Text(':'),
+                              FPickerWheel.builder(
+                                builder: (context, index) => Text(
+                                  (index % 60).toString().padLeft(2, '0'),
+                                ),
+                              ),
+                              const Text(':'),
+                              FPickerWheel.builder(
+                                builder: (context, index) => Text(
+                                  (index % 60).toString().padLeft(2, '0'),
+                                ),
+                              ),
+                            ],
+                          ),
                         ),
-                        const Text(':'),
-                        FPickerWheel.builder(
-                          builder: (context, index) =>
-                              Text((index % 60).toString().padLeft(2, '0')),
-                        ),
-                        const Text(':'),
-                        FPickerWheel.builder(
-                          builder: (context, index) =>
-                              Text((index % 60).toString().padLeft(2, '0')),
-                        ),
+                        (_shouldShowRepDurationError())
+                            ? SizedBox(
+                                height: 20,
+                                child: Text(
+                                  'Enter a time > 0 seconds',
+                                  style: FTheme.of(context).typography.smError,
+                                ),
+                              )
+                            : SizedBox(height: 20),
                       ],
                     ),
                   ),
-                  if (_shouldShowRepDurationError())
-                    Text(
-                      'Enter a time > 0 seconds',
-                      style: FTheme.of(context).typography.smError,
-                    ),
                 ],
               ),
               Column(
@@ -218,11 +248,15 @@ class _WorkoutAuthState extends State<WorkoutAuth> {
                       ],
                     ),
                   ),
-                  if (_shouldShowRestDurationError())
-                    Text(
-                      'Enter a time > 0 seconds',
-                      style: FTheme.of(context).typography.smError,
-                    ),
+                  (_shouldShowRestDurationError())
+                      ? SizedBox(
+                          height: 20,
+                          child: Text(
+                            'Enter a time > 0 seconds',
+                            style: FTheme.of(context).typography.smError,
+                          ),
+                        )
+                      : SizedBox(height: 20),
                 ],
               ),
               // Done button
