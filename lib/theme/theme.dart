@@ -18,7 +18,12 @@ extension TextExtension on FTypography {
   TextStyle get smGrey => sm.copyWith(
     fontFamily: 'IBMPlexMono',
     height: 0,
-    color: Color(0xFFa8a29e),
+    color: Color(0xFFa8a29e), // stone-400
+  );
+  TextStyle get smError => sm.copyWith(
+    fontFamily: 'IBMPlexMono',
+    height: 0,
+    color: Color(0xFF991b1b), // red-800
   );
 }
 
@@ -36,9 +41,9 @@ FThemeData get zincDark {
     secondaryForeground: Color(0xFFa8a29e), // stone-400
     muted: Color(0xFF27272A), //
     mutedForeground: Color(0xFFA1A1AA), //
-    destructive: Color(0xFF7F1D1D), //
+    destructive: Color(0xFF991b1b), // red-800
     destructiveForeground: Color(0xFFFAFAFA), //
-    error: Color(0xFF7F1D1D), //
+    error: Color(0xFF991b1b), // red-800
     errorForeground: Color(0xFFFAFAFA), //
     border: Color(0xFF44403C), // stone-700
   );
