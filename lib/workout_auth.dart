@@ -11,7 +11,6 @@ class WorkoutAuth extends StatefulWidget {
   State<WorkoutAuth> createState() => _WorkoutAuthState();
 }
 
-///TODO: better validation setup for FPickers
 class _WorkoutAuthState extends State<WorkoutAuth> {
   final Map<String, dynamic> _controllers = {
     'name': TextEditingController(),
@@ -24,7 +23,6 @@ class _WorkoutAuthState extends State<WorkoutAuth> {
   final _formKey = GlobalKey<FormState>();
   bool _formSubmitted = false;
 
-  // Validation functions to eliminate duplication
   String? _validateRequired(String? value) {
     if (value == null || value.trim().isEmpty) {
       return 'Required';
@@ -62,7 +60,6 @@ class _WorkoutAuthState extends State<WorkoutAuth> {
       return false;
     }
 
-    // Then validate the picker values (which aren't part of the form)
     final repController = _controllers['repDuration'] as FPickerController;
     final restController = _controllers['restDuration'] as FPickerController;
 
