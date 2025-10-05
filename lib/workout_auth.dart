@@ -80,6 +80,8 @@ class _WorkoutAuthState extends State<WorkoutAuth> {
                 mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                 children: [
                   Expanded(
+                    child: SizedBox(
+                      height: 90,
                     child: FTextFormField(
                       label: Text(
                         'Reps',
@@ -87,7 +89,9 @@ class _WorkoutAuthState extends State<WorkoutAuth> {
                       ),
                       controller: _controllers['repCount'],
                       keyboardType: TextInputType.numberWithOptions(),
-                      inputFormatters: [FilteringTextInputFormatter.digitsOnly],
+                        inputFormatters: [
+                          FilteringTextInputFormatter.digitsOnly,
+                        ],
                       validator: (value) {
                         if (value == null || value.trim().isEmpty) {
                           return 'Required';
@@ -98,10 +102,13 @@ class _WorkoutAuthState extends State<WorkoutAuth> {
                         }
                         return null;
                       },
+                      ),
                     ),
                   ),
                   SizedBox(width: 64),
                   Expanded(
+                    child: SizedBox(
+                      height: 90,
                     child: FTextFormField(
                       label: Text(
                         'Sets',
@@ -109,7 +116,9 @@ class _WorkoutAuthState extends State<WorkoutAuth> {
                       ),
                       controller: _controllers['setCount'],
                       keyboardType: TextInputType.numberWithOptions(),
-                      inputFormatters: [FilteringTextInputFormatter.digitsOnly],
+                        inputFormatters: [
+                          FilteringTextInputFormatter.digitsOnly,
+                        ],
                       validator: (value) {
                         if (value == null || value.trim().isEmpty) {
                           return 'Required';
@@ -120,6 +129,7 @@ class _WorkoutAuthState extends State<WorkoutAuth> {
                         }
                         return null;
                       },
+                      ),
                     ),
                   ),
                 ],
