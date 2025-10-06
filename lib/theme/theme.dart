@@ -11,7 +11,7 @@ extension TextExtension on FTypography {
   TextStyle get lgSemibold =>
       // idk why height needs to be zero for things to be centered
       lg.copyWith(
-        fontWeight: FontWeight.w700,
+        fontWeight: FontWeight.bold,
         fontFamily: 'IBMPlexMono',
         height: 0,
       );
@@ -23,8 +23,8 @@ extension TextExtension on FTypography {
   TextStyle get smError => sm.copyWith(
     fontFamily: 'IBMPlexMono',
     height: 0,
-    color: Color(0xFF7f1d1d),
-    fontWeight: FontWeight.w700,
+    color: Color(0xFF991b1b), // red-800
+    fontWeight: FontWeight.bold,
   );
 }
 
@@ -42,9 +42,9 @@ FThemeData get zincDark {
     secondaryForeground: Color(0xFFa8a29e), // stone-400
     muted: Color(0xFF27272A), //
     mutedForeground: Color(0xFFA1A1AA), //
-    destructive: Color(0xFF7f1d1d),
+    destructive: Color(0xFF991b1b), // red-800
     destructiveForeground: Color(0xFFFAFAFA), //
-    error: Color(0xFF7f1d1d),
+    error: Color(0xFF991b1b), // red-800
     errorForeground: Color(0xFFFAFAFA), //
     border: Color(0xFF44403C), // stone-700
   );

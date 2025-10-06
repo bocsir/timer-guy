@@ -15,7 +15,7 @@ class MyApp extends StatelessWidget {
   // root widget
   @override
   Widget build(BuildContext context) {
-    final theme = FThemes.zinc.dark;
+    final theme = zincDark;
 
     return MaterialApp(
       builder: (_, child) => FTheme(data: theme, child: child!),
