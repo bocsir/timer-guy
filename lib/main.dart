@@ -1,11 +1,19 @@
 // main.dart
 import 'package:flutter/material.dart';
 import 'package:forui/forui.dart';
+import 'package:hive_ce_flutter/hive_flutter.dart';
+import 'package:proj/hive/hive_boxes.dart';
+import 'package:proj/models/workout.dart';
 import 'package:proj/header.dart';
+import 'package:proj/theme/theme.dart';
 import 'package:proj/workout_auth.dart';
 import 'package:proj/workout_list.dart';
 
-void main() {
+Future<void> main() async {
+  // init hive
+  await Hive.initFlutter();
+  // open workoutsBox before starting app
+  await Hive.openBox<Workout>(workoutBox);
   runApp(const MyApp());
 }
 
@@ -19,7 +27,11 @@ class MyApp extends StatelessWidget {
 
     return MaterialApp(
       builder: (_, child) => FTheme(data: theme, child: child!),
-      theme: theme.toApproximateMaterialTheme(),
+      theme: theme.toApproximateMaterialTheme().copyWith(
+        textTheme: theme.toApproximateMaterialTheme().textTheme.apply(
+          fontFamily: 'IBMPlexMono',
+        ),
+      ),
       home: const FScaffold(child: HomePage()),
       debugShowCheckedModeBanner: false,
     );
