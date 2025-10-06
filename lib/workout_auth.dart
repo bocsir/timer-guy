@@ -2,6 +2,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:forui/forui.dart';
+import 'package:proj/header.dart';
 import 'package:proj/theme/theme.dart';
 
 class WorkoutAuth extends StatefulWidget {
@@ -22,6 +23,182 @@ class _WorkoutAuthState extends State<WorkoutAuth> {
 
   final _formKey = GlobalKey<FormState>();
   bool _formSubmitted = false;
+
+  @override
+  Widget build(BuildContext context) {
+    return FScaffold(
+      header: Header(),
+      child: Column(
+        spacing: 16,
+        children: [
+          Text(
+            'Create Workout',
+            style: FTheme.of(context).typography.lgSemibold,
+          ),
+          Form(
+            key: _formKey,
+            child: Column(
+              spacing: 8,
+              children: [
+                SizedBox(
+                  height: 90,
+                  child: FTextFormField(
+                    label: Text(
+                      'Name',
+                      style: FTheme.of(context).typography.lgSemibold,
+                    ),
+                    controller: _controllers['name'],
+                    validator: _validateRequired,
+                  ),
+                ),
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                  children: [
+                    Expanded(
+                      child: SizedBox(
+                        height: 90,
+                        child: FTextFormField(
+                          label: Text(
+                            'Reps',
+                            style: FTheme.of(context).typography.lgSemibold,
+                          ),
+                          controller: _controllers['repCount'],
+                          keyboardType: TextInputType.numberWithOptions(),
+                          inputFormatters: [
+                            FilteringTextInputFormatter.digitsOnly,
+                          ],
+                          validator: (value) =>
+                              _validatePositiveNumber(value, 'reps'),
+                        ),
+                      ),
+                    ),
+                    SizedBox(width: 64),
+                    Expanded(
+                      child: SizedBox(
+                        height: 90,
+                        child: FTextFormField(
+                          label: Text(
+                            'Sets',
+                            style: FTheme.of(context).typography.lgSemibold,
+                          ),
+                          controller: _controllers['setCount'],
+                          keyboardType: TextInputType.numberWithOptions(),
+                          inputFormatters: [
+                            FilteringTextInputFormatter.digitsOnly,
+                          ],
+                          validator: (value) =>
+                              _validatePositiveNumber(value, 'sets'),
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
+                Column(
+                  children: [
+                    Text(
+                      'Time On',
+                      style: FTheme.of(context).typography.lgSemibold,
+                    ),
+                    Text(
+                      'hh:mm:ss',
+                      style: FTheme.of(context).typography.smGrey,
+                    ),
+                    SizedBox(
+                      height: 150,
+                      child: Column(
+                        children: [
+                          Expanded(
+                            child: FPicker(
+                              controller: _controllers['repDuration'],
+                              children: [
+                                FPickerWheel.builder(
+                                  builder: (context, index) => Text(
+                                    (index % 12).toString().padLeft(2, '0'),
+                                  ),
+                                ),
+                                const Text(':'),
+                                FPickerWheel.builder(
+                                  builder: (context, index) => Text(
+                                    (index % 60).toString().padLeft(2, '0'),
+                                  ),
+                                ),
+                                const Text(':'),
+                                FPickerWheel.builder(
+                                  builder: (context, index) => Text(
+                                    (index % 60).toString().padLeft(2, '0'),
+                                  ),
+                                ),
+                              ],
+                            ),
+                          ),
+                          (_shouldShowRepDurationError())
+                              ? SizedBox(
+                                  height: 20,
+                                  child: Text(
+                                    'Enter a time > 0 seconds',
+                                    style: FTheme.of(
+                                      context,
+                                    ).typography.smError,
+                                  ),
+                                )
+                              : SizedBox(height: 20),
+                        ],
+                      ),
+                    ),
+                  ],
+                ),
+                Column(
+                  children: [
+                    Text(
+                      'Time Off',
+                      style: FTheme.of(context).typography.lgSemibold,
+                    ),
+                    Text(
+                      'hh:mm:ss',
+                      style: FTheme.of(context).typography.smGrey,
+                    ),
+                    ConstrainedBox(
+                      constraints: BoxConstraints(maxHeight: 150),
+                      child: FPicker(
+                        controller: _controllers['restDuration'],
+                        children: [
+                          FPickerWheel.builder(
+                            builder: (context, index) =>
+                                Text((index % 12).toString().padLeft(2, '0')),
+                          ),
+                          const Text(':'),
+                          FPickerWheel.builder(
+                            builder: (context, index) =>
+                                Text((index % 60).toString().padLeft(2, '0')),
+                          ),
+                          const Text(':'),
+                          FPickerWheel.builder(
+                            builder: (context, index) =>
+                                Text((index % 60).toString().padLeft(2, '0')),
+                          ),
+                        ],
+                      ),
+                    ),
+                    (_shouldShowRestDurationError())
+                        ? SizedBox(
+                            height: 20,
+                            child: Text(
+                              'Enter a time > 0 seconds',
+                              style: FTheme.of(context).typography.smError,
+                            ),
+                          )
+                        : SizedBox(height: 20),
+                  ],
+                ),
+                // Done button
+                FButton(onPress: _onDonePressed, child: const Text('Done')),
+              ],
+            ),
+          ),
+        ],
+      ),
+    );
+  }
 
   String? _validateRequired(String? value) {
     if (value == null || value.trim().isEmpty) {
@@ -52,7 +229,6 @@ class _WorkoutAuthState extends State<WorkoutAuth> {
   }
 
   bool _validateForm() {
-    // First validate the form fields
     final state = _formKey.currentState;
     bool isFormValid = state?.validate() ?? false;
 
@@ -92,176 +268,7 @@ class _WorkoutAuthState extends State<WorkoutAuth> {
     });
 
     if (_validateForm()) {
-      Navigator.of(context).pop(); // go back to list of workouts
+      Navigator.of(context).pop();
     }
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    return Column(
-      spacing: 16,
-      children: [
-        Text(
-          'Create Workout',
-          style: FTheme.of(context).typography.xl.copyWith(
-            fontWeight: FontWeight.w700,
-            fontFamily: 'IBMPlexMono',
-            height: 0,
-          ),
-        ),
-        Form(
-          key: _formKey,
-          child: Column(
-            spacing: 8,
-            children: [
-              SizedBox(
-                height: 90,
-                child: FTextFormField(
-                  label: Text(
-                    'Name',
-                    style: FTheme.of(context).typography.lgSemibold,
-                  ),
-                  controller: _controllers['name'],
-                  validator: _validateRequired,
-                ),
-              ),
-              Row(
-                mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                children: [
-                  Expanded(
-                    child: SizedBox(
-                      height: 90,
-                      child: FTextFormField(
-                        label: Text(
-                          'Reps',
-                          style: FTheme.of(context).typography.lgSemibold,
-                        ),
-                        controller: _controllers['repCount'],
-                        keyboardType: TextInputType.numberWithOptions(),
-                        inputFormatters: [
-                          FilteringTextInputFormatter.digitsOnly,
-                        ],
-                        validator: (value) =>
-                            _validatePositiveNumber(value, 'reps'),
-                      ),
-                    ),
-                  ),
-                  SizedBox(width: 64),
-                  Expanded(
-                    child: SizedBox(
-                      height: 90,
-                      child: FTextFormField(
-                        label: Text(
-                          'Sets',
-                          style: FTheme.of(context).typography.lgSemibold,
-                        ),
-                        controller: _controllers['setCount'],
-                        keyboardType: TextInputType.numberWithOptions(),
-                        inputFormatters: [
-                          FilteringTextInputFormatter.digitsOnly,
-                        ],
-                        validator: (value) =>
-                            _validatePositiveNumber(value, 'sets'),
-                      ),
-                    ),
-                  ),
-                ],
-              ),
-              Column(
-                children: [
-                  Text(
-                    'Time On',
-                    style: FTheme.of(context).typography.lgSemibold,
-                  ),
-                  Text('hh:mm:ss', style: FTheme.of(context).typography.smGrey),
-                  SizedBox(
-                    height: 150,
-                    child: Column(
-                      children: [
-                        Expanded(
-                          child: FPicker(
-                            controller: _controllers['repDuration'],
-                            children: [
-                              FPickerWheel.builder(
-                                builder: (context, index) => Text(
-                                  (index % 12).toString().padLeft(2, '0'),
-                                ),
-                              ),
-                              const Text(':'),
-                              FPickerWheel.builder(
-                                builder: (context, index) => Text(
-                                  (index % 60).toString().padLeft(2, '0'),
-                                ),
-                              ),
-                              const Text(':'),
-                              FPickerWheel.builder(
-                                builder: (context, index) => Text(
-                                  (index % 60).toString().padLeft(2, '0'),
-                                ),
-                              ),
-                            ],
-                          ),
-                        ),
-                        (_shouldShowRepDurationError())
-                            ? SizedBox(
-                                height: 20,
-                                child: Text(
-                                  'Enter a time > 0 seconds',
-                                  style: FTheme.of(context).typography.smError,
-                                ),
-                              )
-                            : SizedBox(height: 20),
-                      ],
-                    ),
-                  ),
-                ],
-              ),
-              Column(
-                children: [
-                  Text(
-                    'Time Off',
-                    style: FTheme.of(context).typography.lgSemibold,
-                  ),
-                  Text('hh:mm:ss', style: FTheme.of(context).typography.smGrey),
-                  ConstrainedBox(
-                    constraints: BoxConstraints(maxHeight: 150),
-                    child: FPicker(
-                      controller: _controllers['restDuration'],
-                      children: [
-                        FPickerWheel.builder(
-                          builder: (context, index) =>
-                              Text((index % 12).toString().padLeft(2, '0')),
-                        ),
-                        const Text(':'),
-                        FPickerWheel.builder(
-                          builder: (context, index) =>
-                              Text((index % 60).toString().padLeft(2, '0')),
-                        ),
-                        const Text(':'),
-                        FPickerWheel.builder(
-                          builder: (context, index) =>
-                              Text((index % 60).toString().padLeft(2, '0')),
-                        ),
-                      ],
-                    ),
-                  ),
-                  (_shouldShowRestDurationError())
-                      ? SizedBox(
-                          height: 20,
-                          child: Text(
-                            'Enter a time > 0 seconds',
-                            style: FTheme.of(context).typography.smError,
-                          ),
-                        )
-                      : SizedBox(height: 20),
-                ],
-              ),
-              // Done button
-              FButton(onPress: _onDonePressed, child: const Text('Done')),
-            ],
-          ),
-        ),
-      ],
-    );
   }
 }
