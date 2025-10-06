@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:forui/forui.dart';
 import 'package:proj/header.dart';
 import 'package:proj/workout_auth.dart';
+import 'package:proj/workout_list.dart';
 
 void main() {
   runApp(const MyApp());
@@ -35,6 +36,26 @@ class HomePage extends StatefulWidget {
 class HomePageState extends State<HomePage> {
   @override
   Widget build(context) {
-    return FScaffold(header: Header(), child: WorkoutAuth());
+    return FScaffold(
+      header: Header(),
+      footer: Row(
+        mainAxisAlignment: MainAxisAlignment.end,
+        children: [
+          Padding(
+            padding: const EdgeInsets.all(16),
+            child: FButton(
+              style: FButtonStyle.outline(),
+              onPress: () {
+                Navigator.of(
+                  context,
+                ).push(MaterialPageRoute(builder: (context) => WorkoutAuth()));
+              },
+              child: Text('Add Workout'),
+            ),
+          ),
+        ],
+      ),
+      child: WorkoutList(),
+    );
   }
 }
