@@ -4,7 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 
 extension ColorsExtension on FColors {
-  Color get accent => const Color(0xFF166534); // green-800
+  Color get accent => const Color(0xFF38bdf8); // sky-something
 }
 
 extension TextExtension on FTypography {
