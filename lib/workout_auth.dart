@@ -31,15 +31,14 @@ class _WorkoutAuthState extends State<WorkoutAuth> {
 
   @override
   Widget build(BuildContext context) {
+    final typography = context.theme.typography;
+
     return FScaffold(
       header: Header(),
       child: Column(
         spacing: 16,
         children: [
-          Text(
-            'Create Workout',
-            style: FTheme.of(context).typography.lgSemibold,
-          ),
+          Text('Create Workout', style: typography.lgSemibold),
           Form(
             key: _formKey,
             child: Column(
@@ -48,10 +47,7 @@ class _WorkoutAuthState extends State<WorkoutAuth> {
                 SizedBox(
                   height: 90,
                   child: FTextFormField(
-                    label: Text(
-                      'Name',
-                      style: FTheme.of(context).typography.lgSemibold,
-                    ),
+                    label: Text('Name', style: typography.lgSemibold),
                     controller: _controllers['name'],
                     validator: _validateRequired,
                   ),
@@ -63,10 +59,7 @@ class _WorkoutAuthState extends State<WorkoutAuth> {
                       child: SizedBox(
                         height: 90,
                         child: FTextFormField(
-                          label: Text(
-                            'Reps',
-                            style: FTheme.of(context).typography.lgSemibold,
-                          ),
+                          label: Text('Reps', style: typography.lgSemibold),
                           controller: _controllers['repCount'],
                           keyboardType: TextInputType.numberWithOptions(),
                           inputFormatters: [
@@ -82,10 +75,7 @@ class _WorkoutAuthState extends State<WorkoutAuth> {
                       child: SizedBox(
                         height: 90,
                         child: FTextFormField(
-                          label: Text(
-                            'Sets',
-                            style: FTheme.of(context).typography.lgSemibold,
-                          ),
+                          label: Text('Sets', style: typography.lgSemibold),
                           controller: _controllers['setCount'],
                           keyboardType: TextInputType.numberWithOptions(),
                           inputFormatters: [
@@ -100,14 +90,8 @@ class _WorkoutAuthState extends State<WorkoutAuth> {
                 ),
                 Column(
                   children: [
-                    Text(
-                      'Time On',
-                      style: FTheme.of(context).typography.lgSemibold,
-                    ),
-                    Text(
-                      'hh:mm:ss',
-                      style: FTheme.of(context).typography.smGrey,
-                    ),
+                    Text('Time On', style: typography.lgSemibold),
+                    Text('hh:mm:ss', style: typography.smGrey),
                     SizedBox(
                       height: 150,
                       child: Column(
@@ -141,9 +125,7 @@ class _WorkoutAuthState extends State<WorkoutAuth> {
                                   height: 20,
                                   child: Text(
                                     'Enter a time > 0 seconds',
-                                    style: FTheme.of(
-                                      context,
-                                    ).typography.smError,
+                                    style: typography.smError,
                                   ),
                                 )
                               : SizedBox(height: 20),
@@ -154,14 +136,8 @@ class _WorkoutAuthState extends State<WorkoutAuth> {
                 ),
                 Column(
                   children: [
-                    Text(
-                      'Time Off',
-                      style: FTheme.of(context).typography.lgSemibold,
-                    ),
-                    Text(
-                      'hh:mm:ss',
-                      style: FTheme.of(context).typography.smGrey,
-                    ),
+                    Text('Time Off', style: typography.lgSemibold),
+                    Text('hh:mm:ss', style: typography.smGrey),
                     ConstrainedBox(
                       constraints: BoxConstraints(maxHeight: 150),
                       child: FPicker(
@@ -189,7 +165,7 @@ class _WorkoutAuthState extends State<WorkoutAuth> {
                             height: 20,
                             child: Text(
                               'Enter a time > 0 seconds',
-                              style: FTheme.of(context).typography.smError,
+                              style: typography.smError,
                             ),
                           )
                         : SizedBox(height: 20),
