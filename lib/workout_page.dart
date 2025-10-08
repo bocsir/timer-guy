@@ -3,10 +3,12 @@ import 'package:flutter/material.dart';
 import 'package:forui/forui.dart';
 import 'dart:async';
 
-class WorkoutPage extends StatefulWidget {
-  final int initialTime;
+import 'package:proj/models/workout.dart';
 
-  const WorkoutPage({super.key, required this.initialTime});
+class WorkoutPage extends StatefulWidget {
+  final Workout workout;
+
+  const WorkoutPage({super.key, required this.workout});
 
   @override
   WorkoutPageState createState() => WorkoutPageState();
@@ -19,7 +21,7 @@ class WorkoutPageState extends State<WorkoutPage> {
   @override
   void initState() {
     super.initState();
-    currTime = widget.initialTime;
+    currTime = widget.workout.timeOn;
   }
 
   @override
@@ -50,7 +52,7 @@ class WorkoutPageState extends State<WorkoutPage> {
                 onPress: () {
                   timer?.cancel();
                   setState(() {
-                    currTime = widget.initialTime;
+                    currTime = widget.workout.timeOn;
                   });
                 },
                 child: Icon(FIcons.refreshCw),

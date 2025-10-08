@@ -5,9 +5,7 @@ import 'package:hive_ce_flutter/hive_flutter.dart';
 import 'package:proj/hive/hive_boxes.dart';
 import 'package:proj/hive/hive_registrar.g.dart';
 import 'package:proj/models/workout.dart';
-import 'package:proj/header.dart';
 import 'package:proj/theme/theme.dart';
-import 'package:proj/workout_auth.dart';
 import 'package:proj/workout_list.dart';
 
 Future<void> main() async {

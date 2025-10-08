@@ -6,6 +6,7 @@ import 'package:proj/header.dart';
 import 'package:proj/hive/hive_boxes.dart';
 import 'package:proj/models/workout.dart';
 import 'package:proj/workout_auth.dart';
+import 'package:proj/workout_page.dart';
 
 class WorkoutList extends StatelessWidget {
   const WorkoutList({super.key});
@@ -63,16 +64,15 @@ class WorkoutList extends StatelessWidget {
                 )
               : FItemGroup(
                   children: [
-                    FItem(
-                      title: Text('item1'),
-                      suffix: Icon(FIcons.chevronRight),
-                      onPress: () {},
-                    ),
                     ...workouts.map(
                       (w) => FItem(
                         title: Text(w.name),
                         suffix: Icon(FIcons.chevronRight),
-                        onPress: () {},
+                        onPress: () => Navigator.of(context).push(
+                          MaterialPageRoute(
+                            builder: (context) => WorkoutPage(workout: w),
+                          ),
+                        ),
                       ),
                     ),
                   ],

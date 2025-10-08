@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:forui/forui.dart';
 import 'package:hive_ce_flutter/hive_flutter.dart';
+import 'package:proj/extensions/extensions.dart';
 import 'package:proj/header.dart';
 import 'package:proj/models/workout.dart';
 import 'package:proj/theme/theme.dart';
@@ -204,6 +205,8 @@ class _WorkoutAuthState extends State<WorkoutAuth> {
     );
   }
 
+  //TODO: clean up below methods
+
   String? _validateRequired(String? value) {
     if (value == null || value.trim().isEmpty) {
       return 'Required';
@@ -276,12 +279,9 @@ class _WorkoutAuthState extends State<WorkoutAuth> {
         name: _controllers['name'].text.trim(),
         reps: int.parse(_controllers['repCount'].text.trim()),
         sets: int.parse(_controllers['setCount'].text.trim()),
-        timeOn: (_controllers['repDuration'] as FPickerController).value
-            .map((e) => (e % 60).toString().padLeft(2, '0'))
-            .join(':'),
-        timeOff: (_controllers['restDuration'] as FPickerController).value
-            .map((e) => (e % 60).toString().padLeft(2, '0'))
-            .join(':'),
+        timeOn: (_controllers['repDuration'] as FPickerController).totalSeconds,
+        timeOff:
+            (_controllers['restDuration'] as FPickerController).totalSeconds,
       );
 
       widget.workoutBox.add(workout);

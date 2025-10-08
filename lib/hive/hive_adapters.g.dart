@@ -20,8 +20,8 @@ class WorkoutAdapter extends TypeAdapter<Workout> {
       name: fields[0] as String,
       reps: (fields[1] as num).toInt(),
       sets: (fields[2] as num).toInt(),
-      timeOn: fields[3] as String,
-      timeOff: fields[4] as String,
+      timeOn: (fields[3] as num).toInt(),
+      timeOff: (fields[4] as num).toInt(),
     );
   }
 

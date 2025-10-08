@@ -1,4 +1,8 @@
 // models/workout.dart
+//when you change stuff:
+//dart run build_runner build --delete-conflicting-outputs
+
+// models/workout.dart
 import 'package:hive_ce/hive.dart';
 
 // extension has .save(), .delete(), and key
@@ -6,8 +10,8 @@ class Workout extends HiveObject {
   final String name;
   final int reps;
   final int sets;
-  final String timeOn; //use better type
-  final String timeOff; //use better type
+  final int timeOn; //use better type
+  final int timeOff; //use better type
 
   Workout({
     required this.name,
@@ -21,8 +25,8 @@ class Workout extends HiveObject {
     String? name,
     int? reps,
     int? sets,
-    String? timeOn,
-    String? timeOff,
+    int? timeOn,
+    int? timeOff,
   }) {
     return Workout(
       name: name ?? this.name,
