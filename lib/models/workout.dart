@@ -1,5 +1,8 @@
 // models/workout.dart
-class Workout {
+import 'package:hive_ce/hive.dart';
+
+// extension has .save(), .delete(), and key
+class Workout extends HiveObject {
   final String name;
   final int reps;
   final int sets;

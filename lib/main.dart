@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:forui/forui.dart';
 import 'package:hive_ce_flutter/hive_flutter.dart';
 import 'package:proj/hive/hive_boxes.dart';
+import 'package:proj/hive/hive_registrar.g.dart';
 import 'package:proj/models/workout.dart';
 import 'package:proj/header.dart';
 import 'package:proj/theme/theme.dart';
@@ -10,10 +11,11 @@ import 'package:proj/workout_auth.dart';
 import 'package:proj/workout_list.dart';
 
 Future<void> main() async {
-  // init hive
+  // hive setup
   await Hive.initFlutter();
-  // open workoutsBox before starting app
+  Hive.registerAdapters();
   await Hive.openBox<Workout>(workoutBox);
+
   runApp(const MyApp());
 }
 
@@ -54,7 +56,12 @@ class HomePageState extends State<HomePage> {
         mainAxisAlignment: MainAxisAlignment.end,
         children: [
           Padding(
-            padding: const EdgeInsets.all(16),
+            padding: const EdgeInsets.only(
+              bottom: 32,
+              right: 32,
+              top: 16,
+              left: 16,
+            ),
             child: FButton(
               style: FButtonStyle.outline(),
               onPress: () {
