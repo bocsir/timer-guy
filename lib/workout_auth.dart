@@ -2,11 +2,15 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:forui/forui.dart';
+import 'package:hive_ce_flutter/hive_flutter.dart';
 import 'package:proj/header.dart';
+import 'package:proj/models/workout.dart';
 import 'package:proj/theme/theme.dart';
 
 class WorkoutAuth extends StatefulWidget {
-  const WorkoutAuth({super.key});
+  final Box<Workout> workoutBox;
+
+  const WorkoutAuth({super.key, required this.workoutBox});
 
   @override
   State<WorkoutAuth> createState() => _WorkoutAuthState();
@@ -268,6 +272,19 @@ class _WorkoutAuthState extends State<WorkoutAuth> {
     });
 
     if (_validateForm()) {
+      final workout = Workout(
+        name: _controllers['name'].text.trim(),
+        reps: int.parse(_controllers['repCount'].text.trim()),
+        sets: int.parse(_controllers['setCount'].text.trim()),
+        timeOn: (_controllers['repDuration'] as FPickerController).value
+            .map((e) => (e % 60).toString().padLeft(2, '0'))
+            .join(':'),
+        timeOff: (_controllers['restDuration'] as FPickerController).value
+            .map((e) => (e % 60).toString().padLeft(2, '0'))
+            .join(':'),
+      );
+
+      widget.workoutBox.add(workout);
       Navigator.of(context).pop();
     }
   }

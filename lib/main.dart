@@ -50,31 +50,6 @@ class HomePage extends StatefulWidget {
 class HomePageState extends State<HomePage> {
   @override
   Widget build(context) {
-    return FScaffold(
-      header: Header(),
-      footer: Row(
-        mainAxisAlignment: MainAxisAlignment.end,
-        children: [
-          Padding(
-            padding: const EdgeInsets.only(
-              bottom: 32,
-              right: 32,
-              top: 16,
-              left: 16,
-            ),
-            child: FButton(
-              style: FButtonStyle.outline(),
-              onPress: () {
-                Navigator.of(
-                  context,
-                ).push(MaterialPageRoute(builder: (context) => WorkoutAuth()));
-              },
-              child: Text('Add Workout'),
-            ),
-          ),
-        ],
-      ),
-      child: WorkoutList(),
-    );
+    return WorkoutList();
   }
 }
