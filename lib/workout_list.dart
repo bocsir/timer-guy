@@ -8,35 +8,40 @@ import 'package:proj/models/workout.dart';
 import 'package:proj/workout_auth.dart';
 import 'package:proj/workout_page.dart';
 
-class WorkoutList extends StatelessWidget {
+class WorkoutList extends StatefulWidget {
   const WorkoutList({super.key});
 
   @override
+  State<WorkoutList> createState() => _WorkoutListState();
+}
+
+class _WorkoutListState extends State<WorkoutList>
+    with SingleTickerProviderStateMixin {
+  @override
   Widget build(BuildContext context) {
+    final FPopoverController popoverController = FPopoverController(
+      vsync: this,
+    );
     return FScaffold(
-      header: Header(),
-      footer: Row(
-        mainAxisAlignment: MainAxisAlignment.end,
-        children: [
-          Padding(
-            padding: const EdgeInsets.only(
-              bottom: 32,
-              right: 32,
-              top: 16,
-              left: 16,
-            ),
-            child: FButton(
-              style: FButtonStyle.outline(),
-              onPress: () {
-                final box = Hive.box<Workout>(workoutBox);
-                Navigator.of(context).push(
-                  MaterialPageRoute(
-                    builder: (context) => WorkoutAuth(workoutBox: box),
-                  ),
-                );
-              },
-              child: Text('Add Workout'),
-            ),
+      header: Header(
+        popoverController: popoverController,
+        settingsStuff: [
+          FItemGroup(
+            children: [
+              FItem(
+                prefix: Icon(FIcons.plus),
+                title: Text('Add Workout'),
+                onPress: () {
+                  popoverController.hide();
+                  final box = Hive.box<Workout>(workoutBox);
+                  Navigator.of(context).push(
+                    MaterialPageRoute(
+                      builder: (context) => WorkoutAuth(workoutBox: box),
+                    ),
+                  );
+                },
+              ),
+            ],
           ),
         ],
       ),
@@ -67,7 +72,7 @@ class WorkoutList extends StatelessWidget {
                     ...workouts.map(
                       (w) => FItem(
                         title: Text(w.name),
-                        suffix: Icon(FIcons.chevronRight),
+                        suffix: Icon(FIcons.chevronRight, size: 28),
                         onPress: () => Navigator.of(context).push(
                           MaterialPageRoute(
                             builder: (context) => WorkoutPage(workout: w),

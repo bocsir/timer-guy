@@ -8,9 +8,18 @@ import 'package:flutter_svg/flutter_svg.dart';
 class Header extends StatelessWidget {
   final String? backBtnText;
   final String? titleText;
-  //maybe add settings stuff too
 
-  const Header({super.key, this.backBtnText, this.titleText});
+  // settings stuff
+  final FPopoverController? popoverController;
+  final List<FItemGroup>? settingsStuff;
+
+  const Header({
+    super.key,
+    this.backBtnText,
+    this.titleText,
+    this.popoverController,
+    this.settingsStuff,
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -59,14 +68,27 @@ class Header extends StatelessWidget {
               ),
             Align(
               alignment: Alignment.centerRight,
-              child: FButton.icon(
-                onPress: () {},
-                style: transparentButtonStyle,
-                child: SvgPicture.asset(
-                  'lib/assets/circle-ellipsis.svg',
-                  width: 24,
-                  height: 24,
-                  theme: SvgTheme(currentColor: colors.accent),
+              child: FPopoverMenu(
+                popoverController: popoverController,
+                menuAnchor: Alignment.topRight,
+                childAnchor: Alignment.bottomRight,
+                menu: [
+                  if (settingsStuff != null)
+                    ...settingsStuff!
+                  else
+                    FItemGroup(
+                      children: [FItem(title: Text('No settings available'))],
+                    ),
+                ],
+                builder: (context, controller, child) => FButton.icon(
+                  onPress: controller.toggle,
+                  style: transparentButtonStyle,
+                  child: SvgPicture.asset(
+                    'lib/assets/circle-ellipsis.svg',
+                    width: 24,
+                    height: 24,
+                    theme: SvgTheme(currentColor: colors.accent),
+                  ),
                 ),
               ),
             ),
