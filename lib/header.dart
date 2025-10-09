@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:forui/forui.dart';
 import 'package:proj/theme/button_style.dart';
 import 'package:proj/theme/theme.dart';
+import 'package:flutter_svg/flutter_svg.dart';
 
 class Header extends StatelessWidget {
   final String? backBtnText;
@@ -19,7 +20,7 @@ class Header extends StatelessWidget {
 
     return SafeArea(
       child: Padding(
-        padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
+        padding: const EdgeInsets.symmetric(horizontal: 10),
         child: Stack(
           alignment: Alignment.center,
           children: [
@@ -33,7 +34,7 @@ class Header extends StatelessWidget {
                         child: Icon(
                           FIcons.chevronLeft,
                           color: colors.accent,
-                          size: 24,
+                          size: 28,
                         ),
                       )
                     : FButton(
@@ -42,7 +43,7 @@ class Header extends StatelessWidget {
                         prefix: Icon(
                           FIcons.chevronLeft,
                           color: colors.accent,
-                          size: 24,
+                          size: 28,
                         ),
                         child: Text(
                           backBtnText!,
@@ -61,7 +62,12 @@ class Header extends StatelessWidget {
               child: FButton.icon(
                 onPress: () {},
                 style: transparentButtonStyle,
-                child: Icon(FIcons.settings, color: colors.accent),
+                child: SvgPicture.asset(
+                  'lib/assets/circle-ellipsis.svg',
+                  width: 24,
+                  height: 24,
+                  theme: SvgTheme(currentColor: colors.accent),
+                ),
               ),
             ),
           ],

@@ -15,11 +15,19 @@ extension TextExtension on FTypography {
         fontFamily: 'IBMPlexMono',
         height: 0,
       );
+
+  TextStyle get xlSemibold => xl3.copyWith(
+    fontWeight: FontWeight.bold,
+    fontFamily: 'IBMPlexMono',
+    height: 0,
+  );
+
   TextStyle get smGrey => sm.copyWith(
     fontFamily: 'IBMPlexMono',
     height: 0,
     color: Color(0xFFa8a29e), // stone-400
   );
+
   TextStyle get smError => sm.copyWith(
     fontFamily: 'IBMPlexMono',
     height: 0,

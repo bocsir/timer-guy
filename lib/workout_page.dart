@@ -1,9 +1,11 @@
 // workout_page.dart
 import 'package:flutter/material.dart';
 import 'package:forui/forui.dart';
+import 'package:proj/header.dart';
 import 'dart:async';
 
 import 'package:proj/models/workout.dart';
+import 'package:proj/theme/theme.dart';
 
 class WorkoutPage extends StatefulWidget {
   final Workout workout;
@@ -28,12 +30,13 @@ class WorkoutPageState extends State<WorkoutPage> {
   Widget build(context) {
     final typography = context.theme.typography;
 
-    return Scaffold(
-      appBar: AppBar(backgroundColor: Colors.transparent, elevation: 0),
-      body: Column(
-        mainAxisAlignment: MainAxisAlignment.center,
+    return FScaffold(
+      header: Header(),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
         spacing: 32,
         children: [
+          Text(widget.workout.name, style: typography.xlSemibold),
           Text(
             currTime == 0 ? 'Time\'s up!' : '$currTime',
             style: typography.xl3.copyWith(fontWeight: FontWeight.bold),
