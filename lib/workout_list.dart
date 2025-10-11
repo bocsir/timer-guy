@@ -35,6 +35,7 @@ class _WorkoutListState extends State<WorkoutList>
     return FScaffold(
       childPad: false,
       header: Header(
+        hideBackBtn: true,
         popoverController: popoverController,
         settingsStuff: [
           FItemGroup(

@@ -6,6 +6,7 @@ import 'package:proj/theme/theme.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 
 class Header extends StatelessWidget {
+  final bool? hideBackBtn;
   final String? backBtnText;
   final String? titleText;
 
@@ -15,6 +16,7 @@ class Header extends StatelessWidget {
 
   const Header({
     super.key,
+    this.hideBackBtn,
     this.backBtnText,
     this.titleText,
     this.popoverController,
@@ -30,69 +32,77 @@ class Header extends StatelessWidget {
     return SafeArea(
       child: Padding(
         padding: const EdgeInsets.symmetric(horizontal: 4),
-        child: Stack(
-          alignment: Alignment.center,
-          children: [
-            Align(
-              alignment: Alignment.centerLeft,
-              child: IntrinsicWidth(
-                child: backBtnText == null
-                    ? FButton.icon(
-                        style: transparentButtonStyle,
-                        onPress: () => Navigator.pop(context),
-                        child: Icon(
-                          FIcons.chevronLeft,
-                          color: colors.accent,
-                          size: 28,
-                        ),
-                      )
-                    : FButton(
-                        onPress: () => Navigator.pop(context),
-                        style: transparentButtonStyle,
-                        prefix: Icon(
-                          FIcons.chevronLeft,
-                          color: colors.accent,
-                          size: 28,
-                        ),
-                        child: Text(
-                          backBtnText!,
-                          style: TextStyle(color: colors.accent),
-                        ),
-                      ),
-              ),
-            ),
-            if (title != null && title.isNotEmpty)
+        child: SizedBox(
+          // make stack a fixed height
+          height: 40,
+          child: Stack(
+            alignment: Alignment.center,
+            children: [
+              if (hideBackBtn != true)
+                Align(
+                  alignment: Alignment.centerLeft,
+                  child: IntrinsicWidth(
+                    child: backBtnText == null
+                        ? FButton.icon(
+                            style: transparentButtonStyle,
+                            onPress: () => Navigator.pop(context),
+                            child: Icon(
+                              FIcons.chevronLeft,
+                              color: colors.accent,
+                              size: 28,
+                            ),
+                          )
+                        : FButton(
+                            onPress: () => Navigator.pop(context),
+                            style: transparentButtonStyle,
+                            prefix: Icon(
+                              FIcons.chevronLeft,
+                              color: colors.accent,
+                              size: 28,
+                            ),
+                            child: Text(
+                              backBtnText!,
+                              style: TextStyle(color: colors.accent),
+                            ),
+                          ),
+                  ),
+                ),
+              if (title != null && title.isNotEmpty)
+                Align(
+                  alignment: Alignment.center,
+                  child: Text(
+                    title,
+                    style: context.theme.typography.lgSemibold,
+                  ),
+                ),
               Align(
-                alignment: Alignment.center,
-                child: Text(title, style: context.theme.typography.lgSemibold),
-              ),
-            Align(
-              alignment: Alignment.centerRight,
-              child: FPopoverMenu(
-                popoverController: popoverController,
-                menuAnchor: Alignment.topRight,
-                childAnchor: Alignment.bottomRight,
-                menu: [
-                  if (settingsStuff != null)
-                    ...settingsStuff!
-                  else
-                    FItemGroup(
-                      children: [FItem(title: Text('No settings available'))],
+                alignment: Alignment.centerRight,
+                child: FPopoverMenu(
+                  popoverController: popoverController,
+                  menuAnchor: Alignment.topRight,
+                  childAnchor: Alignment.bottomRight,
+                  menu: [
+                    if (settingsStuff != null)
+                      ...settingsStuff!
+                    else
+                      FItemGroup(
+                        children: [FItem(title: Text('No settings available'))],
+                      ),
+                  ],
+                  builder: (context, controller, child) => FButton.icon(
+                    onPress: controller.toggle,
+                    style: transparentButtonStyle,
+                    child: SvgPicture.asset(
+                      'lib/assets/circle-ellipsis.svg',
+                      width: 24,
+                      height: 24,
+                      theme: SvgTheme(currentColor: colors.accent),
                     ),
-                ],
-                builder: (context, controller, child) => FButton.icon(
-                  onPress: controller.toggle,
-                  style: transparentButtonStyle,
-                  child: SvgPicture.asset(
-                    'lib/assets/circle-ellipsis.svg',
-                    width: 24,
-                    height: 24,
-                    theme: SvgTheme(currentColor: colors.accent),
                   ),
                 ),
               ),
-            ),
-          ],
+            ],
+          ),
         ),
       ),
     );
