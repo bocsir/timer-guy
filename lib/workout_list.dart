@@ -8,6 +8,10 @@ import 'package:proj/models/workout.dart';
 import 'package:proj/workout_auth.dart';
 import 'package:proj/workout_page.dart';
 
+//TODO: add isEditing state var and pass it to header settingsStuff.
+//then if isEditing, show checkboxes (circles) + 'select all' btn
+//then if selectedItems.length > 0, show delete button at bottom or somewhere - look at apple ui
+
 class WorkoutList extends StatefulWidget {
   const WorkoutList({super.key});
 
@@ -55,6 +59,7 @@ class _WorkoutListState extends State<WorkoutList>
         builder: (BuildContext context, Box<Workout> box, Widget? _) {
           final workouts = box.values.toList();
           return workouts.isEmpty
+              //TODO: eventually add icon to show type of workout. idk what types will be availible yet
               ? Column(
                   children: [
                     Text(
