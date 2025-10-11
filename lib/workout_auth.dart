@@ -34,7 +34,7 @@ class _WorkoutAuthState extends State<WorkoutAuth> {
     final typography = context.theme.typography;
 
     return FScaffold(
-      header: Header(titleText: 'Create Workout'),
+      header: Header(backBtnText: 'Cancel'),
       child: SingleChildScrollView(
         child: Column(
           spacing: 16,
@@ -42,8 +42,11 @@ class _WorkoutAuthState extends State<WorkoutAuth> {
             Form(
               key: _formKey,
               child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
                 spacing: 8,
                 children: [
+                  Text('Create Workout', style: typography.xlSemibold),
+                  FDivider(),
                   FTextFormField(
                     label: Text('Name', style: typography.lgSemibold),
                     controller: _controllers['name'],
@@ -169,7 +172,15 @@ class _WorkoutAuthState extends State<WorkoutAuth> {
                     ],
                   ),
                   // Done button
-                  FButton(onPress: _onDonePressed, child: const Text('Done')),
+                  FButton(
+                    onPress: _onDonePressed,
+                    child: Text(
+                      'Done',
+                      style: typography.lgSemibold.copyWith(
+                        color: context.theme.colors.background,
+                      ),
+                    ),
+                  ),
                 ],
               ),
             ),
