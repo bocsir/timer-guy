@@ -2,6 +2,7 @@
 import 'package:flutter/material.dart';
 
 import 'package:forui/forui.dart';
+import 'package:proj/theme/theme.dart';
 
 // ignore_for_file: unnecessary_ignore
 // ignore_for_file: avoid_redundant_argument_values
@@ -123,3 +124,13 @@ FButtonStyle transparentButtonStyle(FButtonStyle style) => style.copyWith(
   decoration: FWidgetStateMap.all(BoxDecoration(color: Colors.transparent)),
   contentStyle: (style) => style.copyWith(padding: EdgeInsets.zero),
 );
+FButtonStyle accentButtonStyle(BuildContext context) {
+  final theme = context.theme;
+  return buttonStyle(
+    colors: theme.colors,
+    typography: theme.typography,
+    style: theme.style,
+    color: theme.colors.accent,
+    foregroundColor: theme.colors.background,
+  );
+}
