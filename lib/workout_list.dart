@@ -72,7 +72,7 @@ class _WorkoutListState extends State<WorkoutList>
                 ),
               ),
               workouts.isEmpty
-                  //TODO: eventually add icon to show type of workout. idk what types will be availible yet
+                  //TODO: eventually add icon to show type of workout. idk what types will be available yet
                   ? Column(
                       children: [
                         Text(
