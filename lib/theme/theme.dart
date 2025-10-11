@@ -2,6 +2,7 @@
 import 'package:forui/forui.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:proj/theme/divider_styles.dart';
 
 extension ColorsExtension on FColors {
   Color get accent => const Color(0xFF38bdf8); // sky-something
@@ -66,7 +67,14 @@ FThemeData get zincDark {
   final typography = _typography(colors: colors);
   final style = _style(colors: colors, typography: typography);
 
-  return FThemeData(colors: colors, typography: typography, style: style);
+  final customDividerStyles = dividerStyles(colors: colors, style: style);
+
+  return FThemeData(
+    colors: colors,
+    typography: typography,
+    style: style,
+    dividerStyles: customDividerStyles,
+  );
 }
 
 FTypography _typography({
