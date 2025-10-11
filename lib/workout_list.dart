@@ -17,11 +17,16 @@ class WorkoutList extends StatefulWidget {
 
 class _WorkoutListState extends State<WorkoutList>
     with SingleTickerProviderStateMixin {
+  late FPopoverController popoverController;
+
+  @override
+  void initState() {
+    super.initState();
+    popoverController = FPopoverController(vsync: this);
+  }
+
   @override
   Widget build(BuildContext context) {
-    final FPopoverController popoverController = FPopoverController(
-      vsync: this,
-    );
     return FScaffold(
       header: Header(
         popoverController: popoverController,
