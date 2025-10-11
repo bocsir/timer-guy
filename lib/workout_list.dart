@@ -80,14 +80,20 @@ class _WorkoutListState extends State<WorkoutList>
                   ],
                 )
               : FItemGroup(
+                  divider: FItemDivider.full,
                   children: [
                     ...workouts.map(
                       (w) => FItem(
+                        //TODO: maybe there is some kind of metadata I can add here
                         title: Text(
                           w.name,
                           style: context.theme.typography.baseSemibold,
                         ),
-                        suffix: Icon(FIcons.chevronRight, size: 25),
+                        suffix: Icon(
+                          FIcons.chevronRight,
+                          size: 25,
+                          color: context.theme.colors.foreground,
+                        ),
                         onPress: () => Navigator.of(context).push(
                           MaterialPageRoute(
                             builder: (context) => WorkoutPage(workout: w),
