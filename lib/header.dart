@@ -29,7 +29,7 @@ class Header extends StatelessWidget {
 
     return SafeArea(
       child: Padding(
-        padding: const EdgeInsets.symmetric(horizontal: 10),
+        padding: const EdgeInsets.symmetric(horizontal: 4),
         child: Stack(
           alignment: Alignment.center,
           children: [

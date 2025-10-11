@@ -8,13 +8,19 @@ extension ColorsExtension on FColors {
 }
 
 extension TextExtension on FTypography {
-  TextStyle get lgSemibold =>
-      // idk why height needs to be zero for things to be centered
-      lg.copyWith(
-        fontWeight: FontWeight.bold,
-        fontFamily: 'IBMPlexMono',
-        height: 0,
-      );
+  // idk why height needs to be zero for things to be centered (header title for ex)
+
+  TextStyle get baseSemibold => base.copyWith(
+    fontWeight: FontWeight.bold,
+    fontFamily: 'IBMPlexMono',
+    height: 0,
+  );
+
+  TextStyle get lgSemibold => lg.copyWith(
+    fontWeight: FontWeight.bold,
+    fontFamily: 'IBMPlexMono',
+    height: 0,
+  );
 
   TextStyle get xlSemibold => xl3.copyWith(
     fontWeight: FontWeight.bold,
@@ -43,7 +49,7 @@ FThemeData get zincDark {
     systemOverlayStyle: SystemUiOverlayStyle.light,
     barrier: Color(0xFF000000), // black
     background: Color(0xFF000000), // black
-    foreground: Color(0xFFFAFAF9), // stone-100
+    foreground: Color.fromRGBO(250, 250, 249, 1), // stone-100
     primary: Color(0xFFFAFAF9), // stone-100
     primaryForeground: Color(0xFF1C1917), // stone-800
     secondary: Color(0xFF1C1917), // stone-800

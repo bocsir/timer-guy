@@ -5,6 +5,7 @@ import 'package:hive_ce_flutter/hive_flutter.dart';
 import 'package:proj/header.dart';
 import 'package:proj/hive/hive_boxes.dart';
 import 'package:proj/models/workout.dart';
+import 'package:proj/theme/theme.dart';
 import 'package:proj/workout_auth.dart';
 import 'package:proj/workout_page.dart';
 
@@ -32,6 +33,7 @@ class _WorkoutListState extends State<WorkoutList>
   @override
   Widget build(BuildContext context) {
     return FScaffold(
+      childPad: false,
       header: Header(
         popoverController: popoverController,
         settingsStuff: [
@@ -81,8 +83,11 @@ class _WorkoutListState extends State<WorkoutList>
                   children: [
                     ...workouts.map(
                       (w) => FItem(
-                        title: Text(w.name),
-                        suffix: Icon(FIcons.chevronRight, size: 28),
+                        title: Text(
+                          w.name,
+                          style: context.theme.typography.baseSemibold,
+                        ),
+                        suffix: Icon(FIcons.chevronRight, size: 25),
                         onPress: () => Navigator.of(context).push(
                           MaterialPageRoute(
                             builder: (context) => WorkoutPage(workout: w),
