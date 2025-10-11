@@ -61,49 +61,67 @@ class _WorkoutListState extends State<WorkoutList>
         valueListenable: Hive.box<Workout>(workoutBox).listenable(),
         builder: (BuildContext context, Box<Workout> box, Widget? _) {
           final workouts = box.values.toList();
-          return workouts.isEmpty
-              //TODO: eventually add icon to show type of workout. idk what types will be availible yet
-              ? Column(
-                  children: [
-                    Text(
-                      'No workouts found',
-                      style: context.theme.typography.base,
-                    ),
-                    SizedBox(height: 20),
-                    Text(
-                      '''
+          return Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Padding(
+                padding: const EdgeInsets.only(left: 8, bottom: 8, right: 8),
+                child: Text(
+                  'Workouts',
+                  style: context.theme.typography.xlSemibold,
+                ),
+              ),
+              workouts.isEmpty
+                  //TODO: eventually add icon to show type of workout. idk what types will be availible yet
+                  ? Column(
+                      children: [
+                        Text(
+                          'No workouts found',
+                          style: context.theme.typography.base,
+                        ),
+                        SizedBox(height: 20),
+                        Text(
+                          '''
  o    _ o   __|    \\ /
 /|\\    /\\     \\o    |
 / \\   | \\     ( \\  /o\\
                       ''',
-                      style: TextStyle(fontFamily: 'IBMPlexMono', fontSize: 14),
-                    ),
-                  ],
-                )
-              : FItemGroup(
-                  divider: FItemDivider.full,
-                  children: [
-                    ...workouts.map(
-                      (w) => FItem(
-                        //TODO: maybe there is some kind of metadata I can add here
-                        title: Text(
-                          w.name,
-                          style: context.theme.typography.baseSemibold,
-                        ),
-                        suffix: Icon(
-                          FIcons.chevronRight,
-                          size: 25,
-                          color: context.theme.colors.foreground,
-                        ),
-                        onPress: () => Navigator.of(context).push(
-                          MaterialPageRoute(
-                            builder: (context) => WorkoutPage(workout: w),
+                          style: TextStyle(
+                            fontFamily: 'IBMPlexMono',
+                            fontSize: 14,
                           ),
                         ),
-                      ),
+                      ],
+                    )
+                  //TODO: make this scrollable. when scrolled so far that 'Workouts' title cant be seen,
+                  //set the title in Header to 'Workouts'
+                  //will also need to make Header fixed and have a glass bg
+                  : FItemGroup(
+                      divider: FItemDivider.full,
+                      children: [
+                        ...workouts.map(
+                          (w) => FItem(
+                            //TODO: maybe there is some kind of metadata I can add here
+                            title: Text(
+                              w.name,
+                              style: context.theme.typography.baseSemibold,
+                            ),
+                            suffix: Icon(
+                              FIcons.chevronRight,
+                              size: 25,
+                              color: context.theme.colors.foreground,
+                            ),
+                            onPress: () => Navigator.of(context).push(
+                              MaterialPageRoute(
+                                builder: (context) => WorkoutPage(workout: w),
+                              ),
+                            ),
+                          ),
+                        ),
+                      ],
                     ),
-                  ],
-                );
+            ],
+          );
         },
       ),
     );
