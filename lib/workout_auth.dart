@@ -174,12 +174,12 @@ class _WorkoutAuthState extends State<WorkoutAuth> {
                   ),
                   // Done button
                   FButton(
-                    style: accentButtonStyle(context).call,
+                    style: FButtonStyle.outline(),
                     onPress: _onDonePressed,
                     child: Text(
                       'Done',
                       style: typography.lgSemibold.copyWith(
-                        color: context.theme.colors.background,
+                        color: context.theme.colors.accent,
                       ),
                     ),
                   ),

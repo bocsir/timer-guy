@@ -37,31 +37,73 @@ class WorkoutPageState extends State<WorkoutPage> {
         spacing: 32,
         children: [
           Text(widget.workout.name, style: typography.xlSemibold),
-          Text(
-            currTime == 0 ? 'Time\'s up!' : '$currTime',
-            style: typography.xl3.copyWith(fontWeight: FontWeight.bold),
-          ),
-          Row(
-            mainAxisAlignment: MainAxisAlignment.center,
-            spacing: 16,
-            children: [
-              FButton.icon(
-                style: FButtonStyle.ghost(),
-                onPress: timer?.isActive == true ? null : startTimer,
-                child: Icon(FIcons.play),
+          Expanded(
+            child: SizedBox(
+              width: double.infinity,
+              child: DecoratedBox(
+                decoration: BoxDecoration(
+                  border: BoxBorder.all(
+                    color: context.theme.colors.accent,
+                    width: 2,
+                  ),
+                  borderRadius: BorderRadius.circular(16),
+                ),
+                child: Padding(
+                  padding: const EdgeInsets.all(32),
+                  child: Column(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: [
+                      Text(
+                        currTime == 0 ? 'Time\'s up!' : '$currTime',
+                        style: typography.xl6.copyWith(
+                          fontWeight: FontWeight.bold,
+                        ),
+                      ),
+                      Row(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        spacing: 64,
+                        children: [
+                          FButton.icon(
+                            style: FButtonStyle.ghost(),
+                            onPress: () {
+                              timer?.cancel();
+                              setState(() {
+                                currTime = widget.workout.timeOn;
+                              });
+                            },
+                            child: Icon(FIcons.refreshCw, size: 30),
+                          ),
+                          DecoratedBox(
+                            decoration: BoxDecoration(
+                              border: BoxBorder.all(),
+                              borderRadius: BorderRadius.circular(16),
+                              color: context.theme.colors.accent,
+                            ),
+                            child: Padding(
+                              padding: const EdgeInsets.all(8),
+                              child: FButton.icon(
+                                style: FButtonStyle.ghost(),
+                                onPress: timer?.isActive == true
+                                    ? null
+                                    : startTimer,
+                                child: Icon(
+                                  FIcons.play,
+                                  size: 30,
+                                  color: context.theme.colors.foreground,
+                                ),
+                              ),
+                            ),
+                          ),
+                        ],
+                      ),
+                    ],
+                  ),
+                ),
               ),
-              FButton.icon(
-                style: FButtonStyle.ghost(),
-                onPress: () {
-                  timer?.cancel();
-                  setState(() {
-                    currTime = widget.workout.timeOn;
-                  });
-                },
-                child: Icon(FIcons.refreshCw),
-              ),
-            ],
+            ),
           ),
+          //TODO: temporary
+          SizedBox(height: 16),
         ],
       ),
     );
