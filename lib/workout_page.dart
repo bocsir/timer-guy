@@ -3,9 +3,9 @@ import 'package:flutter/material.dart';
 import 'package:forui/forui.dart';
 import 'package:proj/header.dart';
 import 'dart:async';
-
 import 'package:proj/models/workout.dart';
 import 'package:proj/theme/theme.dart';
+import 'package:progress_border/progress_border.dart';
 
 class WorkoutPage extends StatefulWidget {
   final Workout workout;
@@ -16,7 +16,9 @@ class WorkoutPage extends StatefulWidget {
   WorkoutPageState createState() => WorkoutPageState();
 }
 
-class WorkoutPageState extends State<WorkoutPage> {
+class WorkoutPageState extends State<WorkoutPage>
+    with TickerProviderStateMixin {
+  late final AnimationController animationController;
   Timer? timer;
   late int currTime;
 
@@ -24,6 +26,13 @@ class WorkoutPageState extends State<WorkoutPage> {
   void initState() {
     super.initState();
     currTime = widget.workout.timeOn;
+    animationController = AnimationController(
+      vsync: this,
+      duration: Duration(seconds: widget.workout.timeOn),
+    );
+    animationController.addListener(() {
+      setState(() {});
+    });
   }
 
   @override
@@ -42,8 +51,9 @@ class WorkoutPageState extends State<WorkoutPage> {
               width: double.infinity,
               child: DecoratedBox(
                 decoration: BoxDecoration(
-                  border: BoxBorder.all(
+                  border: ProgressBorder.all(
                     color: context.theme.colors.accent,
+                    progress: animationController.value,
                     width: 2,
                   ),
                   borderRadius: BorderRadius.circular(16),
@@ -85,7 +95,10 @@ class WorkoutPageState extends State<WorkoutPage> {
                                 style: FButtonStyle.ghost(),
                                 onPress: timer?.isActive == true
                                     ? null
-                                    : startTimer,
+                                    : () {
+                                        startTimer();
+                                        restart();
+                                      },
                                 child: Icon(
                                   FIcons.play,
                                   size: 30,
@@ -109,6 +122,15 @@ class WorkoutPageState extends State<WorkoutPage> {
     );
   }
 
+  void restart() {
+    if (animationController.status == AnimationStatus.forward ||
+        animationController.value >= 1) {
+      animationController.reverse();
+    } else {
+      animationController.forward();
+    }
+  }
+
   void startTimer() {
     const s = Duration(seconds: 1);
     timer = Timer.periodic(s, (Timer timer) {
@@ -117,7 +139,11 @@ class WorkoutPageState extends State<WorkoutPage> {
           timer.cancel();
         });
       } else {
-        setState(() => currTime--);
+        // dont need setState here because the animationController listener will update the controller
+        // weird
+
+        // setState(() => currTime--);
+        currTime--;
       }
     });
   }
@@ -125,6 +151,7 @@ class WorkoutPageState extends State<WorkoutPage> {
   @override
   void dispose() {
     timer?.cancel();
+    animationController.dispose();
     super.dispose();
   }
 }
