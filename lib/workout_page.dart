@@ -20,12 +20,12 @@ class WorkoutPageState extends State<WorkoutPage>
     with TickerProviderStateMixin {
   late final AnimationController animationController;
   Timer? timer;
-  late int currTime;
+  late double currTime;
 
   @override
   void initState() {
     super.initState();
-    currTime = widget.workout.timeOn;
+    currTime = widget.workout.timeOn + 0.0;
     animationController = AnimationController(
       vsync: this,
       duration: Duration(seconds: widget.workout.timeOn),
@@ -63,7 +63,7 @@ class WorkoutPageState extends State<WorkoutPage>
                   child: Column(
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: [
-                      currTime == 0
+                      currTime <= 0
                           ? Text(
                               'Time\'s up!',
                               style: typography.xl3.copyWith(
@@ -71,7 +71,7 @@ class WorkoutPageState extends State<WorkoutPage>
                               ),
                             )
                           : Text(
-                              '$currTime',
+                              currTime.toStringAsFixed(0),
                               style: typography.xl6.copyWith(
                                 fontWeight: FontWeight.bold,
                               ),
@@ -80,12 +80,13 @@ class WorkoutPageState extends State<WorkoutPage>
                         mainAxisAlignment: MainAxisAlignment.center,
                         spacing: 64,
                         children: [
+                          // RESTART
                           FButton.icon(
                             style: FButtonStyle.ghost(),
                             onPress: () {
                               timer?.cancel();
                               setState(() {
-                                currTime = widget.workout.timeOn;
+                                currTime = widget.workout.timeOn + 0.0;
                               });
                             },
                             child: Icon(FIcons.refreshCw, size: 30),
@@ -99,7 +100,8 @@ class WorkoutPageState extends State<WorkoutPage>
                             child: Padding(
                               padding: const EdgeInsets.all(8),
                               child: timer?.isActive == true
-                                  ? FButton.icon(
+                                  ? // PAUSE
+                                    FButton.icon(
                                       style: FButtonStyle.ghost(),
                                       onPress: pause,
                                       child: Icon(
@@ -108,12 +110,12 @@ class WorkoutPageState extends State<WorkoutPage>
                                         color: context.theme.colors.foreground,
                                       ),
                                     )
-                                  : FButton.icon(
+                                  : // PLAY
+                                    FButton.icon(
                                       style: FButtonStyle.ghost(),
                                       onPress: () {
                                         startTimer();
-                                        //start animation
-                                        restart();
+                                        animate();
                                       },
                                       child: Icon(
                                         FIcons.play,
@@ -138,7 +140,7 @@ class WorkoutPageState extends State<WorkoutPage>
     );
   }
 
-  void restart() {
+  void animate() {
     if (animationController.value >= 1) {
       animationController.reverse();
     } else {
@@ -153,18 +155,21 @@ class WorkoutPageState extends State<WorkoutPage>
   }
 
   void startTimer() {
-    const s = Duration(seconds: 1);
-    timer = Timer.periodic(s, (Timer timer) {
-      if (currTime == 0) {
+    const ms = Duration(milliseconds: 100);
+    timer = Timer.periodic(ms, (Timer timer) {
+      if (currTime <= 0) {
         setState(() {
           timer.cancel();
         });
       } else {
-        // dont need setState here because the animationController listener will update the controller
-        // weird
+        currTime -= (ms.inMilliseconds / 1000);
 
-        // setState(() => currTime--);
-        currTime--;
+        // hack for if user pauses a bunch and creates animation syncing issues
+        // animationController listener was initially doing a bunch of setStates.
+        // if it gets out of sync, this is needed:
+        if (!animationController.isAnimating) {
+          setState(() {});
+        }
       }
     });
   }
