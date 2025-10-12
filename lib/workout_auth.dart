@@ -6,7 +6,6 @@ import 'package:hive_ce_flutter/hive_flutter.dart';
 import 'package:proj/extensions/extensions.dart';
 import 'package:proj/header.dart';
 import 'package:proj/models/workout.dart';
-import 'package:proj/theme/button_style.dart';
 import 'package:proj/theme/theme.dart';
 
 class WorkoutAuth extends StatefulWidget {

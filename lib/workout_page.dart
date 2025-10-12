@@ -63,12 +63,19 @@ class WorkoutPageState extends State<WorkoutPage>
                   child: Column(
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: [
-                      Text(
-                        currTime == 0 ? 'Time\'s up!' : '$currTime',
-                        style: typography.xl6.copyWith(
-                          fontWeight: FontWeight.bold,
-                        ),
-                      ),
+                      currTime == 0
+                          ? Text(
+                              'Time\'s up!',
+                              style: typography.xl3.copyWith(
+                                fontWeight: FontWeight.bold,
+                              ),
+                            )
+                          : Text(
+                              '$currTime',
+                              style: typography.xl6.copyWith(
+                                fontWeight: FontWeight.bold,
+                              ),
+                            ),
                       Row(
                         mainAxisAlignment: MainAxisAlignment.center,
                         spacing: 64,
@@ -91,20 +98,29 @@ class WorkoutPageState extends State<WorkoutPage>
                             ),
                             child: Padding(
                               padding: const EdgeInsets.all(8),
-                              child: FButton.icon(
-                                style: FButtonStyle.ghost(),
-                                onPress: timer?.isActive == true
-                                    ? null
-                                    : () {
+                              child: timer?.isActive == true
+                                  ? FButton.icon(
+                                      style: FButtonStyle.ghost(),
+                                      onPress: pause,
+                                      child: Icon(
+                                        FIcons.pause,
+                                        size: 30,
+                                        color: context.theme.colors.foreground,
+                                      ),
+                                    )
+                                  : FButton.icon(
+                                      style: FButtonStyle.ghost(),
+                                      onPress: () {
                                         startTimer();
+                                        //start animation
                                         restart();
                                       },
-                                child: Icon(
-                                  FIcons.play,
-                                  size: 30,
-                                  color: context.theme.colors.foreground,
-                                ),
-                              ),
+                                      child: Icon(
+                                        FIcons.play,
+                                        size: 30,
+                                        color: context.theme.colors.foreground,
+                                      ),
+                                    ),
                             ),
                           ),
                         ],
@@ -123,12 +139,17 @@ class WorkoutPageState extends State<WorkoutPage>
   }
 
   void restart() {
-    if (animationController.status == AnimationStatus.forward ||
-        animationController.value >= 1) {
+    if (animationController.value >= 1) {
       animationController.reverse();
     } else {
       animationController.forward();
     }
+  }
+
+  void pause() {
+    animationController.stop();
+    timer?.cancel();
+    setState(() {});
   }
 
   void startTimer() {
