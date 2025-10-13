@@ -3,6 +3,7 @@ import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 
 import 'package:forui/forui.dart';
+import 'package:proj/theme/theme.dart';
 
 // ignore_for_file: unnecessary_ignore
 // ignore_for_file: avoid_redundant_argument_values
@@ -131,8 +132,9 @@ FTextFieldStyle textFieldStyle({
     descriptionPadding: label.descriptionPadding,
     errorPadding: label.errorPadding,
     childPadding: label.childPadding,
-    cursorColor: CupertinoColors.activeBlue,
-    filled: false,
+    cursorColor: colors.accent,
+    filled: true,
+    fillColor: colors.primaryForeground,
     contentPadding: const EdgeInsets.symmetric(horizontal: 10, vertical: 10),
     clearButtonPadding: const EdgeInsetsDirectional.only(end: 4),
     scrollPadding: const EdgeInsets.all(20),

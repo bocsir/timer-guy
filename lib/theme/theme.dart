@@ -5,6 +5,7 @@ import 'package:flutter/services.dart';
 
 // my customized stuff
 import 'package:proj/theme/divider_styles.dart';
+import 'package:proj/theme/picker_style.dart';
 import 'package:proj/theme/text_field_style.dart';
 
 extension ColorsExtension on FColors {
@@ -27,9 +28,13 @@ extension TextExtension on FTypography {
       _withMonoFont(base, fontWeight: FontWeight.bold);
   TextStyle get lgSemibold => _withMonoFont(lg, fontWeight: FontWeight.bold);
   TextStyle get xlSemibold => _withMonoFont(xl3, fontWeight: FontWeight.bold);
-  TextStyle get smGrey => _withMonoFont(sm, color: Color(0xFFa8a29e));
-  TextStyle get smError =>
-      _withMonoFont(sm, fontWeight: FontWeight.bold, color: Color(0xFF991b1b));
+  TextStyle get smGrey =>
+      _withMonoFont(sm, color: Color(0xFFa8a29e)); // stone-400
+  TextStyle get smError => _withMonoFont(
+    sm,
+    fontWeight: FontWeight.bold,
+    color: Color(0xFF991b1b), // red-80
+  );
 }
 
 /// See https://forui.dev/docs/themes#customize-themes for more information.
@@ -44,7 +49,7 @@ FThemeData get zincDark {
     primaryForeground: Color(0xFF1C1917), // stone-800
     secondary: Color(0xFF1C1917), // stone-800
     secondaryForeground: Color(0xFFa8a29e), // stone-400
-    muted: Color(0xFF27272A), //
+    muted: Color(0xFF1C1917), // stone-800
     mutedForeground: Color(0xFFA1A1AA), //
     destructive: Color(0xFF991b1b), // red-800
     destructiveForeground: Color(0xFFFAFAFA), //
@@ -63,6 +68,11 @@ FThemeData get zincDark {
     typography: typography,
     style: style,
   );
+  final customPickerStyles = pickerStyle(
+    colors: colors,
+    style: style,
+    typography: typography,
+  );
 
   return FThemeData(
     colors: colors,
@@ -70,6 +80,7 @@ FThemeData get zincDark {
     style: style,
     dividerStyles: customDividerStyles,
     textFieldStyle: customTextFieldStyles,
+    pickerStyle: customPickerStyles,
   );
 }
 
