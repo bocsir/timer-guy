@@ -2,45 +2,34 @@
 import 'package:forui/forui.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+
+// my customized stuff
 import 'package:proj/theme/divider_styles.dart';
+import 'package:proj/theme/text_field_style.dart';
 
 extension ColorsExtension on FColors {
   Color get accent => const Color(0xFF38bdf8); // sky-something
 }
 
 extension TextExtension on FTypography {
-  // idk why height needs to be zero for things to be centered (header title for ex)
-
-  TextStyle get baseSemibold => base.copyWith(
-    fontWeight: FontWeight.bold,
+  TextStyle _withMonoFont(
+    TextStyle base, {
+    FontWeight? fontWeight,
+    Color? color,
+  }) => base.copyWith(
     fontFamily: 'IBMPlexMono',
     height: 0,
+    fontWeight: fontWeight,
+    color: color,
   );
 
-  TextStyle get lgSemibold => lg.copyWith(
-    fontWeight: FontWeight.bold,
-    fontFamily: 'IBMPlexMono',
-    height: 0,
-  );
-
-  TextStyle get xlSemibold => xl3.copyWith(
-    fontWeight: FontWeight.bold,
-    fontFamily: 'IBMPlexMono',
-    height: 0,
-  );
-
-  TextStyle get smGrey => sm.copyWith(
-    fontFamily: 'IBMPlexMono',
-    height: 0,
-    color: Color(0xFFa8a29e), // stone-400
-  );
-
-  TextStyle get smError => sm.copyWith(
-    fontFamily: 'IBMPlexMono',
-    height: 0,
-    color: Color(0xFF991b1b), // red-800
-    fontWeight: FontWeight.bold,
-  );
+  TextStyle get baseSemibold =>
+      _withMonoFont(base, fontWeight: FontWeight.bold);
+  TextStyle get lgSemibold => _withMonoFont(lg, fontWeight: FontWeight.bold);
+  TextStyle get xlSemibold => _withMonoFont(xl3, fontWeight: FontWeight.bold);
+  TextStyle get smGrey => _withMonoFont(sm, color: Color(0xFFa8a29e));
+  TextStyle get smError =>
+      _withMonoFont(sm, fontWeight: FontWeight.bold, color: Color(0xFF991b1b));
 }
 
 /// See https://forui.dev/docs/themes#customize-themes for more information.
@@ -67,13 +56,20 @@ FThemeData get zincDark {
   final typography = _typography(colors: colors);
   final style = _style(colors: colors, typography: typography);
 
+  // my customized styles
   final customDividerStyles = dividerStyles(colors: colors, style: style);
+  final customTextFieldStyles = textFieldStyle(
+    colors: colors,
+    typography: typography,
+    style: style,
+  );
 
   return FThemeData(
     colors: colors,
     typography: typography,
     style: style,
     dividerStyles: customDividerStyles,
+    textFieldStyle: customTextFieldStyles,
   );
 }
 
