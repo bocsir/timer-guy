@@ -7,9 +7,6 @@ import 'package:proj/models/workout.dart';
 import 'package:proj/theme/theme.dart';
 import 'package:progress_border/progress_border.dart';
 
-//TODO: will need to add time before first active period (~5 sec?) to get set up
-//should that be modifiable in authoring page?
-
 class WorkoutPage extends StatefulWidget {
   final Workout workout;
 
@@ -27,7 +24,7 @@ class WorkoutPageState extends State<WorkoutPage>
 
   late ValueNotifier<int> currRep;
   late ValueNotifier<int> currSet;
-  late ValueNotifier<bool> resting;
+  late ValueNotifier<bool> wasResting;
 
   @override
   void initState() {
@@ -43,7 +40,7 @@ class WorkoutPageState extends State<WorkoutPage>
 
     currRep = ValueNotifier(1);
     currSet = ValueNotifier(1);
-    resting = ValueNotifier(false); //eventually make true for initial 5 sec
+    wasResting = ValueNotifier(false);
   }
 
   @override
@@ -57,6 +54,27 @@ class WorkoutPageState extends State<WorkoutPage>
         spacing: 32,
         children: [
           Text(widget.workout.name, style: typography.xlSemibold),
+          ValueListenableBuilder<int>(
+            valueListenable: currSet,
+            builder: (context, setValue, child) {
+              return ValueListenableBuilder(
+                valueListenable: currRep,
+                builder: (context, repValue, child) {
+                  return ValueListenableBuilder(
+                    valueListenable: wasResting,
+                    builder: (context, setwasResting, child) {
+                      return Text(
+                        wasResting.value
+                            ? 'Rest - Set $setValue'
+                            : 'Set $setValue - Rep $repValue',
+                        style: typography.lgSemibold,
+                      );
+                    },
+                  );
+                },
+              );
+            },
+          ),
           Expanded(
             child: SizedBox(
               width: double.infinity,
@@ -173,7 +191,8 @@ class WorkoutPageState extends State<WorkoutPage>
   void startTimer() {
     const ms = Duration(milliseconds: 100);
     timer = Timer.periodic(ms, (Timer timer) {
-      if (currTime <= 0) {
+      if (currTime <= 1) {
+        iterationComplete();
         setState(() {
           timer.cancel();
         });
@@ -190,13 +209,78 @@ class WorkoutPageState extends State<WorkoutPage>
     });
   }
 
+  /*
+
+1.(start workout)
+currTime & animationController set in init()
+press play => startTimer()
+
+
+when currTime <= 1:
+(first working iteration complete)
+iterationComplete()
+
+2. wasResting is false
+(start rest)
+set wasResting to true
+set currTime & animationController
+[] show user it is resting time
+increment rep if there are more
+startTimer() for rest
+
+
+when currTime <= 1:
+(first resting iteration complete)
+
+3. wasResting is true
+(start workout)
+set wasResting to false
+set currTime & animationController
+startTimer() for working rep
+
+4. loop starts until workout finished
+5. [] show user workout finished
+*/
+  // timer is finished
+  void iterationComplete() {
+    if (wasResting.value) {
+      // set up working stuff
+      wasResting.value = false;
+
+      final tOn = widget.workout.timeOn;
+      currTime = tOn + 0.0;
+      animationController.duration = Duration(seconds: tOn);
+      startTimer();
+    } else {
+      // set up resting stuff
+      wasResting.value = true;
+
+      final tOff = widget.workout.timeOff;
+      currTime = tOff + 0.0;
+      animationController.duration = Duration(seconds: tOff);
+
+      // go to next rep / set
+      if (currRep.value <= widget.workout.reps) {
+        currRep.value++;
+        startTimer();
+      } else if (currSet.value <= widget.workout.sets) {
+        // TODO: on set change, user should need to click play again
+        currSet.value++;
+        currRep.value = 1;
+        startTimer();
+      } else {
+        //  TODO: all sets done, workout over, tell user
+      }
+    }
+  }
+
   @override
   void dispose() {
     timer?.cancel();
     animationController.dispose();
     currRep.dispose();
     currSet.dispose();
-    resting.dispose();
+    wasResting.dispose();
     super.dispose();
   }
 }
