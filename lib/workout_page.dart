@@ -56,27 +56,28 @@ class WorkoutPageState extends State<WorkoutPage>
         spacing: 32,
         children: [
           Text(widget.workout.name, style: typography.xlSemibold),
-          ValueListenableBuilder<int>(
-            valueListenable: currSet,
-            builder: (context, setValue, child) {
-              return ValueListenableBuilder(
-                valueListenable: currRep,
-                builder: (context, repValue, child) {
-                  return ValueListenableBuilder(
-                    valueListenable: wasResting,
-                    builder: (context, setwasResting, child) {
-                      return Text(
-                        wasResting.value
-                            ? 'Rest - Set $setValue / ${widget.workout.sets}'
-                            : 'Set $setValue / ${widget.workout.sets} - Rep $repValue / ${widget.workout.reps}',
-                        style: typography.lgSemibold,
-                      );
-                    },
-                  );
-                },
-              );
-            },
-          ),
+          if (!workoutOver.value)
+            ValueListenableBuilder<int>(
+              valueListenable: currSet,
+              builder: (context, setValue, child) {
+                return ValueListenableBuilder(
+                  valueListenable: currRep,
+                  builder: (context, repValue, child) {
+                    return ValueListenableBuilder(
+                      valueListenable: wasResting,
+                      builder: (context, setwasResting, child) {
+                        return Text(
+                          wasResting.value
+                              ? 'Rest - Set $setValue / ${widget.workout.sets}'
+                              : 'Set $setValue / ${widget.workout.sets} - Rep $repValue / ${widget.workout.reps}',
+                          style: typography.lgSemibold,
+                        );
+                      },
+                    );
+                  },
+                );
+              },
+            ),
           Expanded(
             child: SizedBox(
               width: double.infinity,
@@ -201,7 +202,9 @@ class WorkoutPageState extends State<WorkoutPage>
     const ms = Duration(milliseconds: 100);
     timer = Timer.periodic(ms, (Timer timer) {
       if (currTime <= .8) {
-        iterationComplete();
+        if (!workoutOver.value) {
+          iterationComplete();
+        }
         setState(() {
           timer.cancel();
         });
@@ -220,36 +223,38 @@ class WorkoutPageState extends State<WorkoutPage>
 
   /*
 
-1.(start workout)
-currTime & animationController set in init()
-press play => startTimer()
+    1.(start workout)
+    currTime & animationController set in init()
+    press play => startTimer()
 
 
-when currTime <= 1:
-(first working iteration complete)
-iterationComplete()
+    when currTime <= 1:
+    (first working iteration complete)
+    iterationComplete()
 
-2. wasResting is false
-(start rest)
-set wasResting to true
-set currTime & animationController
-[] show user it is resting time
-increment rep if there are more
-startTimer() for rest
+    2. wasResting is false
+    (start rest)
+    set wasResting to true
+    set currTime & animationController
+    [] show user it is resting time
+    increment rep if there are more
+    startTimer() for rest
 
 
-when currTime <= 1:
-(first resting iteration complete)
+    when currTime <= 1:
+    (first resting iteration complete)
 
-3. wasResting is true
-(start workout)
-set wasResting to false
-set currTime & animationController
-startTimer() for working rep
+    3. wasResting is true
+    (start workout)
+    set wasResting to false
+    set currTime & animationController
+    startTimer() for working rep
 
-4. loop starts until workout finished
-5. [] show user workout finished
-*/
+    4. loop starts until workout finished
+    5. [] show user workout finished
+
+  */
+
   // timer is finished
   void iterationComplete() {
     if (wasResting.value) {
@@ -279,7 +284,6 @@ startTimer() for working rep
         currRep.value = 1;
         startTimer();
       } else {
-        //  TODO: all sets done, workout over, tell user
         workoutOver.value = true;
       }
     }
