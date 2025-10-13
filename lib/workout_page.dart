@@ -25,6 +25,7 @@ class WorkoutPageState extends State<WorkoutPage>
   late ValueNotifier<int> currRep;
   late ValueNotifier<int> currSet;
   late ValueNotifier<bool> wasResting;
+  late ValueNotifier<bool> workoutOver;
 
   @override
   void initState() {
@@ -32,7 +33,7 @@ class WorkoutPageState extends State<WorkoutPage>
     currTime = widget.workout.timeOn + 0.0;
     animationController = AnimationController(
       vsync: this,
-      duration: Duration(seconds: widget.workout.timeOn),
+      duration: Duration(seconds: widget.workout.timeOn - 1),
     );
     animationController.addListener(() {
       setState(() {});
@@ -41,6 +42,7 @@ class WorkoutPageState extends State<WorkoutPage>
     currRep = ValueNotifier(1);
     currSet = ValueNotifier(1);
     wasResting = ValueNotifier(false);
+    workoutOver = ValueNotifier(false);
   }
 
   @override
@@ -65,8 +67,8 @@ class WorkoutPageState extends State<WorkoutPage>
                     builder: (context, setwasResting, child) {
                       return Text(
                         wasResting.value
-                            ? 'Rest - Set $setValue'
-                            : 'Set $setValue - Rep $repValue',
+                            ? 'Rest - Set $setValue / ${widget.workout.sets}'
+                            : 'Set $setValue / ${widget.workout.sets} - Rep $repValue / ${widget.workout.reps}',
                         style: typography.lgSemibold,
                       );
                     },
@@ -94,74 +96,81 @@ class WorkoutPageState extends State<WorkoutPage>
                 ),
                 child: Padding(
                   padding: const EdgeInsets.all(64),
-                  child: Column(
-                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                    children: [
-                      currTime <= 0
-                          ? Text(
-                              'Time\'s up!',
-                              style: typography.xl3.copyWith(
-                                fontWeight: FontWeight.bold,
-                              ),
-                            )
-                          : Text(
-                              currTime.toStringAsFixed(0),
-                              style: typography.xl7.copyWith(
-                                fontWeight: FontWeight.bold,
-                              ),
-                            ),
-                      Row(
-                        mainAxisAlignment: MainAxisAlignment.center,
-                        spacing: 64,
+                  child: ValueListenableBuilder(
+                    valueListenable: workoutOver,
+                    builder: (context, value, child) {
+                      return Column(
+                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
                         children: [
-                          // RESTART
-                          FButton.icon(
-                            style: FButtonStyle.ghost(),
-                            onPress: () {
-                              timer?.cancel();
-                              setState(() {
-                                currTime = widget.workout.timeOn + 0.0;
-                              });
-                            },
-                            child: Icon(FIcons.refreshCw, size: 30),
-                          ),
-                          DecoratedBox(
-                            decoration: BoxDecoration(
-                              border: BoxBorder.all(),
-                              borderRadius: BorderRadius.circular(16),
-                              color: context.theme.colors.accent,
-                            ),
-                            child: Padding(
-                              padding: const EdgeInsets.all(8),
-                              child: timer?.isActive == true
-                                  ? // PAUSE
-                                    FButton.icon(
-                                      style: FButtonStyle.ghost(),
-                                      onPress: pause,
-                                      child: Icon(
-                                        FIcons.pause,
-                                        size: 30,
-                                        color: context.theme.colors.foreground,
-                                      ),
-                                    )
-                                  : // PLAY
-                                    FButton.icon(
-                                      style: FButtonStyle.ghost(),
-                                      onPress: () {
-                                        startTimer();
-                                        animate();
-                                      },
-                                      child: Icon(
-                                        FIcons.play,
-                                        size: 30,
-                                        color: context.theme.colors.foreground,
-                                      ),
-                                    ),
-                            ),
+                          workoutOver.value
+                              ? Text(
+                                  'All done!',
+                                  style: typography.xl3.copyWith(
+                                    fontWeight: FontWeight.bold,
+                                  ),
+                                )
+                              : Text(
+                                  currTime.toStringAsFixed(0),
+                                  style: typography.xl7.copyWith(
+                                    fontWeight: FontWeight.bold,
+                                  ),
+                                ),
+                          Row(
+                            mainAxisAlignment: MainAxisAlignment.center,
+                            spacing: 64,
+                            children: [
+                              // RESTART
+                              FButton.icon(
+                                style: FButtonStyle.ghost(),
+                                onPress: () {
+                                  timer?.cancel();
+                                  setState(() {
+                                    currTime = widget.workout.timeOn + 0.0;
+                                  });
+                                },
+                                child: Icon(FIcons.refreshCw, size: 30),
+                              ),
+                              DecoratedBox(
+                                decoration: BoxDecoration(
+                                  border: BoxBorder.all(),
+                                  borderRadius: BorderRadius.circular(16),
+                                  color: context.theme.colors.accent,
+                                ),
+                                child: Padding(
+                                  padding: const EdgeInsets.all(8),
+                                  child: timer?.isActive == true
+                                      ? // PAUSE
+                                        FButton.icon(
+                                          style: FButtonStyle.ghost(),
+                                          onPress: pause,
+                                          child: Icon(
+                                            FIcons.pause,
+                                            size: 30,
+                                            color:
+                                                context.theme.colors.foreground,
+                                          ),
+                                        )
+                                      : // PLAY
+                                        FButton.icon(
+                                          style: FButtonStyle.ghost(),
+                                          onPress: () {
+                                            startTimer();
+                                            animate();
+                                          },
+                                          child: Icon(
+                                            FIcons.play,
+                                            size: 30,
+                                            color:
+                                                context.theme.colors.foreground,
+                                          ),
+                                        ),
+                                ),
+                              ),
+                            ],
                           ),
                         ],
-                      ),
-                    ],
+                      );
+                    },
                   ),
                 ),
               ),
@@ -191,7 +200,7 @@ class WorkoutPageState extends State<WorkoutPage>
   void startTimer() {
     const ms = Duration(milliseconds: 100);
     timer = Timer.periodic(ms, (Timer timer) {
-      if (currTime <= 1) {
+      if (currTime <= .8) {
         iterationComplete();
         setState(() {
           timer.cancel();
@@ -249,7 +258,8 @@ startTimer() for working rep
 
       final tOn = widget.workout.timeOn;
       currTime = tOn + 0.0;
-      animationController.duration = Duration(seconds: tOn);
+      animationController.duration = Duration(seconds: tOn - 1);
+      animate();
       startTimer();
     } else {
       // set up resting stuff
@@ -257,19 +267,20 @@ startTimer() for working rep
 
       final tOff = widget.workout.timeOff;
       currTime = tOff + 0.0;
-      animationController.duration = Duration(seconds: tOff);
-
+      animationController.duration = Duration(seconds: tOff - 1);
+      animate();
       // go to next rep / set
-      if (currRep.value <= widget.workout.reps) {
+      if (currRep.value < widget.workout.reps) {
         currRep.value++;
         startTimer();
-      } else if (currSet.value <= widget.workout.sets) {
+      } else if (currSet.value < widget.workout.sets) {
         // TODO: on set change, user should need to click play again
         currSet.value++;
         currRep.value = 1;
         startTimer();
       } else {
         //  TODO: all sets done, workout over, tell user
+        workoutOver.value = true;
       }
     }
   }
