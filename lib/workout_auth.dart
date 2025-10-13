@@ -46,7 +46,6 @@ class _WorkoutAuthState extends State<WorkoutAuth> {
                 spacing: 8,
                 children: [
                   Text('Create Workout', style: typography.xlSemibold),
-                  FDivider(),
                   FTextFormField(
                     label: Text('Name', style: typography.lgSemibold),
                     controller: _controllers['name'],

@@ -54,12 +54,17 @@ class WorkoutPageState extends State<WorkoutPage>
                   border: ProgressBorder.all(
                     color: context.theme.colors.accent,
                     progress: animationController.value,
-                    width: 2,
+                    width: 6,
+                    backgroundBorder: Border.all(
+                      color: context.theme.colors.border,
+                      width: 2,
+                    ),
                   ),
+                  color: context.theme.colors.secondary,
                   borderRadius: BorderRadius.circular(16),
                 ),
                 child: Padding(
-                  padding: const EdgeInsets.all(32),
+                  padding: const EdgeInsets.all(64),
                   child: Column(
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: [
@@ -72,7 +77,7 @@ class WorkoutPageState extends State<WorkoutPage>
                             )
                           : Text(
                               currTime.toStringAsFixed(0),
-                              style: typography.xl6.copyWith(
+                              style: typography.xl7.copyWith(
                                 fontWeight: FontWeight.bold,
                               ),
                             ),
