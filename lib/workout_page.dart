@@ -7,6 +7,9 @@ import 'package:proj/models/workout.dart';
 import 'package:proj/theme/theme.dart';
 import 'package:progress_border/progress_border.dart';
 
+//TODO: will need to add time before first active period (~5 sec?) to get set up
+//should that be modifiable in authoring page?
+
 class WorkoutPage extends StatefulWidget {
   final Workout workout;
 
@@ -22,6 +25,10 @@ class WorkoutPageState extends State<WorkoutPage>
   Timer? timer;
   late double currTime;
 
+  late ValueNotifier<int> currRep;
+  late ValueNotifier<int> currSet;
+  late ValueNotifier<bool> resting;
+
   @override
   void initState() {
     super.initState();
@@ -33,6 +40,10 @@ class WorkoutPageState extends State<WorkoutPage>
     animationController.addListener(() {
       setState(() {});
     });
+
+    currRep = ValueNotifier(1);
+    currSet = ValueNotifier(1);
+    resting = ValueNotifier(false); //eventually make true for initial 5 sec
   }
 
   @override
@@ -183,6 +194,9 @@ class WorkoutPageState extends State<WorkoutPage>
   void dispose() {
     timer?.cancel();
     animationController.dispose();
+    currRep.dispose();
+    currSet.dispose();
+    resting.dispose();
     super.dispose();
   }
 }
