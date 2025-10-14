@@ -123,12 +123,7 @@ class WorkoutPageState extends State<WorkoutPage>
                               // RESTART
                               FButton.icon(
                                 style: FButtonStyle.ghost(),
-                                onPress: () {
-                                  timer?.cancel();
-                                  setState(() {
-                                    currTime = widget.workout.timeOn + 0.0;
-                                  });
-                                },
+                                onPress: restartWorkout,
                                 child: Icon(FIcons.refreshCw, size: 30),
                               ),
                               DecoratedBox(
@@ -287,6 +282,17 @@ class WorkoutPageState extends State<WorkoutPage>
         workoutOver.value = true;
       }
     }
+  }
+
+  void restartWorkout() {
+    timer?.cancel();
+    animationController.reset();
+    animationController.duration = Duration(seconds: widget.workout.timeOn - 1);
+    currSet.value = 1;
+    currRep.value = 1;
+    currTime = widget.workout.timeOn + 0.0;
+    wasResting.value = false;
+    workoutOver.value = false;
   }
 
   @override
