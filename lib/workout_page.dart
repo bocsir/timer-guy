@@ -199,7 +199,7 @@ class WorkoutPageState extends State<WorkoutPage>
   }
 
   void pause() {
-    animationController.stop();
+    animationController.reset();
     timer?.cancel();
     setState(() {});
   }
@@ -285,12 +285,13 @@ class WorkoutPageState extends State<WorkoutPage>
         currRep.value++;
         startTimer();
       } else if (currSet.value < widget.workout.sets) {
-        // TODO: on set change, user should need to click play again
+        // pause at end of each set
+        pause();
         currSet.value++;
         currRep.value = 1;
-        startTimer();
       } else {
         workoutOver.value = true;
+        pause();
       }
     }
   }
