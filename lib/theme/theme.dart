@@ -44,18 +44,18 @@ FThemeData get zincDark {
     systemOverlayStyle: SystemUiOverlayStyle.light,
     barrier: Color(0xFF000000), // black
     background: Color(0xFF000000), // black
-    foreground: Color.fromRGBO(250, 250, 249, 1), // stone-100
-    primary: Color(0xFFFAFAF9), // stone-100
-    primaryForeground: Color(0xFF1C1917), // stone-800
-    secondary: Color(0xFF1C1917), // stone-800
-    secondaryForeground: Color(0xFFa8a29e), // stone-400
-    muted: Color(0xFF1C1917), // stone-800
+    foreground: Color(0xFFf5f5f5), // neutral-100
+    primary: Color(0xFFf5f5f5), // neutral-100
+    primaryForeground: Color(0xFF262626), // neutral-800
+    secondary: Color(0xFF171717), // neutral-900
+    secondaryForeground: Color(0xFFa3a3a3), // neutral-400
+    muted: Color(0xFF262626), // neutral-800
     mutedForeground: Color(0xFFA1A1AA), //
     destructive: Color(0xFF991b1b), // red-800
-    destructiveForeground: Color(0xFFFAFAFA), //
+    destructiveForeground: Color(0xFFf5f5f5), // neutral-100
     error: Color(0xFF991b1b), // red-800
-    errorForeground: Color(0xFFFAFAFA), //
-    border: Color(0xFF44403C), // stone-700
+    errorForeground: Color(0xFFf5f5f5), // neutral-100
+    border: Color(0xFF404040), // neutral-700
   );
 
   final typography = _typography(colors: colors);
