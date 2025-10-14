@@ -33,7 +33,7 @@ class WorkoutPageState extends State<WorkoutPage>
     currTime = widget.workout.timeOn + 0.0;
     animationController = AnimationController(
       vsync: this,
-      duration: Duration(seconds: widget.workout.timeOn - 1),
+      duration: Duration(seconds: widget.workout.timeOn),
     );
     animationController.addListener(() {
       setState(() {});
@@ -110,11 +110,22 @@ class WorkoutPageState extends State<WorkoutPage>
                                     fontWeight: FontWeight.bold,
                                   ),
                                 )
-                              : Text(
-                                  currTime.toStringAsFixed(0),
-                                  style: typography.xl7.copyWith(
-                                    fontWeight: FontWeight.bold,
-                                  ),
+                              : Row(
+                                  mainAxisAlignment: MainAxisAlignment.center,
+                                  crossAxisAlignment:
+                                      CrossAxisAlignment.baseline,
+                                  textBaseline: TextBaseline.values.first,
+                                  spacing: 4,
+                                  children: [
+                                    Text(
+                                      currTime.toString()[0],
+                                      style: typography.xl7,
+                                    ),
+                                    Text(
+                                      currTime.toString()[2],
+                                      style: typography.xl5,
+                                    ),
+                                  ],
                                 ),
                           Row(
                             mainAxisAlignment: MainAxisAlignment.center,
@@ -196,7 +207,7 @@ class WorkoutPageState extends State<WorkoutPage>
   void startTimer() {
     const ms = Duration(milliseconds: 100);
     timer = Timer.periodic(ms, (Timer timer) {
-      if (currTime <= .8) {
+      if (currTime <= ms.inMilliseconds / 1000) {
         if (!workoutOver.value) {
           iterationComplete();
         }
@@ -258,7 +269,7 @@ class WorkoutPageState extends State<WorkoutPage>
 
       final tOn = widget.workout.timeOn;
       currTime = tOn + 0.0;
-      animationController.duration = Duration(seconds: tOn - 1);
+      animationController.duration = Duration(seconds: tOn);
       animate();
       startTimer();
     } else {
@@ -267,7 +278,7 @@ class WorkoutPageState extends State<WorkoutPage>
 
       final tOff = widget.workout.timeOff;
       currTime = tOff + 0.0;
-      animationController.duration = Duration(seconds: tOff - 1);
+      animationController.duration = Duration(seconds: tOff);
       animate();
       // go to next rep / set
       if (currRep.value < widget.workout.reps) {
@@ -287,7 +298,7 @@ class WorkoutPageState extends State<WorkoutPage>
   void restartWorkout() {
     timer?.cancel();
     animationController.reset();
-    animationController.duration = Duration(seconds: widget.workout.timeOn - 1);
+    animationController.duration = Duration(seconds: widget.workout.timeOn);
     currSet.value = 1;
     currRep.value = 1;
     currTime = widget.workout.timeOn + 0.0;
