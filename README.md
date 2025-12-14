@@ -1,5 +1,6 @@
-# timer guy
-*Workout creation app for interval training and probably more eventually*
+![Timer Guy Logo](./static/svg/logo.svg)
+
+_Workout creation app for interval training and probably more eventually_
 
 Name tbd
 
