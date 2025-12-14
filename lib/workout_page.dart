@@ -7,6 +7,8 @@ import 'package:proj/models/workout.dart';
 import 'package:proj/theme/theme.dart';
 import 'package:progress_border/progress_border.dart';
 
+enum WorkoutStatus { wasPaused, wasRunning, wasResting }
+
 class WorkoutPage extends StatefulWidget {
   final Workout workout;
 
@@ -24,7 +26,7 @@ class WorkoutPageState extends State<WorkoutPage>
 
   late ValueNotifier<int> currRep;
   late ValueNotifier<int> currSet;
-  late ValueNotifier<bool> wasResting;
+  late ValueNotifier<WorkoutStatus> status;
   late ValueNotifier<bool> workoutOver;
 
   @override
@@ -41,7 +43,7 @@ class WorkoutPageState extends State<WorkoutPage>
 
     currRep = ValueNotifier(1);
     currSet = ValueNotifier(1);
-    wasResting = ValueNotifier(false);
+    status = ValueNotifier(WorkoutStatus.wasPaused);
     workoutOver = ValueNotifier(false);
   }
 
@@ -60,24 +62,14 @@ class WorkoutPageState extends State<WorkoutPage>
             children: [
               Text(widget.workout.name, style: typography.xlSemibold),
               if (!workoutOver.value)
-                ValueListenableBuilder<int>(
-                  valueListenable: currSet,
-                  builder: (context, setValue, child) {
-                    return ValueListenableBuilder(
-                      valueListenable: currRep,
-                      builder: (context, repValue, child) {
-                        return ValueListenableBuilder(
-                          valueListenable: wasResting,
-                          builder: (context, setwasResting, child) {
-                            return Text(
-                              wasResting.value
-                                  ? 'Rest - Set $setValue / ${widget.workout.sets}'
-                                  : 'Set $setValue / ${widget.workout.sets} - Rep $repValue / ${widget.workout.reps}',
-                              style: typography.lgSemibold,
-                            );
-                          },
-                        );
-                      },
+                ListenableBuilder(
+                  listenable: Listenable.merge([currSet, currRep, status]),
+                  builder: (context, child) {
+                    return Text(
+                      status.value == WorkoutStatus.wasResting
+                          ? 'Rest - Set ${currSet.value} / ${widget.workout.sets}'
+                          : 'Set ${currSet.value} / ${widget.workout.sets} - Rep ${currRep.value} / ${widget.workout.reps}',
+                      style: typography.lgSemibold,
                     );
                   },
                 ),
@@ -150,8 +142,9 @@ class WorkoutPageState extends State<WorkoutPage>
                                 ),
                                 child: Padding(
                                   padding: const EdgeInsets.all(8),
-                                  child: timer?.isActive == true
-                                      ? // PAUSE
+                                  child:
+                                      status.value == WorkoutStatus.wasRunning
+                                      ? // show pause
                                         FButton.icon(
                                           style: FButtonStyle.ghost(),
                                           onPress: pause,
@@ -162,12 +155,12 @@ class WorkoutPageState extends State<WorkoutPage>
                                                 context.theme.colors.foreground,
                                           ),
                                         )
-                                      : // PLAY
+                                      : // show play
                                         FButton.icon(
                                           style: FButtonStyle.ghost(),
                                           onPress: () {
-                                            startTimer();
                                             animate();
+                                            startTimer();
                                           },
                                           child: Icon(
                                             FIcons.play,
@@ -196,7 +189,14 @@ class WorkoutPageState extends State<WorkoutPage>
   }
 
   void animate() {
-    if (animationController.value >= 1) {
+    if (status.value == WorkoutStatus.wasPaused) {
+      // Resume from where we paused, don't change direction
+      if (animationController.status == AnimationStatus.reverse) {
+        animationController.reverse();
+      } else {
+        animationController.forward();
+      }
+    } else if (animationController.value >= 1) {
       animationController.reverse();
     } else {
       animationController.forward();
@@ -204,14 +204,18 @@ class WorkoutPageState extends State<WorkoutPage>
   }
 
   void pause() {
-    animationController.reset();
+    status.value = WorkoutStatus.wasPaused;
+    animationController.stop();
     timer?.cancel();
     setState(() {});
   }
 
   void startTimer() {
+    status.value = WorkoutStatus.wasRunning;
+
     const ms = Duration(milliseconds: 100);
     timer = Timer.periodic(ms, (Timer timer) {
+      // if current time <= 1/10 second. this is to avoid showing negative time
       if (currTime <= ms.inMilliseconds / 1000) {
         if (!workoutOver.value) {
           iterationComplete();
@@ -266,20 +270,22 @@ class WorkoutPageState extends State<WorkoutPage>
 
   */
 
-  // timer is finished
+  // called after an iteration (work or rest) completes
   void iterationComplete() {
-    if (wasResting.value) {
+    // rest completed
+    if (status.value == WorkoutStatus.wasResting) {
       // set up working stuff
-      wasResting.value = false;
+      status.value = WorkoutStatus.wasRunning;
 
       final tOn = widget.workout.timeOn;
       currTime = tOn + 0.0;
       animationController.duration = Duration(seconds: tOn);
       animate();
       startTimer();
+      // work completed
     } else {
       // set up resting stuff
-      wasResting.value = true;
+      status.value = WorkoutStatus.wasResting;
 
       final tOff = widget.workout.timeOff;
       currTime = tOff + 0.0;
@@ -308,7 +314,7 @@ class WorkoutPageState extends State<WorkoutPage>
     currSet.value = 1;
     currRep.value = 1;
     currTime = widget.workout.timeOn + 0.0;
-    wasResting.value = false;
+    status.value = WorkoutStatus.wasPaused;
     workoutOver.value = false;
   }
 
@@ -318,7 +324,7 @@ class WorkoutPageState extends State<WorkoutPage>
     animationController.dispose();
     currRep.dispose();
     currSet.dispose();
-    wasResting.dispose();
+    status.dispose();
     super.dispose();
   }
 }
