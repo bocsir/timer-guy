@@ -55,29 +55,34 @@ class WorkoutPageState extends State<WorkoutPage>
         crossAxisAlignment: CrossAxisAlignment.start,
         spacing: 32,
         children: [
-          Text(widget.workout.name, style: typography.xlSemibold),
-          if (!workoutOver.value)
-            ValueListenableBuilder<int>(
-              valueListenable: currSet,
-              builder: (context, setValue, child) {
-                return ValueListenableBuilder(
-                  valueListenable: currRep,
-                  builder: (context, repValue, child) {
+          Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text(widget.workout.name, style: typography.xlSemibold),
+              if (!workoutOver.value)
+                ValueListenableBuilder<int>(
+                  valueListenable: currSet,
+                  builder: (context, setValue, child) {
                     return ValueListenableBuilder(
-                      valueListenable: wasResting,
-                      builder: (context, setwasResting, child) {
-                        return Text(
-                          wasResting.value
-                              ? 'Rest - Set $setValue / ${widget.workout.sets}'
-                              : 'Set $setValue / ${widget.workout.sets} - Rep $repValue / ${widget.workout.reps}',
-                          style: typography.lgSemibold,
+                      valueListenable: currRep,
+                      builder: (context, repValue, child) {
+                        return ValueListenableBuilder(
+                          valueListenable: wasResting,
+                          builder: (context, setwasResting, child) {
+                            return Text(
+                              wasResting.value
+                                  ? 'Rest - Set $setValue / ${widget.workout.sets}'
+                                  : 'Set $setValue / ${widget.workout.sets} - Rep $repValue / ${widget.workout.reps}',
+                              style: typography.lgSemibold,
+                            );
+                          },
                         );
                       },
                     );
                   },
-                );
-              },
-            ),
+                ),
+            ],
+          ),
           Expanded(
             child: SizedBox(
               width: double.infinity,
@@ -89,7 +94,7 @@ class WorkoutPageState extends State<WorkoutPage>
                     width: 6,
                     backgroundBorder: Border.all(
                       color: context.theme.colors.border,
-                      width: 2,
+                      width: 1,
                     ),
                   ),
                   color: context.theme.colors.secondary,
@@ -118,11 +123,11 @@ class WorkoutPageState extends State<WorkoutPage>
                                   spacing: 4,
                                   children: [
                                     Text(
-                                      currTime.toString()[0],
+                                      currTime.toString().split('.')[0],
                                       style: typography.xl7,
                                     ),
                                     Text(
-                                      currTime.toString()[2],
+                                      currTime.toString().split('.')[1][0],
                                       style: typography.xl5,
                                     ),
                                   ],
