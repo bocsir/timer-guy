@@ -6,6 +6,7 @@ import 'package:proj/header.dart';
 import 'package:proj/hive/hive_boxes.dart';
 import 'package:proj/models/workout.dart';
 import 'package:proj/theme/theme.dart';
+import 'package:proj/widgets/workout_analytics.dart';
 import 'package:proj/workout_auth.dart';
 import 'package:proj/workout_page.dart';
 
@@ -110,10 +111,30 @@ class _WorkoutListState extends State<WorkoutList>
                                 w.name,
                                 style: context.theme.typography.baseSemibold,
                               ),
-                              suffix: Icon(
-                                FIcons.chevronRight,
-                                size: 25,
-                                color: context.theme.colors.foreground,
+                              suffix: Row(
+                                mainAxisSize: MainAxisSize.min,
+                                children: [
+                                  // Analytics button
+                                  IconButton(
+                                    icon: Icon(
+                                      Icons.bar_chart_rounded,
+                                      size: 22,
+                                      color: context.theme.colors.foreground.withOpacity(0.6),
+                                    ),
+                                    onPressed: () => Navigator.of(context).push(
+                                      MaterialPageRoute(
+                                        builder: (context) => WorkoutAnalyticsPage(workout: w),
+                                      ),
+                                    ),
+                                    tooltip: 'View Analytics',
+                                  ),
+                                  const SizedBox(width: 4),
+                                  Icon(
+                                    FIcons.chevronRight,
+                                    size: 25,
+                                    color: context.theme.colors.foreground,
+                                  ),
+                                ],
                               ),
                               onPress: () => Navigator.of(context).push(
                                 MaterialPageRoute(

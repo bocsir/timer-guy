@@ -11,6 +11,7 @@
 .svn/
 .swiftpm/
 migrate_working_dir/
+run.sh
 
 # The .vscode folder contains launch configuration and tasks you configure in
 # VS Code which you may wish to be included in version control, so this line

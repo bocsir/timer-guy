@@ -8,11 +8,15 @@ import 'package:proj/hive/hive_adapters.dart';
 extension HiveRegistrar on HiveInterface {
   void registerAdapters() {
     registerAdapter(WorkoutAdapter());
+    registerAdapter(WorkoutSessionAdapter());
+    registerAdapter(WorkoutSetAdapter());
   }
 }
 
 extension IsolatedHiveRegistrar on IsolatedHiveInterface {
   void registerAdapters() {
     registerAdapter(WorkoutAdapter());
+    registerAdapter(WorkoutSessionAdapter());
+    registerAdapter(WorkoutSetAdapter());
   }
 }

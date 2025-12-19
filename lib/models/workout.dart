@@ -4,36 +4,25 @@
 
 // models/workout.dart
 import 'package:hive_ce/hive.dart';
+import 'package:proj/models/workout_set.dart';
 
 // extension has .save(), .delete(), and key
 class Workout extends HiveObject {
   final String name;
-  final int reps;
-  final int sets;
-  final int timeOn; //use better type
-  final int timeOff; //use better type
+  final List<WorkoutSet> sets;
 
   Workout({
     required this.name,
-    required this.reps,
     required this.sets,
-    required this.timeOn,
-    required this.timeOff,
   });
 
   Workout copyWith({
     String? name,
-    int? reps,
-    int? sets,
-    int? timeOn,
-    int? timeOff,
+    List<WorkoutSet>? sets,
   }) {
     return Workout(
       name: name ?? this.name,
-      reps: reps ?? this.reps,
       sets: sets ?? this.sets,
-      timeOn: timeOn ?? this.timeOn,
-      timeOff: timeOff ?? this.timeOff,
     );
   }
 }
