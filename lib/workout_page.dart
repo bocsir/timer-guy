@@ -115,11 +115,13 @@ class WorkoutPageState extends State<WorkoutPage>
                                   spacing: 4,
                                   children: [
                                     Text(
-                                      currTime.toString().split('.')[0],
+                                      currTime.toStringAsFixed(1).split('.')[0],
                                       style: typography.xl7,
                                     ),
                                     Text(
-                                      currTime.toString().split('.')[1][0],
+                                      currTime
+                                          .toStringAsFixed(1)
+                                          .split('.')[1][0],
                                       style: typography.xl5,
                                     ),
                                   ],
