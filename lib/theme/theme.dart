@@ -13,23 +13,13 @@ extension ColorsExtension on FColors {
 }
 
 extension TextExtension on FTypography {
-  TextStyle _withMonoFont(
-    TextStyle base, {
-    FontWeight? fontWeight,
-    Color? color,
-  }) => base.copyWith(
-    fontFamily: 'IBMPlexMono',
-    height: 0,
-    fontWeight: fontWeight,
-    color: color,
-  );
+  TextStyle _withMonoFont(TextStyle base, {FontWeight? fontWeight, Color? color}) =>
+      base.copyWith(fontFamily: 'IBMPlexMono', height: 0, fontWeight: fontWeight, color: color);
 
-  TextStyle get baseSemibold =>
-      _withMonoFont(base, fontWeight: FontWeight.bold);
+  TextStyle get baseSemibold => _withMonoFont(base, fontWeight: FontWeight.bold);
   TextStyle get lgSemibold => _withMonoFont(lg, fontWeight: FontWeight.bold);
   TextStyle get xlSemibold => _withMonoFont(xl3, fontWeight: FontWeight.bold);
-  TextStyle get smGrey =>
-      _withMonoFont(sm, color: Color(0xFFa8a29e)); // stone-400
+  TextStyle get smGrey => _withMonoFont(sm, color: Color(0xFFa8a29e)); // stone-400
   TextStyle get smError => _withMonoFont(
     sm,
     fontWeight: FontWeight.bold,
@@ -68,11 +58,7 @@ FThemeData get zincDark {
     typography: typography,
     style: style,
   );
-  final customPickerStyles = pickerStyle(
-    colors: colors,
-    style: style,
-    typography: typography,
-  );
+  final customPickerStyles = pickerStyle(colors: colors, style: style, typography: typography);
 
   return FThemeData(
     colors: colors,
@@ -88,12 +74,7 @@ FTypography _typography({
   required FColors colors,
   String defaultFontFamily = 'IBMPlexMono',
 }) => FTypography(
-  xs: TextStyle(
-    color: colors.foreground,
-    fontFamily: defaultFontFamily,
-    fontSize: 12,
-    height: 1,
-  ),
+  xs: TextStyle(color: colors.foreground, fontFamily: defaultFontFamily, fontSize: 12, height: 1),
   sm: TextStyle(
     color: colors.foreground,
     fontFamily: defaultFontFamily,
@@ -118,12 +99,7 @@ FTypography _typography({
     fontSize: 20,
     height: 1.75,
   ),
-  xl2: TextStyle(
-    color: colors.foreground,
-    fontFamily: defaultFontFamily,
-    fontSize: 22,
-    height: 2,
-  ),
+  xl2: TextStyle(color: colors.foreground, fontFamily: defaultFontFamily, fontSize: 22, height: 2),
   xl3: TextStyle(
     color: colors.foreground,
     fontFamily: defaultFontFamily,
@@ -136,52 +112,22 @@ FTypography _typography({
     fontSize: 36,
     height: 2.5,
   ),
-  xl5: TextStyle(
-    color: colors.foreground,
-    fontFamily: defaultFontFamily,
-    fontSize: 48,
-    height: 1,
-  ),
-  xl6: TextStyle(
-    color: colors.foreground,
-    fontFamily: defaultFontFamily,
-    fontSize: 60,
-    height: 1,
-  ),
-  xl7: TextStyle(
-    color: colors.foreground,
-    fontFamily: defaultFontFamily,
-    fontSize: 72,
-    height: 1,
-  ),
-  xl8: TextStyle(
-    color: colors.foreground,
-    fontFamily: defaultFontFamily,
-    fontSize: 96,
-    height: 1,
-  ),
+  xl5: TextStyle(color: colors.foreground, fontFamily: defaultFontFamily, fontSize: 48, height: 1),
+  xl6: TextStyle(color: colors.foreground, fontFamily: defaultFontFamily, fontSize: 60, height: 1),
+  xl7: TextStyle(color: colors.foreground, fontFamily: defaultFontFamily, fontSize: 72, height: 1),
+  xl8: TextStyle(color: colors.foreground, fontFamily: defaultFontFamily, fontSize: 96, height: 1),
 );
 
-FStyle _style({required FColors colors, required FTypography typography}) =>
-    FStyle(
-      formFieldStyle: FFormFieldStyle.inherit(
-        colors: colors,
-        typography: typography,
-      ),
-      focusedOutlineStyle: FFocusedOutlineStyle(
-        color: colors.primary,
-        borderRadius: const BorderRadius.all(Radius.circular(8)),
-      ),
-      iconStyle: IconThemeData(color: colors.primary, size: 20),
-      tappableStyle: FTappableStyle(),
-      borderRadius: const FLerpBorderRadius.all(Radius.circular(8), min: 24),
-      borderWidth: 1,
-      pagePadding: const EdgeInsets.symmetric(vertical: 8, horizontal: 12),
-      shadow: const [
-        BoxShadow(
-          color: Color(0x0d000000),
-          offset: Offset(0, 1),
-          blurRadius: 2,
-        ),
-      ],
-    );
+FStyle _style({required FColors colors, required FTypography typography}) => FStyle(
+  formFieldStyle: FFormFieldStyle.inherit(colors: colors, typography: typography),
+  focusedOutlineStyle: FFocusedOutlineStyle(
+    color: colors.primary,
+    borderRadius: const BorderRadius.all(Radius.circular(8)),
+  ),
+  iconStyle: IconThemeData(color: colors.primary, size: 20),
+  tappableStyle: FTappableStyle(),
+  borderRadius: const FLerpBorderRadius.all(Radius.circular(8), min: 24),
+  borderWidth: 1,
+  pagePadding: const EdgeInsets.symmetric(vertical: 8, horizontal: 12),
+  shadow: const [BoxShadow(color: Color(0x0d000000), offset: Offset(0, 1), blurRadius: 2)],
+);

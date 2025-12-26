@@ -7,7 +7,7 @@ import 'package:proj/models/workout.dart';
 import 'package:proj/theme/theme.dart';
 import 'package:progress_border/progress_border.dart';
 
-enum WorkoutStatus { wasPaused, wasRunning, wasResting }
+enum WorkoutStatus { notStarted, paused, working, resting }
 
 class WorkoutPage extends StatefulWidget {
   final Workout workout;
@@ -18,8 +18,7 @@ class WorkoutPage extends StatefulWidget {
   WorkoutPageState createState() => WorkoutPageState();
 }
 
-class WorkoutPageState extends State<WorkoutPage>
-    with TickerProviderStateMixin {
+class WorkoutPageState extends State<WorkoutPage> with TickerProviderStateMixin {
   late final AnimationController animationController;
   Timer? timer;
   late double currTime;
@@ -43,7 +42,7 @@ class WorkoutPageState extends State<WorkoutPage>
 
     currRep = ValueNotifier(1);
     currSet = ValueNotifier(1);
-    status = ValueNotifier(WorkoutStatus.wasPaused);
+    status = ValueNotifier(WorkoutStatus.notStarted);
     workoutOver = ValueNotifier(false);
   }
 
@@ -66,7 +65,7 @@ class WorkoutPageState extends State<WorkoutPage>
                   listenable: Listenable.merge([currSet, currRep, status]),
                   builder: (context, child) {
                     return Text(
-                      status.value == WorkoutStatus.wasResting
+                      status.value == WorkoutStatus.resting
                           ? 'Rest - Set ${currSet.value} / ${widget.workout.sets}'
                           : 'Set ${currSet.value} / ${widget.workout.sets} - Rep ${currRep.value} / ${widget.workout.reps}',
                       style: typography.lgSemibold,
@@ -84,10 +83,7 @@ class WorkoutPageState extends State<WorkoutPage>
                     color: context.theme.colors.accent,
                     progress: animationController.value,
                     width: 6,
-                    backgroundBorder: Border.all(
-                      color: context.theme.colors.border,
-                      width: 1,
-                    ),
+                    backgroundBorder: Border.all(color: context.theme.colors.border, width: 1),
                   ),
                   color: context.theme.colors.secondary,
                   borderRadius: BorderRadius.circular(16),
@@ -101,36 +97,27 @@ class WorkoutPageState extends State<WorkoutPage>
                         mainAxisAlignment: MainAxisAlignment.spaceBetween,
                         children: [
                           workoutOver.value
-                              ? Text(
-                                  'All done!',
-                                  style: typography.xl3.copyWith(
-                                    fontWeight: FontWeight.bold,
-                                  ),
-                                )
+                              ? Text('All done!', style: typography.xl3.copyWith(fontWeight: FontWeight.bold))
                               : Row(
                                   mainAxisAlignment: MainAxisAlignment.center,
-                                  crossAxisAlignment:
-                                      CrossAxisAlignment.baseline,
+                                  crossAxisAlignment: CrossAxisAlignment.baseline,
                                   textBaseline: TextBaseline.values.first,
                                   spacing: 4,
                                   children: [
-                                    Text(
-                                      currTime.toStringAsFixed(1).split('.')[0],
-                                      style: typography.xl7,
-                                    ),
-                                    Text(
-                                      currTime
-                                          .toStringAsFixed(1)
-                                          .split('.')[1][0],
-                                      style: typography.xl5,
-                                    ),
+                                    Text(currTime.toStringAsFixed(1).split('.')[0], style: typography.xl7),
+                                    Text(currTime.toStringAsFixed(1).split('.')[1][0], style: typography.xl5),
                                   ],
                                 ),
+                          switch (status.value) {
+                            WorkoutStatus.resting => Text('Rest'),
+                            WorkoutStatus.working => Text('Go'),
+                            WorkoutStatus.paused => Text('Paused'),
+                            _ => SizedBox.shrink(),
+                          },
                           Row(
                             mainAxisAlignment: MainAxisAlignment.center,
                             spacing: 64,
                             children: [
-                              // RESTART
                               FButton.icon(
                                 style: FButtonStyle.ghost(),
                                 onPress: restartWorkout,
@@ -144,32 +131,29 @@ class WorkoutPageState extends State<WorkoutPage>
                                 ),
                                 child: Padding(
                                   padding: const EdgeInsets.all(8),
-                                  child:
-                                      status.value == WorkoutStatus.wasRunning
+                                  child: status.value == WorkoutStatus.working || status.value == WorkoutStatus.resting
                                       ? // show pause
                                         FButton.icon(
                                           style: FButtonStyle.ghost(),
                                           onPress: pause,
-                                          child: Icon(
-                                            FIcons.pause,
-                                            size: 30,
-                                            color:
-                                                context.theme.colors.foreground,
-                                          ),
+                                          child: Icon(FIcons.pause, size: 30, color: context.theme.colors.foreground),
                                         )
                                       : // show play
                                         FButton.icon(
                                           style: FButtonStyle.ghost(),
                                           onPress: () {
-                                            animate();
+                                            // TODO: add 5 sec delay after hitting play
+                                            if (animationController.status == AnimationStatus.reverse) {
+                                              status.value = WorkoutStatus.resting;
+                                            } else if (animationController.status == AnimationStatus.forward) {
+                                              status.value = WorkoutStatus.working;
+                                            } else if (status.value == WorkoutStatus.notStarted) {
+                                              status.value = WorkoutStatus.working;
+                                            }
+                                            animate(status.value);
                                             startTimer();
                                           },
-                                          child: Icon(
-                                            FIcons.play,
-                                            size: 30,
-                                            color:
-                                                context.theme.colors.foreground,
-                                          ),
+                                          child: Icon(FIcons.play, size: 30, color: context.theme.colors.foreground),
                                         ),
                                 ),
                               ),
@@ -190,37 +174,35 @@ class WorkoutPageState extends State<WorkoutPage>
     );
   }
 
-  void animate() {
-    if (status.value == WorkoutStatus.wasPaused) {
-      // Resume from where we paused, don't change direction
-      if (animationController.status == AnimationStatus.reverse) {
-        animationController.reverse();
-      } else {
+  void animate(WorkoutStatus status) {
+    switch (status) {
+      case WorkoutStatus.working:
         animationController.forward();
-      }
-    } else if (animationController.value >= 1) {
-      animationController.reverse();
-    } else {
-      animationController.forward();
+      case WorkoutStatus.paused:
+        animationController.status == AnimationStatus.reverse
+            ? animationController.reverse()
+            : animationController.forward();
+      case WorkoutStatus.notStarted:
+        animationController.forward();
+      case WorkoutStatus.resting:
+        animationController.reverse();
     }
   }
 
   void pause() {
-    status.value = WorkoutStatus.wasPaused;
+    status.value = WorkoutStatus.paused;
     animationController.stop();
     timer?.cancel();
     setState(() {});
   }
 
   void startTimer() {
-    status.value = WorkoutStatus.wasRunning;
-
     const ms = Duration(milliseconds: 100);
     timer = Timer.periodic(ms, (Timer timer) {
       // if current time <= 1/10 second. this is to avoid showing negative time
       if (currTime <= ms.inMilliseconds / 1000) {
         if (!workoutOver.value) {
-          iterationComplete();
+          workOrRestComplete();
         }
         setState(() {
           timer.cancel();
@@ -238,61 +220,25 @@ class WorkoutPageState extends State<WorkoutPage>
     });
   }
 
-  /*
-
-    1.(start workout)
-    currTime & animationController set in init()
-    press play => startTimer()
-
-
-    when currTime <= 1:
-    (first working iteration complete)
-    iterationComplete()
-
-    2. wasResting is false
-    (start rest)
-    set wasResting to true
-    set currTime & animationController
-    [] show user it is resting time
-    increment rep if there are more
-    startTimer() for rest
-
-
-    when currTime <= 1:
-    (first resting iteration complete)
-
-    3. wasResting is true
-    (start workout)
-    set wasResting to false
-    set currTime & animationController
-    startTimer() for working rep
-
-    4. loop starts until workout finished
-    5. [] show user workout finished
-
-  */
-
-  // called after an iteration (work or rest) completes
-  void iterationComplete() {
-    // rest completed
-    if (status.value == WorkoutStatus.wasResting) {
+  // called after an iteration completes
+  void workOrRestComplete() {
+    if (status.value == WorkoutStatus.resting) {
       // set up working stuff
-      status.value = WorkoutStatus.wasRunning;
+      final newStatus = WorkoutStatus.working;
 
       final tOn = widget.workout.timeOn;
       currTime = tOn + 0.0;
       animationController.duration = Duration(seconds: tOn);
-      animate();
+      animate(newStatus);
       startTimer();
-      // work completed
     } else {
       // set up resting stuff
-      status.value = WorkoutStatus.wasResting;
-
+      final newStatus = WorkoutStatus.resting;
+      status.value = newStatus;
       final tOff = widget.workout.timeOff;
       currTime = tOff + 0.0;
       animationController.duration = Duration(seconds: tOff);
-      animate();
+      animate(newStatus);
       // go to next rep / set
       if (currRep.value < widget.workout.reps) {
         currRep.value++;
@@ -316,7 +262,7 @@ class WorkoutPageState extends State<WorkoutPage>
     currSet.value = 1;
     currRep.value = 1;
     currTime = widget.workout.timeOn + 0.0;
-    status.value = WorkoutStatus.wasPaused;
+    status.value = WorkoutStatus.paused;
     workoutOver.value = false;
   }
 

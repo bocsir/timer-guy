@@ -21,13 +21,7 @@ class Workout extends HiveObject {
     required this.timeOff,
   });
 
-  Workout copyWith({
-    String? name,
-    int? reps,
-    int? sets,
-    int? timeOn,
-    int? timeOff,
-  }) {
+  Workout copyWith({String? name, int? reps, int? sets, int? timeOn, int? timeOff}) {
     return Workout(
       name: name ?? this.name,
       reps: reps ?? this.reps,

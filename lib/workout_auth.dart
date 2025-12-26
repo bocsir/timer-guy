@@ -61,11 +61,8 @@ class _WorkoutAuthState extends State<WorkoutAuth> {
                             label: Text('Sets', style: typography.lgSemibold),
                             controller: _controllers['setCount'],
                             keyboardType: TextInputType.numberWithOptions(),
-                            inputFormatters: [
-                              FilteringTextInputFormatter.digitsOnly,
-                            ],
-                            validator: (value) =>
-                                _validatePositiveNumber(value, 'sets'),
+                            inputFormatters: [FilteringTextInputFormatter.digitsOnly],
+                            validator: (value) => _validatePositiveNumber(value, 'sets'),
                           ),
                         ),
                       ),
@@ -77,11 +74,8 @@ class _WorkoutAuthState extends State<WorkoutAuth> {
                             label: Text('Reps', style: typography.lgSemibold),
                             controller: _controllers['repCount'],
                             keyboardType: TextInputType.numberWithOptions(),
-                            inputFormatters: [
-                              FilteringTextInputFormatter.digitsOnly,
-                            ],
-                            validator: (value) =>
-                                _validatePositiveNumber(value, 'reps'),
+                            inputFormatters: [FilteringTextInputFormatter.digitsOnly],
+                            validator: (value) => _validatePositiveNumber(value, 'reps'),
                           ),
                         ),
                       ),
@@ -100,21 +94,18 @@ class _WorkoutAuthState extends State<WorkoutAuth> {
                                 controller: _controllers['repDuration'],
                                 children: [
                                   FPickerWheel.builder(
-                                    builder: (context, index) => Text(
-                                      (index % 12).toString().padLeft(2, '0'),
-                                    ),
+                                    builder: (context, index) =>
+                                        Text((index % 12).toString().padLeft(2, '0')),
                                   ),
                                   const Text(':'),
                                   FPickerWheel.builder(
-                                    builder: (context, index) => Text(
-                                      (index % 60).toString().padLeft(2, '0'),
-                                    ),
+                                    builder: (context, index) =>
+                                        Text((index % 60).toString().padLeft(2, '0')),
                                   ),
                                   const Text(':'),
                                   FPickerWheel.builder(
-                                    builder: (context, index) => Text(
-                                      (index % 60).toString().padLeft(2, '0'),
-                                    ),
+                                    builder: (context, index) =>
+                                        Text((index % 60).toString().padLeft(2, '0')),
                                   ),
                                 ],
                               ),
@@ -162,10 +153,7 @@ class _WorkoutAuthState extends State<WorkoutAuth> {
                       (_shouldShowRestDurationError())
                           ? SizedBox(
                               height: 20,
-                              child: Text(
-                                'Enter a time > 0 seconds',
-                                style: typography.smError,
-                              ),
+                              child: Text('Enter a time > 0 seconds', style: typography.smError),
                             )
                           : SizedBox(height: 20),
                     ],
@@ -176,9 +164,7 @@ class _WorkoutAuthState extends State<WorkoutAuth> {
                     onPress: _onDonePressed,
                     child: Text(
                       'Done',
-                      style: typography.lgSemibold.copyWith(
-                        color: context.theme.colors.accent,
-                      ),
+                      style: typography.lgSemibold.copyWith(color: context.theme.colors.accent),
                     ),
                   ),
                 ],
@@ -203,8 +189,7 @@ class _WorkoutAuthState extends State<WorkoutAuth> {
         reps: int.parse(_controllers['repCount'].text.trim()),
         sets: int.parse(_controllers['setCount'].text.trim()),
         timeOn: (_controllers['repDuration'] as FPickerController).totalSeconds,
-        timeOff:
-            (_controllers['restDuration'] as FPickerController).totalSeconds,
+        timeOff: (_controllers['restDuration'] as FPickerController).totalSeconds,
       );
 
       widget.workoutBox.add(workout);

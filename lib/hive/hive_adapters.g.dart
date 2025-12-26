@@ -47,7 +47,5 @@ class WorkoutAdapter extends TypeAdapter<Workout> {
   @override
   bool operator ==(Object other) =>
       identical(this, other) ||
-      other is WorkoutAdapter &&
-          runtimeType == other.runtimeType &&
-          typeId == other.typeId;
+      other is WorkoutAdapter && runtimeType == other.runtimeType && typeId == other.typeId;
 }

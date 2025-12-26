@@ -53,10 +53,7 @@ import 'package:forui/forui.dart';
 /// ```
 ///
 /// See https://forui.dev/docs/themes#customize-themes for more information.
-FDividerStyles dividerStyles({
-  required FColors colors,
-  required FStyle style,
-}) => FDividerStyles(
+FDividerStyles dividerStyles({required FColors colors, required FStyle style}) => FDividerStyles(
   horizontalStyle: FDividerStyle(
     color: colors.border,
     padding: EdgeInsets.all(2),
