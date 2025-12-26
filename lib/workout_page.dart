@@ -109,9 +109,9 @@ class WorkoutPageState extends State<WorkoutPage> with TickerProviderStateMixin 
                                   ],
                                 ),
                           switch (status.value) {
-                            WorkoutStatus.resting => Text('Rest'),
-                            WorkoutStatus.working => Text('Go'),
-                            WorkoutStatus.paused => Text('Paused'),
+                            WorkoutStatus.resting => Text('Rest', style: context.theme.typography.lgSemibold),
+                            WorkoutStatus.working => Text('Go', style: context.theme.typography.lgSemibold),
+                            WorkoutStatus.paused => Text('Paused', style: context.theme.typography.lgSemibold),
                             _ => SizedBox.shrink(),
                           },
                           Row(
