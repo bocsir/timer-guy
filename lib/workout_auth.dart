@@ -3,10 +3,10 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:forui/forui.dart';
 import 'package:hive_ce_flutter/hive_flutter.dart';
-import 'package:proj/extensions/extensions.dart';
 import 'package:proj/header.dart';
 import 'package:proj/models/workout.dart';
 import 'package:proj/theme/theme.dart';
+import 'package:proj/workout_auth_sets.dart';
 
 class WorkoutAuth extends StatefulWidget {
   final Box<Workout> workoutBox;
@@ -18,13 +18,9 @@ class WorkoutAuth extends StatefulWidget {
 }
 
 class _WorkoutAuthState extends State<WorkoutAuth> {
-  final Map<String, dynamic> _controllers = {
-    'name': TextEditingController(),
-    'repCount': TextEditingController(),
-    'repDuration': FPickerController(initialIndexes: [0, 0, 0]),
-    'restDuration': FPickerController(initialIndexes: [0, 0, 0]),
-    'setCount': TextEditingController(),
-  };
+  var setCount = 0;
+
+  final Map<String, dynamic> _controllers = {'name': TextEditingController()};
 
   final _formKey = GlobalKey<FormState>();
   bool _formSubmitted = false;
@@ -35,8 +31,18 @@ class _WorkoutAuthState extends State<WorkoutAuth> {
 
     return FScaffold(
       header: Header(backBtnText: 'Cancel'),
+      footer: Padding(
+        padding: const EdgeInsets.all(16),
+        child: FButton(
+          style: FButtonStyle.outline(),
+          onPress: _onDonePressed,
+          child: Text('Done', style: typography.lg.copyWith(color: context.theme.colors.accent)),
+        ),
+      ),
+
       child: SingleChildScrollView(
         child: Column(
+          mainAxisSize: MainAxisSize.min,
           spacing: 16,
           children: [
             Form(
@@ -47,125 +53,19 @@ class _WorkoutAuthState extends State<WorkoutAuth> {
                 children: [
                   Text('Create Workout', style: typography.xlSemibold),
                   FTextFormField(
-                    label: Text('Name', style: typography.lgSemibold),
+                    label: Text('Workout Name', style: typography.lg),
                     controller: _controllers['name'],
                     validator: _validateRequired,
                   ),
-                  Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                    children: [
-                      Expanded(
-                        child: SizedBox(
-                          height: 90,
-                          child: FTextFormField(
-                            label: Text('Sets', style: typography.lgSemibold),
-                            controller: _controllers['setCount'],
-                            keyboardType: TextInputType.numberWithOptions(),
-                            inputFormatters: [FilteringTextInputFormatter.digitsOnly],
-                            validator: (value) => _validatePositiveNumber(value, 'sets'),
-                          ),
-                        ),
-                      ),
-                      SizedBox(width: 64),
-                      Expanded(
-                        child: SizedBox(
-                          height: 90,
-                          child: FTextFormField(
-                            label: Text('Reps', style: typography.lgSemibold),
-                            controller: _controllers['repCount'],
-                            keyboardType: TextInputType.numberWithOptions(),
-                            inputFormatters: [FilteringTextInputFormatter.digitsOnly],
-                            validator: (value) => _validatePositiveNumber(value, 'reps'),
-                          ),
-                        ),
-                      ),
-                    ],
-                  ),
-                  Column(
-                    children: [
-                      Text('Time On', style: typography.lgSemibold),
-                      Text('hh:mm:ss', style: typography.smGrey),
-                      SizedBox(
-                        height: 150,
-                        child: Column(
-                          children: [
-                            Expanded(
-                              child: FPicker(
-                                controller: _controllers['repDuration'],
-                                children: [
-                                  FPickerWheel.builder(
-                                    builder: (context, index) =>
-                                        Text((index % 12).toString().padLeft(2, '0')),
-                                  ),
-                                  const Text(':'),
-                                  FPickerWheel.builder(
-                                    builder: (context, index) =>
-                                        Text((index % 60).toString().padLeft(2, '0')),
-                                  ),
-                                  const Text(':'),
-                                  FPickerWheel.builder(
-                                    builder: (context, index) =>
-                                        Text((index % 60).toString().padLeft(2, '0')),
-                                  ),
-                                ],
-                              ),
-                            ),
-                            (_shouldShowRepDurationError())
-                                ? SizedBox(
-                                    height: 20,
-                                    child: Text(
-                                      'Enter a time > 0 seconds',
-                                      style: typography.smError,
-                                    ),
-                                  )
-                                : SizedBox(height: 20),
-                          ],
-                        ),
-                      ),
-                    ],
-                  ),
-                  Column(
-                    children: [
-                      Text('Time Off', style: typography.lgSemibold),
-                      Text('hh:mm:ss', style: typography.smGrey),
-                      ConstrainedBox(
-                        constraints: BoxConstraints(maxHeight: 150),
-                        child: FPicker(
-                          controller: _controllers['restDuration'],
-                          children: [
-                            FPickerWheel.builder(
-                              builder: (context, index) =>
-                                  Text((index % 12).toString().padLeft(2, '0')),
-                            ),
-                            const Text(':'),
-                            FPickerWheel.builder(
-                              builder: (context, index) =>
-                                  Text((index % 60).toString().padLeft(2, '0')),
-                            ),
-                            const Text(':'),
-                            FPickerWheel.builder(
-                              builder: (context, index) =>
-                                  Text((index % 60).toString().padLeft(2, '0')),
-                            ),
-                          ],
-                        ),
-                      ),
-                      (_shouldShowRestDurationError())
-                          ? SizedBox(
-                              height: 20,
-                              child: Text('Enter a time > 0 seconds', style: typography.smError),
-                            )
-                          : SizedBox(height: 20),
-                    ],
-                  ),
-                  // Done button
+                  for (var i = 1; i <= setCount; i++) WorkoutAuthSets(key: ValueKey(i), setCount: i),
                   FButton(
                     style: FButtonStyle.outline(),
-                    onPress: _onDonePressed,
-                    child: Text(
-                      'Done',
-                      style: typography.lgSemibold.copyWith(color: context.theme.colors.accent),
-                    ),
+                    onPress: () {
+                      setState(() {
+                        setCount++;
+                      });
+                    },
+                    child: Text('Add Set', style: typography.lg),
                   ),
                 ],
               ),
@@ -184,15 +84,15 @@ class _WorkoutAuthState extends State<WorkoutAuth> {
     });
 
     if (_validateForm()) {
-      final workout = Workout(
-        name: _controllers['name'].text.trim(),
-        reps: int.parse(_controllers['repCount'].text.trim()),
-        sets: int.parse(_controllers['setCount'].text.trim()),
-        timeOn: (_controllers['repDuration'] as FPickerController).totalSeconds,
-        timeOff: (_controllers['restDuration'] as FPickerController).totalSeconds,
-      );
+      // final workout = Workout(
+      //   name: _controllers['name'].text.trim(),
+      //   reps: int.parse(_controllers['repCount'].text.trim()),
+      //   sets: int.parse(_controllers['setCount'].text.trim()),
+      //   timeOn: (_controllers['repDuration'] as FPickerController).totalSeconds,
+      //   timeOff: (_controllers['restDuration'] as FPickerController).totalSeconds,
+      // );
 
-      widget.workoutBox.add(workout);
+      // widget.workoutBox.add(workout);
       Navigator.of(context).pop();
     }
   }

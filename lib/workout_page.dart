@@ -7,7 +7,7 @@ import 'package:proj/models/workout.dart';
 import 'package:proj/theme/theme.dart';
 import 'package:progress_border/progress_border.dart';
 
-enum WorkoutStatus { notStarted, paused, working, resting }
+enum WorkoutStatus { notStarted, paused, working, resting, preparing }
 
 class WorkoutPage extends StatefulWidget {
   final Workout workout;
@@ -31,10 +31,10 @@ class WorkoutPageState extends State<WorkoutPage> with TickerProviderStateMixin 
   @override
   void initState() {
     super.initState();
-    currTime = widget.workout.timeOn + 0.0;
+    // currTime = widget.workout.timeOn + 0.0;
     animationController = AnimationController(
       vsync: this,
-      duration: Duration(seconds: widget.workout.timeOn),
+      // duration: Duration(seconds: widget.workout.timeOn),
     );
     animationController.addListener(() {
       setState(() {});
@@ -65,9 +65,8 @@ class WorkoutPageState extends State<WorkoutPage> with TickerProviderStateMixin 
                   listenable: Listenable.merge([currSet, currRep, status]),
                   builder: (context, child) {
                     return Text(
-                      status.value == WorkoutStatus.resting
-                          ? 'Rest - Set ${currSet.value} / ${widget.workout.sets}'
-                          : 'Set ${currSet.value} / ${widget.workout.sets} - Rep ${currRep.value} / ${widget.workout.reps}',
+                      //'Set ${currSet.value} / ${widget.workout.sets} - Rep ${currRep.value} / ${widget.workout.reps}',
+                      '',
                       style: typography.lgSemibold,
                     );
                   },
@@ -112,6 +111,7 @@ class WorkoutPageState extends State<WorkoutPage> with TickerProviderStateMixin 
                             WorkoutStatus.resting => Text('Rest', style: context.theme.typography.lgSemibold),
                             WorkoutStatus.working => Text('Go', style: context.theme.typography.lgSemibold),
                             WorkoutStatus.paused => Text('Paused', style: context.theme.typography.lgSemibold),
+                            WorkoutStatus.preparing => Text('Get Ready', style: context.theme.typography.lgSemibold),
                             _ => SizedBox.shrink(),
                           },
                           Row(
@@ -120,7 +120,7 @@ class WorkoutPageState extends State<WorkoutPage> with TickerProviderStateMixin 
                             children: [
                               FButton.icon(
                                 style: FButtonStyle.ghost(),
-                                onPress: restartWorkout,
+                                onPress: () {}, //restartWorkout,
                                 child: Icon(FIcons.refreshCw, size: 30),
                               ),
                               DecoratedBox(
@@ -142,16 +142,24 @@ class WorkoutPageState extends State<WorkoutPage> with TickerProviderStateMixin 
                                         FButton.icon(
                                           style: FButtonStyle.ghost(),
                                           onPress: () {
-                                            // TODO: add 5 sec delay after hitting play
-                                            if (animationController.status == AnimationStatus.reverse) {
-                                              status.value = WorkoutStatus.resting;
-                                            } else if (animationController.status == AnimationStatus.forward) {
-                                              status.value = WorkoutStatus.working;
-                                            } else if (status.value == WorkoutStatus.notStarted) {
-                                              status.value = WorkoutStatus.working;
+                                            if (status.value == WorkoutStatus.notStarted) {
+                                              // Start 5 second preparation countdown
+                                              status.value = WorkoutStatus.preparing;
+                                              currTime = 5.0;
+                                              animationController.duration = Duration(seconds: 5);
+                                              animationController.reset();
+                                              animate(WorkoutStatus.preparing);
+                                              // startTimer();
+                                            } else {
+                                              // Resume from paused state
+                                              if (animationController.status == AnimationStatus.reverse) {
+                                                status.value = WorkoutStatus.resting;
+                                              } else {
+                                                status.value = WorkoutStatus.working;
+                                              }
+                                              animate(status.value);
+                                              // startTimer();
                                             }
-                                            animate(status.value);
-                                            startTimer();
                                           },
                                           child: Icon(FIcons.play, size: 30, color: context.theme.colors.foreground),
                                         ),
@@ -186,6 +194,8 @@ class WorkoutPageState extends State<WorkoutPage> with TickerProviderStateMixin 
         animationController.forward();
       case WorkoutStatus.resting:
         animationController.reverse();
+      case WorkoutStatus.preparing:
+        animationController.reverse();
     }
   }
 
@@ -196,83 +206,95 @@ class WorkoutPageState extends State<WorkoutPage> with TickerProviderStateMixin 
     setState(() {});
   }
 
-  void startTimer() {
-    const ms = Duration(milliseconds: 100);
-    timer = Timer.periodic(ms, (Timer timer) {
-      // if current time <= 1/10 second. this is to avoid showing negative time
-      if (currTime <= ms.inMilliseconds / 1000) {
-        if (!workoutOver.value) {
-          workOrRestComplete();
-        }
-        setState(() {
-          timer.cancel();
-        });
-      } else {
-        currTime -= (ms.inMilliseconds / 1000);
+  // void startTimer() {
+  //   const ms = Duration(milliseconds: 100);
+  //   timer = Timer.periodic(ms, (Timer timer) {
+  //     // if current time <= 1/10 second. this is to avoid showing negative time
+  //     if (currTime <= ms.inMilliseconds / 1000) {
+  //       if (!workoutOver.value) {
+  //         workOrRestComplete();
+  //       }
+  //       setState(() {
+  //         timer.cancel();
+  //       });
+  //     } else {
+  //       currTime -= (ms.inMilliseconds / 1000);
 
-        // hack for if user pauses a bunch and creates animation syncing issues
-        // animationController listener was initially doing a bunch of setStates.
-        // if it gets out of sync, this is needed:
-        if (!animationController.isAnimating) {
-          setState(() {});
-        }
-      }
-    });
-  }
+  //       // hack for if user pauses a bunch and creates animation syncing issues
+  //       // animationController listener was initially doing a bunch of setStates.
+  //       // if it gets out of sync, this is needed:
+  //       if (!animationController.isAnimating) {
+  //         setState(() {});
+  //       }
+  //     }
+  //   });
+  // }
 
   // called after an iteration completes
-  void workOrRestComplete() {
-    if (status.value == WorkoutStatus.resting) {
-      // set up working stuff
-      final newStatus = WorkoutStatus.working;
-
-      final tOn = widget.workout.timeOn;
-      currTime = tOn + 0.0;
-      animationController.duration = Duration(seconds: tOn);
-      animate(newStatus);
-      startTimer();
-    } else {
-      // set up resting stuff
-      final newStatus = WorkoutStatus.resting;
-      status.value = newStatus;
-      final tOff = widget.workout.timeOff;
-      currTime = tOff + 0.0;
-      animationController.duration = Duration(seconds: tOff);
-      animate(newStatus);
-      // go to next rep / set
-      if (currRep.value < widget.workout.reps) {
-        currRep.value++;
-        startTimer();
-      } else if (currSet.value < widget.workout.sets) {
-        // pause at end of each set
-        pause();
-        currSet.value++;
-        currRep.value = 1;
-      } else {
-        workoutOver.value = true;
-        pause();
-      }
-    }
-  }
-
-  void restartWorkout() {
-    timer?.cancel();
-    animationController.reset();
-    animationController.duration = Duration(seconds: widget.workout.timeOn);
-    currSet.value = 1;
-    currRep.value = 1;
-    currTime = widget.workout.timeOn + 0.0;
-    status.value = WorkoutStatus.paused;
-    workoutOver.value = false;
-  }
-
-  @override
-  void dispose() {
-    timer?.cancel();
-    animationController.dispose();
-    currRep.dispose();
-    currSet.dispose();
-    status.dispose();
-    super.dispose();
-  }
+  // void workOrRestComplete() {
+  //   if (status.value == WorkoutStatus.preparing) {
+  //     // preparation complete, start working
+  //     final newStatus = WorkoutStatus.working;
+  //     status.value = newStatus;
+  //     final tOn = widget.workout.timeOn;
+  //     currTime = tOn + 0.0;
+  //     animationController.duration = Duration(seconds: tOn);
+  //     animationController.reset();
+  //     animate(newStatus);
+  //     startTimer();
+  //   } else if (status.value == WorkoutStatus.resting) {
+  //     // set up working stuff
+  //     final newStatus = WorkoutStatus.working;
+  //     status.value = newStatus;
+  //     final tOn = widget.workout.timeOn;
+  //     currTime = tOn + 0.0;
+  //     animationController.duration = Duration(seconds: tOn);
+  //     animate(newStatus);
+  //     startTimer();
+  //   } else {
+  //     // set up resting stuff
+  //     final newStatus = WorkoutStatus.resting;
+  //     status.value = newStatus;
+  //     final tOff = widget.workout.timeOff;
+  //     currTime = tOff + 0.0;
+  //     animationController.duration = Duration(seconds: tOff);
+  //     animate(newStatus);
+  //     // go to next rep / set
+  //     if (currRep.value < widget.workout.reps) {
+  //       currRep.value++;
+  //       startTimer();
+  //     } else if (currSet.value < widget.workout.sets) {
+  //       // pause at end of each set
+  //       animationController.reset();
+  //       pause();
+  //       currSet.value++;
+  //       currRep.value = 1;
+  //     } else {
+  //       workoutOver.value = true;
+  //       animationController.reset();
+  //       pause();
+  //     }
+  //   }
 }
+
+  // void restartWorkout() {
+  //   timer?.cancel();
+  //   animationController.reset();
+  //   animationController.duration = Duration(seconds: widget.workout.timeOn);
+  //   currSet.value = 1;
+  //   currRep.value = 1;
+  //   currTime = widget.workout.timeOn + 0.0;
+  //   status.value = WorkoutStatus.paused;
+  //   workoutOver.value = false;
+  // }
+
+  // @override
+  // void dispose() {
+  //   timer?.cancel();
+  //   animationController.dispose();
+  //   currRep.dispose();
+  //   currSet.dispose();
+  //   status.dispose();
+  //   super.dispose();
+  // }
+// }
