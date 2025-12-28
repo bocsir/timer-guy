@@ -20,7 +20,8 @@ class WorkoutList extends StatefulWidget {
   State<WorkoutList> createState() => _WorkoutListState();
 }
 
-class _WorkoutListState extends State<WorkoutList> with SingleTickerProviderStateMixin {
+class _WorkoutListState extends State<WorkoutList>
+    with SingleTickerProviderStateMixin {
   late FPopoverController popoverController;
 
   @override
@@ -45,9 +46,11 @@ class _WorkoutListState extends State<WorkoutList> with SingleTickerProviderStat
                 onPress: () {
                   popoverController.hide();
                   final box = Hive.box<Workout>(workoutBox);
-                  Navigator.of(
-                    context,
-                  ).push(MaterialPageRoute(builder: (context) => WorkoutAuth(workoutBox: box)));
+                  Navigator.of(context).push(
+                    MaterialPageRoute(
+                      builder: (context) => WorkoutAuth(workoutBox: box),
+                    ),
+                  );
                 },
               ),
             ],
@@ -64,19 +67,31 @@ class _WorkoutListState extends State<WorkoutList> with SingleTickerProviderStat
               children: [
                 Padding(
                   padding: const EdgeInsets.only(left: 8, bottom: 8, right: 8),
-                  child: Text('Workouts', style: context.theme.typography.xlSemibold),
+                  child: Text(
+                    'Workouts',
+                    style: context.theme.typography.xlSemibold,
+                  ),
                 ),
                 workouts.isEmpty
                     //TODO: eventually add icon to show type of workout. idk what types will be available yet
                     ? Column(
                         children: [
-                          Text('No workouts found', style: context.theme.typography.base),
+                          Text(
+                            'No workouts found',
+                            style: context.theme.typography.base,
+                          ),
                           SizedBox(height: 20),
-                          Text('''
+                          Text(
+                            '''
            o    _ o   __|    \\ /
           /|\\    /\\     \\o    |
           / \\   | \\     ( \\  /o\\
-                      ''', style: TextStyle(fontFamily: 'IBMPlexMono', fontSize: 14)),
+                      ''',
+                            style: TextStyle(
+                              fontFamily: 'IBMPlexMono',
+                              fontSize: 14,
+                            ),
+                          ),
                         ],
                       )
                     //TODO: make this scrollable. when scrolled so far that 'Workouts' title cant be seen,
@@ -91,14 +106,19 @@ class _WorkoutListState extends State<WorkoutList> with SingleTickerProviderStat
                               // Title
                               // description
                               // (sets, reps)
-                              title: Text(w.name, style: context.theme.typography.baseSemibold),
+                              title: Text(
+                                w.name,
+                                style: context.theme.typography.baseSemibold,
+                              ),
                               suffix: Icon(
                                 FIcons.chevronRight,
                                 size: 25,
                                 color: context.theme.colors.foreground,
                               ),
                               onPress: () => Navigator.of(context).push(
-                                MaterialPageRoute(builder: (context) => WorkoutPage(workout: w)),
+                                MaterialPageRoute(
+                                  builder: (context) => WorkoutPage(workout: w),
+                                ),
                               ),
                             ),
                           ),

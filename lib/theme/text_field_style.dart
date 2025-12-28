@@ -59,8 +59,14 @@ FTextFieldStyle textFieldStyle({
   required FStyle style,
 }) {
   final label = _labelStyles(style: style).verticalStyle;
-  final ghost = _buttonStyles(colors: colors, typography: typography, style: style).ghost;
-  final textStyle = typography.sm.copyWith(fontFamily: typography.defaultFontFamily);
+  final ghost = _buttonStyles(
+    colors: colors,
+    typography: typography,
+    style: style,
+  ).ghost;
+  final textStyle = typography.sm.copyWith(
+    fontFamily: typography.defaultFontFamily,
+  );
   return FTextFieldStyle(
     keyboardAppearance: colors.brightness,
     clearButtonStyle: ghost.copyWith(
@@ -71,21 +77,30 @@ FTextFieldStyle textFieldStyle({
                 color: colors.disable(colors.mutedForeground),
                 size: 17,
               ),
-              WidgetState.any: IconThemeData(color: colors.mutedForeground, size: 17),
+              WidgetState.any: IconThemeData(
+                color: colors.mutedForeground,
+                size: 17,
+              ),
             }),
           )
           .call,
     ),
     contentTextStyle: FWidgetStateMap({
-      WidgetState.disabled: textStyle.copyWith(color: colors.disable(colors.primary)),
+      WidgetState.disabled: textStyle.copyWith(
+        color: colors.disable(colors.primary),
+      ),
       WidgetState.any: textStyle.copyWith(color: colors.primary),
     }),
     hintTextStyle: FWidgetStateMap({
-      WidgetState.disabled: textStyle.copyWith(color: colors.disable(colors.border)),
+      WidgetState.disabled: textStyle.copyWith(
+        color: colors.disable(colors.border),
+      ),
       WidgetState.any: textStyle.copyWith(color: colors.mutedForeground),
     }),
     counterTextStyle: FWidgetStateMap({
-      WidgetState.disabled: textStyle.copyWith(color: colors.disable(colors.primary)),
+      WidgetState.disabled: textStyle.copyWith(
+        color: colors.disable(colors.primary),
+      ),
       WidgetState.any: textStyle.copyWith(color: colors.primary),
     }),
     border: FWidgetStateMap({
@@ -94,7 +109,10 @@ FTextFieldStyle textFieldStyle({
         borderRadius: style.borderRadius,
       ),
       WidgetState.disabled: OutlineInputBorder(
-        borderSide: BorderSide(color: colors.disable(colors.border), width: style.borderWidth),
+        borderSide: BorderSide(
+          color: colors.disable(colors.border),
+          width: style.borderWidth,
+        ),
         borderRadius: style.borderRadius,
       ),
       WidgetState.focused: OutlineInputBorder(
@@ -244,7 +262,10 @@ FButtonStyle _buttonStyle({
       borderRadius: style.borderRadius,
       color: colors.hover(color),
     ),
-    WidgetState.any: BoxDecoration(borderRadius: style.borderRadius, color: color),
+    WidgetState.any: BoxDecoration(
+      borderRadius: style.borderRadius,
+      color: color,
+    ),
   }),
   focusedOutlineStyle: style.focusedOutlineStyle,
   contentStyle: _buttonContentStyle(

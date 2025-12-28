@@ -69,7 +69,10 @@ FButtonStyle buttonStyle({
       borderRadius: style.borderRadius,
       color: colors.hover(color),
     ),
-    WidgetState.any: BoxDecoration(borderRadius: style.borderRadius, color: color),
+    WidgetState.any: BoxDecoration(
+      borderRadius: style.borderRadius,
+      color: color,
+    ),
   }),
   focusedOutlineStyle: style.focusedOutlineStyle,
   contentStyle: _buttonContentStyle(

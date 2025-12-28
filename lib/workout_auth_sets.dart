@@ -35,29 +35,36 @@ class _WorkoutAuthSetsState extends State<WorkoutAuthSets> {
           controller: _controllers['name'],
           validator: (value) => _validateRequired(value),
         ),
-        Text('Reps', style: typography.lg),
-        Row(
-          children: [
-            FButton(
-              onPress: () {
-                setState(() {
-                  repCount--;
-                });
-              },
-              style: FButtonStyle.ghost(),
-              child: Icon(FIcons.minus),
-            ),
-            Text(repCount.toString(), style: typography.lg),
-            FButton(
-              onPress: () {
-                setState(() {
-                  repCount++;
-                });
-              },
-              style: FButtonStyle.ghost(),
-              child: Icon(FIcons.plus),
-            ),
-          ],
+        Text('Rep Count', style: typography.lg),
+        Padding(
+          padding: const EdgeInsets.symmetric(vertical: 4),
+          child: Row(
+            children: [
+              FButton(
+                onPress: () {
+                  setState(() {
+                    repCount--;
+                  });
+                },
+                style: FButtonStyle.outline(),
+                child: Icon(FIcons.minus, color: context.theme.colors.foreground),
+              ),
+              SizedBox(
+                width: 40,
+                child: Center(child: Text(repCount.toString(), style: typography.lgSemibold)),
+              ),
+
+              FButton(
+                onPress: () {
+                  setState(() {
+                    repCount++;
+                  });
+                },
+                style: FButtonStyle.outline(),
+                child: Icon(FIcons.plus, color: context.theme.colors.foreground),
+              ),
+            ],
+          ),
         ),
         // FTextFormField(
         //   label: Text('Reps', style: typography.lgSemibold),
@@ -66,32 +73,66 @@ class _WorkoutAuthSetsState extends State<WorkoutAuthSets> {
         //   inputFormatters: [FilteringTextInputFormatter.digitsOnly],
         //   validator: (value) => _validatePositiveNumber(value, 'reps'),
         // ),
-        Text('Time On', style: typography.lg),
-        Text('mm:ss', style: typography.smGrey),
-        // FPicker(
-        //   controller: _controllers['repDuration'],
-        //   children: [
-        //     FPickerWheel.builder(builder: (context, index) => Text((index % 60).toString().padLeft(2, '0'))),
-        //     const Text(':'),
-        //     FPickerWheel.builder(builder: (context, index) => Text((index % 60).toString().padLeft(2, '0'))),
-        //   ],
-        // ),
-        // (_shouldShowRepDurationError())
-        //     ? SizedBox(height: 20, child: Text('Enter a time > 0 seconds', style: typography.smError))
-        //     : SizedBox(height: 20),
-        // Text('Time Off', style: typography.lgSemibold),
-        // Text('mm:ss', style: typography.smGrey),
-        // FPicker(
-        //   controller: _controllers['restDuration'],
-        //   children: [
-        //     FPickerWheel.builder(builder: (context, index) => Text((index % 60).toString().padLeft(2, '0'))),
-        //     const Text(':'),
-        //     FPickerWheel.builder(builder: (context, index) => Text((index % 60).toString().padLeft(2, '0'))),
-        //   ],
-        // ),
-        // (_shouldShowRestDurationError())
-        //     ? SizedBox(height: 20, child: Text('Enter a time > 0 seconds', style: typography.smError))
-        //     : SizedBox(height: 20),
+        ConstrainedBox(
+          constraints: BoxConstraints(maxWidth: 400),
+          child: Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
+              Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text('Time On', style: typography.lg),
+                  Text('mm:ss', style: typography.smGrey),
+                  SizedBox(
+                    height: 100,
+                    width: 150,
+                    child: FPicker(
+                      controller: _controllers['repDuration'],
+                      children: [
+                        FPickerWheel.builder(
+                          builder: (context, index) => Text((index % 60).toString().padLeft(2, '0')),
+                        ),
+                        const Text(':'),
+                        FPickerWheel.builder(
+                          builder: (context, index) => Text((index % 60).toString().padLeft(2, '0')),
+                        ),
+                      ],
+                    ),
+                  ),
+                  (_shouldShowRepDurationError())
+                      ? SizedBox(height: 20, child: Text('Enter a time > 0 seconds', style: typography.smError))
+                      : SizedBox(height: 20),
+                ],
+              ),
+              Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text('Time Off', style: typography.lg),
+                  Text('mm:ss', style: typography.smGrey),
+                  SizedBox(
+                    height: 100,
+                    width: 150,
+                    child: FPicker(
+                      controller: _controllers['restDuration'],
+                      children: [
+                        FPickerWheel.builder(
+                          builder: (context, index) => Text((index % 60).toString().padLeft(2, '0')),
+                        ),
+                        const Text(':'),
+                        FPickerWheel.builder(
+                          builder: (context, index) => Text((index % 60).toString().padLeft(2, '0')),
+                        ),
+                      ],
+                    ),
+                  ),
+                  (_shouldShowRestDurationError())
+                      ? SizedBox(height: 20, child: Text('Enter a time > 0 seconds', style: typography.smError))
+                      : SizedBox(height: 20),
+                ],
+              ),
+            ],
+          ),
+        ),
       ],
     );
   }

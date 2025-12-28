@@ -36,7 +36,10 @@ class _WorkoutAuthState extends State<WorkoutAuth> {
         child: FButton(
           style: FButtonStyle.outline(),
           onPress: _onDonePressed,
-          child: Text('Done', style: typography.lg.copyWith(color: context.theme.colors.accent)),
+          child: Text(
+            'Done',
+            style: typography.lg.copyWith(color: context.theme.colors.accent),
+          ),
         ),
       ),
 
@@ -57,7 +60,8 @@ class _WorkoutAuthState extends State<WorkoutAuth> {
                     controller: _controllers['name'],
                     validator: _validateRequired,
                   ),
-                  for (var i = 1; i <= setCount; i++) WorkoutAuthSets(key: ValueKey(i), setCount: i),
+                  for (var i = 1; i <= setCount; i++)
+                    WorkoutAuthSets(key: ValueKey(i), setCount: i),
                   FButton(
                     style: FButtonStyle.outline(),
                     onPress: () {

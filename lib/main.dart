@@ -28,7 +28,9 @@ class MyApp extends StatelessWidget {
     return MaterialApp(
       builder: (_, child) => FTheme(data: theme, child: child!),
       theme: theme.toApproximateMaterialTheme().copyWith(
-        textTheme: theme.toApproximateMaterialTheme().textTheme.apply(fontFamily: 'IBMPlexMono'),
+        textTheme: theme.toApproximateMaterialTheme().textTheme.apply(
+          fontFamily: 'IBMPlexMono',
+        ),
       ),
       home: const FScaffold(child: HomePage()),
       debugShowCheckedModeBanner: false,

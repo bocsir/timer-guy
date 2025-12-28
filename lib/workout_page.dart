@@ -18,7 +18,8 @@ class WorkoutPage extends StatefulWidget {
   WorkoutPageState createState() => WorkoutPageState();
 }
 
-class WorkoutPageState extends State<WorkoutPage> with TickerProviderStateMixin {
+class WorkoutPageState extends State<WorkoutPage>
+    with TickerProviderStateMixin {
   late final AnimationController animationController;
   Timer? timer;
   late double currTime;
@@ -82,7 +83,10 @@ class WorkoutPageState extends State<WorkoutPage> with TickerProviderStateMixin 
                     color: context.theme.colors.accent,
                     progress: animationController.value,
                     width: 6,
-                    backgroundBorder: Border.all(color: context.theme.colors.border, width: 1),
+                    backgroundBorder: Border.all(
+                      color: context.theme.colors.border,
+                      width: 1,
+                    ),
                   ),
                   color: context.theme.colors.secondary,
                   borderRadius: BorderRadius.circular(16),
@@ -96,22 +100,48 @@ class WorkoutPageState extends State<WorkoutPage> with TickerProviderStateMixin 
                         mainAxisAlignment: MainAxisAlignment.spaceBetween,
                         children: [
                           workoutOver.value
-                              ? Text('All done!', style: typography.xl3.copyWith(fontWeight: FontWeight.bold))
+                              ? Text(
+                                  'All done!',
+                                  style: typography.xl3.copyWith(
+                                    fontWeight: FontWeight.bold,
+                                  ),
+                                )
                               : Row(
                                   mainAxisAlignment: MainAxisAlignment.center,
-                                  crossAxisAlignment: CrossAxisAlignment.baseline,
+                                  crossAxisAlignment:
+                                      CrossAxisAlignment.baseline,
                                   textBaseline: TextBaseline.values.first,
                                   spacing: 4,
                                   children: [
-                                    Text(currTime.toStringAsFixed(1).split('.')[0], style: typography.xl7),
-                                    Text(currTime.toStringAsFixed(1).split('.')[1][0], style: typography.xl5),
+                                    Text(
+                                      currTime.toStringAsFixed(1).split('.')[0],
+                                      style: typography.xl7,
+                                    ),
+                                    Text(
+                                      currTime
+                                          .toStringAsFixed(1)
+                                          .split('.')[1][0],
+                                      style: typography.xl5,
+                                    ),
                                   ],
                                 ),
                           switch (status.value) {
-                            WorkoutStatus.resting => Text('Rest', style: context.theme.typography.lgSemibold),
-                            WorkoutStatus.working => Text('Go', style: context.theme.typography.lgSemibold),
-                            WorkoutStatus.paused => Text('Paused', style: context.theme.typography.lgSemibold),
-                            WorkoutStatus.preparing => Text('Get Ready', style: context.theme.typography.lgSemibold),
+                            WorkoutStatus.resting => Text(
+                              'Rest',
+                              style: context.theme.typography.lgSemibold,
+                            ),
+                            WorkoutStatus.working => Text(
+                              'Go',
+                              style: context.theme.typography.lgSemibold,
+                            ),
+                            WorkoutStatus.paused => Text(
+                              'Paused',
+                              style: context.theme.typography.lgSemibold,
+                            ),
+                            WorkoutStatus.preparing => Text(
+                              'Get Ready',
+                              style: context.theme.typography.lgSemibold,
+                            ),
                             _ => SizedBox.shrink(),
                           },
                           Row(
@@ -131,37 +161,55 @@ class WorkoutPageState extends State<WorkoutPage> with TickerProviderStateMixin 
                                 ),
                                 child: Padding(
                                   padding: const EdgeInsets.all(8),
-                                  child: status.value == WorkoutStatus.working || status.value == WorkoutStatus.resting
+                                  child:
+                                      status.value == WorkoutStatus.working ||
+                                          status.value == WorkoutStatus.resting
                                       ? // show pause
                                         FButton.icon(
                                           style: FButtonStyle.ghost(),
                                           onPress: pause,
-                                          child: Icon(FIcons.pause, size: 30, color: context.theme.colors.foreground),
+                                          child: Icon(
+                                            FIcons.pause,
+                                            size: 30,
+                                            color:
+                                                context.theme.colors.foreground,
+                                          ),
                                         )
                                       : // show play
                                         FButton.icon(
                                           style: FButtonStyle.ghost(),
                                           onPress: () {
-                                            if (status.value == WorkoutStatus.notStarted) {
+                                            if (status.value ==
+                                                WorkoutStatus.notStarted) {
                                               // Start 5 second preparation countdown
-                                              status.value = WorkoutStatus.preparing;
+                                              status.value =
+                                                  WorkoutStatus.preparing;
                                               currTime = 5.0;
-                                              animationController.duration = Duration(seconds: 5);
+                                              animationController.duration =
+                                                  Duration(seconds: 5);
                                               animationController.reset();
                                               animate(WorkoutStatus.preparing);
                                               // startTimer();
                                             } else {
                                               // Resume from paused state
-                                              if (animationController.status == AnimationStatus.reverse) {
-                                                status.value = WorkoutStatus.resting;
+                                              if (animationController.status ==
+                                                  AnimationStatus.reverse) {
+                                                status.value =
+                                                    WorkoutStatus.resting;
                                               } else {
-                                                status.value = WorkoutStatus.working;
+                                                status.value =
+                                                    WorkoutStatus.working;
                                               }
                                               animate(status.value);
                                               // startTimer();
                                             }
                                           },
-                                          child: Icon(FIcons.play, size: 30, color: context.theme.colors.foreground),
+                                          child: Icon(
+                                            FIcons.play,
+                                            size: 30,
+                                            color:
+                                                context.theme.colors.foreground,
+                                          ),
                                         ),
                                 ),
                               ),
@@ -277,24 +325,24 @@ class WorkoutPageState extends State<WorkoutPage> with TickerProviderStateMixin 
   //   }
 }
 
-  // void restartWorkout() {
-  //   timer?.cancel();
-  //   animationController.reset();
-  //   animationController.duration = Duration(seconds: widget.workout.timeOn);
-  //   currSet.value = 1;
-  //   currRep.value = 1;
-  //   currTime = widget.workout.timeOn + 0.0;
-  //   status.value = WorkoutStatus.paused;
-  //   workoutOver.value = false;
-  // }
+// void restartWorkout() {
+//   timer?.cancel();
+//   animationController.reset();
+//   animationController.duration = Duration(seconds: widget.workout.timeOn);
+//   currSet.value = 1;
+//   currRep.value = 1;
+//   currTime = widget.workout.timeOn + 0.0;
+//   status.value = WorkoutStatus.paused;
+//   workoutOver.value = false;
+// }
 
-  // @override
-  // void dispose() {
-  //   timer?.cancel();
-  //   animationController.dispose();
-  //   currRep.dispose();
-  //   currSet.dispose();
-  //   status.dispose();
-  //   super.dispose();
-  // }
+// @override
+// void dispose() {
+//   timer?.cancel();
+//   animationController.dispose();
+//   currRep.dispose();
+//   currSet.dispose();
+//   status.dispose();
+//   super.dispose();
+// }
 // }
