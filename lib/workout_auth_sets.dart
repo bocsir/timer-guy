@@ -1,6 +1,5 @@
 // workout_auth_sets.dart
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
 import 'package:forui/forui.dart';
 import 'package:proj/theme/theme.dart';
 
@@ -15,11 +14,10 @@ class WorkoutAuthSets extends StatefulWidget {
 
 class _WorkoutAuthSetsState extends State<WorkoutAuthSets> {
   int repCount = 0;
-  Map<String, dynamic> get _controllers => {
-    'name': TextEditingController(text: 'Set ${widget.setCount}'),
-    'repCount': TextEditingController(),
-    'repDuration': FPickerController(initialIndexes: [0, 0, 0]),
-    'restDuration': FPickerController(initialIndexes: [0, 0, 0]),
+  final Map<String, dynamic> _controllers = {
+    'name': TextEditingController(),
+    'repDuration': FPickerController(initialIndexes: [0, 0]),
+    'restDuration': FPickerController(initialIndexes: [0, 0]),
   };
 
   @override
@@ -32,40 +30,47 @@ class _WorkoutAuthSetsState extends State<WorkoutAuthSets> {
         Text('Set ${widget.setCount}', style: typography.lgSemibold),
         FTextFormField(
           label: Text('Set Name', style: typography.lg.copyWith(fontWeight: FontWeight.normal)),
+          onChange: (value) => setState(() {}),
           controller: _controllers['name'],
           validator: (value) => _validateRequired(value),
+          autovalidateMode: widget.formSubmitted ? AutovalidateMode.onUserInteraction : AutovalidateMode.disabled,
         ),
         Text('Rep Count', style: typography.lg),
         Padding(
           padding: const EdgeInsets.symmetric(vertical: 4),
-          child: Row(
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              FButton(
-                onPress: () {
-                  setState(() {
-                    repCount--;
-                  });
-                },
-                style: FButtonStyle.outline(),
-                child: Icon(FIcons.minus, color: context.theme.colors.foreground),
-              ),
-              SizedBox(
-                width: 40,
-                child: Center(child: Text(repCount.toString(), style: typography.lgSemibold)),
-              ),
+              Row(
+                children: [
+                  FButton(
+                    onPress: () {
+                      _updateRepCount(false);
+                    },
+                    style: FButtonStyle.outline(),
+                    child: Icon(FIcons.minus, color: context.theme.colors.foreground),
+                  ),
+                  SizedBox(
+                    width: 40,
+                    child: Center(child: Text(repCount.toString(), style: typography.lgSemibold)),
+                  ),
 
-              FButton(
-                onPress: () {
-                  setState(() {
-                    repCount++;
-                  });
-                },
-                style: FButtonStyle.outline(),
-                child: Icon(FIcons.plus, color: context.theme.colors.foreground),
+                  FButton(
+                    onPress: () {
+                      _updateRepCount(true);
+                    },
+                    style: FButtonStyle.outline(),
+                    child: Icon(FIcons.plus, color: context.theme.colors.foreground),
+                  ),
+                ],
               ),
+              (_shouldShowRepCountError())
+                  ? SizedBox(height: 20, child: Text('0 Reps?', style: typography.smError))
+                  : SizedBox(height: 20),
             ],
           ),
         ),
+
         // FTextFormField(
         //   label: Text('Reps', style: typography.lgSemibold),
         //   controller: _controllers['repCount'],
@@ -75,64 +80,70 @@ class _WorkoutAuthSetsState extends State<WorkoutAuthSets> {
         // ),
         ConstrainedBox(
           constraints: BoxConstraints(maxWidth: 400),
-          child: Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+          child: Column(
             children: [
-              Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
+              Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
-                  Text('Time On', style: typography.lg),
-                  Text('mm:ss', style: typography.smGrey),
-                  SizedBox(
-                    height: 100,
-                    width: 150,
-                    child: FPicker(
-                      controller: _controllers['repDuration'],
-                      children: [
-                        FPickerWheel.builder(
-                          builder: (context, index) => Text((index % 60).toString().padLeft(2, '0')),
+                  Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text('Time On', style: typography.lg),
+                      Text('mm:ss', style: typography.smGrey),
+                      SizedBox(
+                        height: 100,
+                        width: 150,
+                        child: FPicker(
+                          controller: _controllers['repDuration'],
+                          onChange: (value) => setState(() {}),
+                          children: [
+                            FPickerWheel.builder(
+                              builder: (context, index) => Text((index % 60).toString().padLeft(2, '0')),
+                            ),
+                            const Text(':'),
+                            FPickerWheel.builder(
+                              builder: (context, index) => Text((index % 60).toString().padLeft(2, '0')),
+                            ),
+                          ],
                         ),
-                        const Text(':'),
-                        FPickerWheel.builder(
-                          builder: (context, index) => Text((index % 60).toString().padLeft(2, '0')),
-                        ),
-                      ],
-                    ),
+                      ),
+                    ],
                   ),
-                  (_shouldShowRepDurationError())
-                      ? SizedBox(height: 20, child: Text('Enter a time > 0 seconds', style: typography.smError))
-                      : SizedBox(height: 20),
-                ],
-              ),
-              Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text('Time Off', style: typography.lg),
-                  Text('mm:ss', style: typography.smGrey),
-                  SizedBox(
-                    height: 100,
-                    width: 150,
-                    child: FPicker(
-                      controller: _controllers['restDuration'],
-                      children: [
-                        FPickerWheel.builder(
-                          builder: (context, index) => Text((index % 60).toString().padLeft(2, '0')),
+                  Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text('Time Off', style: typography.lg),
+                      Text('mm:ss', style: typography.smGrey),
+                      SizedBox(
+                        height: 100,
+                        width: 150,
+                        child: FPicker(
+                          controller: _controllers['restDuration'],
+                          onChange: (value) => setState(() {}),
+                          children: [
+                            FPickerWheel.builder(
+                              builder: (context, index) => Text((index % 60).toString().padLeft(2, '0')),
+                            ),
+                            const Text(':'),
+                            FPickerWheel.builder(
+                              builder: (context, index) => Text((index % 60).toString().padLeft(2, '0')),
+                            ),
+                          ],
                         ),
-                        const Text(':'),
-                        FPickerWheel.builder(
-                          builder: (context, index) => Text((index % 60).toString().padLeft(2, '0')),
-                        ),
-                      ],
-                    ),
+                      ),
+                    ],
                   ),
-                  (_shouldShowRestDurationError())
-                      ? SizedBox(height: 20, child: Text('Enter a time > 0 seconds', style: typography.smError))
-                      : SizedBox(height: 20),
                 ],
               ),
             ],
           ),
         ),
+        (_shouldShowRepDurationError())
+            ? SizedBox(height: 20, child: Text('Enter rep time > 0 seconds', style: typography.smError))
+            : SizedBox(height: 20),
+        (_shouldShowRestDurationError())
+            ? SizedBox(height: 20, child: Text('Enter rest time > 0 seconds', style: typography.smError))
+            : SizedBox(height: 20),
       ],
     );
   }
@@ -144,18 +155,10 @@ class _WorkoutAuthSetsState extends State<WorkoutAuthSets> {
     return null;
   }
 
-  String? _validatePositiveNumber(String? value, String fieldName) {
-    final requiredError = _validateRequired(value);
-    if (requiredError != null) return requiredError;
-
-    final intValue = int.tryParse(value!.trim());
-    if (intValue == null) {
-      return 'Enter a valid number';
-    }
-    if (intValue <= 0) {
-      return '0 ${fieldName.toLowerCase()}?';
-    }
-    return null;
+  void _updateRepCount(bool increment) {
+    setState(() {
+      increment ? repCount++ : repCount--;
+    });
   }
 
   String? _validateTimeSelection(List<int> timeIndexes) {
@@ -179,5 +182,9 @@ class _WorkoutAuthSetsState extends State<WorkoutAuthSets> {
   bool _shouldShowRestDurationError() {
     final controller = _controllers['restDuration'] as FPickerController;
     return widget.formSubmitted && _validateTimeSelection(controller.value) != null;
+  }
+
+  bool _shouldShowRepCountError() {
+    return widget.formSubmitted && repCount <= 0;
   }
 }

@@ -1,6 +1,5 @@
 // workout_auth.dart
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
 import 'package:forui/forui.dart';
 import 'package:hive_ce_flutter/hive_flutter.dart';
 import 'package:proj/header.dart';
@@ -36,10 +35,7 @@ class _WorkoutAuthState extends State<WorkoutAuth> {
         child: FButton(
           style: FButtonStyle.outline(),
           onPress: _onDonePressed,
-          child: Text(
-            'Done',
-            style: typography.lg.copyWith(color: context.theme.colors.accent),
-          ),
+          child: Text('Done', style: typography.lg.copyWith(color: context.theme.colors.accent)),
         ),
       ),
 
@@ -59,9 +55,10 @@ class _WorkoutAuthState extends State<WorkoutAuth> {
                     label: Text('Workout Name', style: typography.lg),
                     controller: _controllers['name'],
                     validator: _validateRequired,
+                    autovalidateMode: _formSubmitted ? AutovalidateMode.onUserInteraction : AutovalidateMode.disabled,
                   ),
                   for (var i = 1; i <= setCount; i++)
-                    WorkoutAuthSets(key: ValueKey(i), setCount: i),
+                    WorkoutAuthSets(key: ValueKey(i), setCount: i, formSubmitted: _formSubmitted),
                   FButton(
                     style: FButtonStyle.outline(),
                     onPress: () {
@@ -154,15 +151,5 @@ class _WorkoutAuthState extends State<WorkoutAuth> {
     final minutes = timeIndexes[1] % 60;
     final seconds = timeIndexes[2] % 60;
     return hours > 0 || minutes > 0 || seconds > 0;
-  }
-
-  bool _shouldShowRepDurationError() {
-    final controller = _controllers['repDuration'] as FPickerController;
-    return _formSubmitted && _validateTimeSelection(controller.value) != null;
-  }
-
-  bool _shouldShowRestDurationError() {
-    final controller = _controllers['restDuration'] as FPickerController;
-    return _formSubmitted && _validateTimeSelection(controller.value) != null;
   }
 }
