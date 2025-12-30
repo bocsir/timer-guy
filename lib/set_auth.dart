@@ -8,13 +8,13 @@ class SetAuth extends StatefulWidget {
   final WorkoutSet set;
   final void Function(int, WorkoutSet) upsertSet;
   final bool formSubmitted;
-  final int setCount;
+  final int setNumber;
   const SetAuth({
     super.key,
     required this.set,
     required this.upsertSet,
     this.formSubmitted = false,
-    required this.setCount,
+    required this.setNumber,
   });
 
   @override
@@ -34,7 +34,7 @@ class _SetAuthState extends State<SetAuth> {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Text('Set ${widget.setCount}', style: typography.lgSemibold),
+        Text('Set ${widget.setNumber}', style: typography.lgSemibold),
         FTextFormField(
           label: Text('Set Name', style: typography.lg.copyWith(fontWeight: FontWeight.normal)),
           onChange: (value) {
@@ -81,13 +81,6 @@ class _SetAuthState extends State<SetAuth> {
           ),
         ),
 
-        // FTextFormField(
-        //   label: Text('Reps', style: typography.lgSemibold),
-        //   controller: _controllers['repCount'],
-        //   keyboardType: TextInputType.numberWithOptions(),
-        //   inputFormatters: [FilteringTextInputFormatter.digitsOnly],
-        //   validator: (value) => _validatePositiveNumber(value, 'reps'),
-        // ),
         ConstrainedBox(
           constraints: BoxConstraints(maxWidth: 400),
           child: Column(
@@ -169,7 +162,7 @@ class _SetAuthState extends State<SetAuth> {
     final restDuration = restDurationController.value;
 
     widget.upsertSet(
-      widget.setCount - 1,
+      widget.setNumber - 1,
       WorkoutSet(
         name: nameController.text,
         reps: repCount,

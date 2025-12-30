@@ -56,14 +56,14 @@ class _WorkoutAuthState extends State<WorkoutAuth> {
                     validator: _validateRequired,
                     autovalidateMode: _formSubmitted ? AutovalidateMode.onUserInteraction : AutovalidateMode.disabled,
                   ),
-                  for (var i = 1; i <= sets.length; i++)
+                  for (var i = 0; i < sets.length; i++)
                     Column(
                       children: [
                         FDivider(),
                         SetAuth(
                           key: ValueKey(i),
-                          set: sets[i - 1],
-                          setCount: i,
+                          set: sets[i],
+                          setNumber: i + 1,
                           upsertSet: (index, newSet) => upsertSet(index, newSet),
                           formSubmitted: _formSubmitted,
                         ),
@@ -85,7 +85,7 @@ class _WorkoutAuthState extends State<WorkoutAuth> {
 
   void upsertSet(final index, WorkoutSet newSet) {
     setState(() {
-      if (index > sets.length) {
+      if (index >= sets.length) {
         sets.add(newSet);
       } else {
         sets[index] = newSet;
@@ -99,15 +99,8 @@ class _WorkoutAuthState extends State<WorkoutAuth> {
     });
 
     if (_validateForm()) {
-      // final workout = Workout(
-      //   name: nameController.text.trim(),
-      //   reps: int.parse(_controllers['repCount'].text.trim()),
-      //   sets: int.parse(_controllers['setCount'].text.trim()),
-      //   timeOn: (_controllers['repDuration'] as FPickerController).totalSeconds,
-      //   timeOff: (_controllers['restDuration'] as FPickerController).totalSeconds,
-      // );
-
-      // widget.workoutBox.add(workout);
+      final workout = Workout(name: nameController.text.trim(), sets: sets);
+      widget.workoutBox.add(workout);
       Navigator.of(context).pop();
     }
   }
@@ -128,21 +121,5 @@ class _WorkoutAuthState extends State<WorkoutAuth> {
       return 'Required';
     }
     return null;
-  }
-
-  // maybe dont need separate method for this. could be useful if more complex time filters are needed
-  // but why would they be
-  String? _validateTimeSelection(List<int> timeIndexes) {
-    if (!_isTimeGreaterThanZero(timeIndexes)) {
-      return 'Enter a time > 0 seconds';
-    }
-    return null;
-  }
-
-  bool _isTimeGreaterThanZero(List<int> timeIndexes) {
-    final hours = timeIndexes[0] % 12;
-    final minutes = timeIndexes[1] % 60;
-    final seconds = timeIndexes[2] % 60;
-    return hours > 0 || minutes > 0 || seconds > 0;
   }
 }
