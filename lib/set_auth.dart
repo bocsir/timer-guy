@@ -1,24 +1,31 @@
-// workout_auth_sets.dart
+// set_auth.dart
 import 'package:flutter/material.dart';
 import 'package:forui/forui.dart';
+import 'package:proj/hive/hive_adapters.dart';
 import 'package:proj/theme/theme.dart';
 
-class WorkoutAuthSets extends StatefulWidget {
+class SetAuth extends StatefulWidget {
+  final WorkoutSet set;
+  final void Function(int, WorkoutSet) upsertSet;
   final bool formSubmitted;
   final int setCount;
-  const WorkoutAuthSets({super.key, this.formSubmitted = false, required this.setCount});
+  const SetAuth({
+    super.key,
+    required this.set,
+    required this.upsertSet,
+    this.formSubmitted = false,
+    required this.setCount,
+  });
 
   @override
-  State<WorkoutAuthSets> createState() => _WorkoutAuthSetsState();
+  State<SetAuth> createState() => _SetAuthState();
 }
 
-class _WorkoutAuthSetsState extends State<WorkoutAuthSets> {
+class _SetAuthState extends State<SetAuth> {
   int repCount = 0;
-  final Map<String, dynamic> _controllers = {
-    'name': TextEditingController(),
-    'repDuration': FPickerController(initialIndexes: [0, 0]),
-    'restDuration': FPickerController(initialIndexes: [0, 0]),
-  };
+  final nameController = TextEditingController();
+  final repDurationController = FPickerController(initialIndexes: [0, 0]);
+  final restDurationController = FPickerController(initialIndexes: [0, 0]);
 
   @override
   Widget build(BuildContext context) {
@@ -30,8 +37,11 @@ class _WorkoutAuthSetsState extends State<WorkoutAuthSets> {
         Text('Set ${widget.setCount}', style: typography.lgSemibold),
         FTextFormField(
           label: Text('Set Name', style: typography.lg.copyWith(fontWeight: FontWeight.normal)),
-          onChange: (value) => setState(() {}),
-          controller: _controllers['name'],
+          onChange: (value) {
+            setState(() {});
+            _updateSetProperty();
+          },
+          controller: nameController,
           validator: (value) => _validateRequired(value),
           autovalidateMode: widget.formSubmitted ? AutovalidateMode.onUserInteraction : AutovalidateMode.disabled,
         ),
@@ -94,8 +104,11 @@ class _WorkoutAuthSetsState extends State<WorkoutAuthSets> {
                         height: 100,
                         width: 150,
                         child: FPicker(
-                          controller: _controllers['repDuration'],
-                          onChange: (value) => setState(() {}),
+                          controller: repDurationController,
+                          onChange: (value) {
+                            setState(() {});
+                            _updateSetProperty();
+                          },
                           children: [
                             FPickerWheel.builder(
                               builder: (context, index) => Text((index % 60).toString().padLeft(2, '0')),
@@ -118,8 +131,11 @@ class _WorkoutAuthSetsState extends State<WorkoutAuthSets> {
                         height: 100,
                         width: 150,
                         child: FPicker(
-                          controller: _controllers['restDuration'],
-                          onChange: (value) => setState(() {}),
+                          controller: restDurationController,
+                          onChange: (value) {
+                            setState(() {});
+                            _updateSetProperty();
+                          },
                           children: [
                             FPickerWheel.builder(
                               builder: (context, index) => Text((index % 60).toString().padLeft(2, '0')),
@@ -148,6 +164,21 @@ class _WorkoutAuthSetsState extends State<WorkoutAuthSets> {
     );
   }
 
+  void _updateSetProperty() {
+    final repDuration = repDurationController.value;
+    final restDuration = restDurationController.value;
+
+    widget.upsertSet(
+      widget.setCount - 1,
+      WorkoutSet(
+        name: nameController.text,
+        reps: repCount,
+        timeOn: (repDuration[0] % 60) * 60 + (repDuration[1] % 60),
+        timeOff: (restDuration[0] % 60) * 60 + (restDuration[1] % 60),
+      ),
+    );
+  }
+
   String? _validateRequired(String? value) {
     if (value == null || value.trim().isEmpty) {
       return 'Required';
@@ -159,6 +190,7 @@ class _WorkoutAuthSetsState extends State<WorkoutAuthSets> {
     setState(() {
       increment ? repCount++ : repCount--;
     });
+    _updateSetProperty();
   }
 
   String? _validateTimeSelection(List<int> timeIndexes) {
@@ -175,13 +207,11 @@ class _WorkoutAuthSetsState extends State<WorkoutAuthSets> {
   }
 
   bool _shouldShowRepDurationError() {
-    final controller = _controllers['repDuration'] as FPickerController;
-    return widget.formSubmitted && _validateTimeSelection(controller.value) != null;
+    return widget.formSubmitted && _validateTimeSelection(repDurationController.value) != null;
   }
 
   bool _shouldShowRestDurationError() {
-    final controller = _controllers['restDuration'] as FPickerController;
-    return widget.formSubmitted && _validateTimeSelection(controller.value) != null;
+    return widget.formSubmitted && _validateTimeSelection(restDurationController.value) != null;
   }
 
   bool _shouldShowRepCountError() {

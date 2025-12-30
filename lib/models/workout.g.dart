@@ -18,7 +18,7 @@ class WorkoutAdapter extends TypeAdapter<Workout> {
     };
     return Workout(
       name: fields[0] as String,
-      sets: (fields[1] as List).cast<Set>(),
+      sets: (fields[1] as List).cast<WorkoutSet>(),
     );
   }
 
@@ -43,17 +43,17 @@ class WorkoutAdapter extends TypeAdapter<Workout> {
           typeId == other.typeId;
 }
 
-class SetAdapter extends TypeAdapter<Set> {
+class WorkoutSetAdapter extends TypeAdapter<WorkoutSet> {
   @override
   final typeId = 1;
 
   @override
-  Set read(BinaryReader reader) {
+  WorkoutSet read(BinaryReader reader) {
     final numOfFields = reader.readByte();
     final fields = <int, dynamic>{
       for (int i = 0; i < numOfFields; i++) reader.readByte(): reader.read(),
     };
-    return Set(
+    return WorkoutSet(
       name: fields[0] as String,
       reps: (fields[1] as num).toInt(),
       timeOn: (fields[2] as num).toInt(),
@@ -62,7 +62,7 @@ class SetAdapter extends TypeAdapter<Set> {
   }
 
   @override
-  void write(BinaryWriter writer, Set obj) {
+  void write(BinaryWriter writer, WorkoutSet obj) {
     writer
       ..writeByte(4)
       ..writeByte(0)
@@ -81,7 +81,7 @@ class SetAdapter extends TypeAdapter<Set> {
   @override
   bool operator ==(Object other) =>
       identical(this, other) ||
-      other is SetAdapter &&
+      other is WorkoutSetAdapter &&
           runtimeType == other.runtimeType &&
           typeId == other.typeId;
 }

@@ -14,23 +14,17 @@ class Workout extends HiveObject {
   final String name;
 
   @HiveField(1)
-  final List<Set> sets;
+  final List<WorkoutSet> sets;
 
   Workout({required this.name, required this.sets});
 
-  Workout copyWith({
-    String? name,
-    int? reps,
-    List<Set>? sets,
-    int? timeOn,
-    int? timeOff,
-  }) {
+  Workout copyWith({String? name, int? reps, List<WorkoutSet>? sets, int? timeOn, int? timeOff}) {
     return Workout(name: name ?? this.name, sets: sets ?? this.sets);
   }
 }
 
 @HiveType(typeId: 1)
-class Set extends HiveObject {
+class WorkoutSet extends HiveObject {
   @HiveField(0)
   final String name;
 
@@ -44,15 +38,10 @@ class Set extends HiveObject {
   @HiveField(3)
   final int timeOff;
 
-  Set({
-    required this.name,
-    required this.reps,
-    required this.timeOn,
-    required this.timeOff,
-  });
+  WorkoutSet({required this.name, required this.reps, required this.timeOn, required this.timeOff});
 
-  Set copyWith({String? name, int? reps, int? timeOn, int? timeOff}) {
-    return Set(
+  WorkoutSet copyWith({String? name, int? reps, int? timeOn, int? timeOff}) {
+    return WorkoutSet(
       name: name ?? this.name,
       reps: reps ?? this.reps,
       timeOn: timeOn ?? this.timeOn,

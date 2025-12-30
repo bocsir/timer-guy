@@ -5,7 +5,7 @@ import 'package:hive_ce_flutter/hive_flutter.dart';
 import 'package:proj/header.dart';
 import 'package:proj/models/workout.dart';
 import 'package:proj/theme/theme.dart';
-import 'package:proj/workout_auth_sets.dart';
+import 'package:proj/set_auth.dart';
 
 class WorkoutAuth extends StatefulWidget {
   final Box<Workout> workoutBox;
@@ -17,9 +17,8 @@ class WorkoutAuth extends StatefulWidget {
 }
 
 class _WorkoutAuthState extends State<WorkoutAuth> {
-  var setCount = 0;
-
-  final Map<String, dynamic> _controllers = {'name': TextEditingController()};
+  List<WorkoutSet> sets = [];
+  final nameController = TextEditingController();
 
   final _formKey = GlobalKey<FormState>();
   bool _formSubmitted = false;
@@ -33,9 +32,9 @@ class _WorkoutAuthState extends State<WorkoutAuth> {
       footer: Padding(
         padding: const EdgeInsets.all(16),
         child: FButton(
-          style: FButtonStyle.outline(),
+          style: FButtonStyle.ghost(),
           onPress: _onDonePressed,
-          child: Text('Done', style: typography.lg.copyWith(color: context.theme.colors.accent)),
+          child: Text('Done!', style: typography.lg.copyWith(color: context.theme.colors.accent)),
         ),
       ),
 
@@ -53,19 +52,26 @@ class _WorkoutAuthState extends State<WorkoutAuth> {
                   Text('Create Workout', style: typography.xlSemibold),
                   FTextFormField(
                     label: Text('Workout Name', style: typography.lg),
-                    controller: _controllers['name'],
+                    controller: nameController,
                     validator: _validateRequired,
                     autovalidateMode: _formSubmitted ? AutovalidateMode.onUserInteraction : AutovalidateMode.disabled,
                   ),
-                  for (var i = 1; i <= setCount; i++)
-                    WorkoutAuthSets(key: ValueKey(i), setCount: i, formSubmitted: _formSubmitted),
+                  for (var i = 1; i <= sets.length; i++)
+                    Column(
+                      children: [
+                        FDivider(),
+                        SetAuth(
+                          key: ValueKey(i),
+                          set: sets[i - 1],
+                          setCount: i,
+                          upsertSet: (index, newSet) => upsertSet(index, newSet),
+                          formSubmitted: _formSubmitted,
+                        ),
+                      ],
+                    ),
                   FButton(
                     style: FButtonStyle.outline(),
-                    onPress: () {
-                      setState(() {
-                        setCount++;
-                      });
-                    },
+                    onPress: () => upsertSet(sets.length, WorkoutSet(name: '', reps: 0, timeOn: 0, timeOff: 0)),
                     child: Text('Add Set', style: typography.lg),
                   ),
                 ],
@@ -77,7 +83,15 @@ class _WorkoutAuthState extends State<WorkoutAuth> {
     );
   }
 
-  //TODO: clean up below methods
+  void upsertSet(final index, WorkoutSet newSet) {
+    setState(() {
+      if (index > sets.length) {
+        sets.add(newSet);
+      } else {
+        sets[index] = newSet;
+      }
+    });
+  }
 
   void _onDonePressed() {
     setState(() {
@@ -86,7 +100,7 @@ class _WorkoutAuthState extends State<WorkoutAuth> {
 
     if (_validateForm()) {
       // final workout = Workout(
-      //   name: _controllers['name'].text.trim(),
+      //   name: nameController.text.trim(),
       //   reps: int.parse(_controllers['repCount'].text.trim()),
       //   sets: int.parse(_controllers['setCount'].text.trim()),
       //   timeOn: (_controllers['repDuration'] as FPickerController).totalSeconds,
@@ -106,33 +120,12 @@ class _WorkoutAuthState extends State<WorkoutAuth> {
       return false;
     }
 
-    // check FPicker fields
-    final repController = _controllers['repDuration'] as FPickerController;
-    final restController = _controllers['restDuration'] as FPickerController;
-
-    final repDurationError = _validateTimeSelection(repController.value);
-    final restDurationError = _validateTimeSelection(restController.value);
-
-    return repDurationError == null && restDurationError == null;
+    return true;
   }
 
   String? _validateRequired(String? value) {
     if (value == null || value.trim().isEmpty) {
       return 'Required';
-    }
-    return null;
-  }
-
-  String? _validatePositiveNumber(String? value, String fieldName) {
-    final requiredError = _validateRequired(value);
-    if (requiredError != null) return requiredError;
-
-    final intValue = int.tryParse(value!.trim());
-    if (intValue == null) {
-      return 'Enter a valid number';
-    }
-    if (intValue <= 0) {
-      return '0 ${fieldName.toLowerCase()}?';
     }
     return null;
   }

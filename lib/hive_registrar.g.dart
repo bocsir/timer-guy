@@ -7,14 +7,14 @@ import 'package:proj/models/workout.dart';
 
 extension HiveRegistrar on HiveInterface {
   void registerAdapters() {
-    registerAdapter(SetAdapter());
     registerAdapter(WorkoutAdapter());
+    registerAdapter(WorkoutSetAdapter());
   }
 }
 
 extension IsolatedHiveRegistrar on IsolatedHiveInterface {
   void registerAdapters() {
-    registerAdapter(SetAdapter());
     registerAdapter(WorkoutAdapter());
+    registerAdapter(WorkoutSetAdapter());
   }
 }
