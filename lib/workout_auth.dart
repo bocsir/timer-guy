@@ -49,29 +49,54 @@ class _WorkoutAuthState extends State<WorkoutAuth> {
                 crossAxisAlignment: CrossAxisAlignment.start,
                 spacing: 8,
                 children: [
-                  Text('Create Workout', style: typography.xlSemibold),
+                  Text('Create Workout', style: typography.xl3Semibold),
                   FTextFormField(
                     label: Text('Workout Name', style: typography.lg),
                     controller: nameController,
                     validator: _validateRequired,
                     autovalidateMode: _formSubmitted ? AutovalidateMode.onUserInteraction : AutovalidateMode.disabled,
                   ),
+                  if (sets.isNotEmpty) Text('Sets', style: typography.lgSemibold),
                   for (var i = 0; i < sets.length; i++)
-                    Column(
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
                       children: [
-                        FDivider(),
-                        SetAuth(
-                          key: ValueKey(i),
-                          set: sets[i],
-                          setNumber: i + 1,
-                          upsertSet: (index, newSet) => upsertSet(index, newSet),
-                          formSubmitted: _formSubmitted,
+                        Text(sets[i].name, style: context.theme.typography.sm),
+                        Row(
+                          children: [
+                            FButton(
+                              onPress: () async {
+                                final updatedSet = await showSetAuthSheet(i, sets[i]);
+                                if (updatedSet != null) {
+                                  upsertSet(i, updatedSet);
+                                }
+                              },
+                              style: FButtonStyle.ghost(),
+                              child: Icon(FIcons.pencil),
+                            ),
+                            FButton(
+                              onPress: () {
+                                setState(() => sets.removeAt(i));
+                              },
+                              style: FButtonStyle.ghost(),
+                              child: Icon(FIcons.x),
+                            ),
+                          ],
                         ),
                       ],
                     ),
                   FButton(
                     style: FButtonStyle.outline(),
-                    onPress: () => upsertSet(sets.length, WorkoutSet(name: '', reps: 0, timeOn: 0, timeOff: 0)),
+                    onPress: () async {
+                      final index = sets.length;
+                      final newSet = await showSetAuthSheet(
+                        index,
+                        WorkoutSet(name: '', reps: 0, timeOn: 0, timeOff: 0),
+                      );
+                      if (newSet != null) {
+                        upsertSet(index, newSet);
+                      }
+                    },
                     child: Text('Add Set', style: typography.lg),
                   ),
                 ],
@@ -83,7 +108,7 @@ class _WorkoutAuthState extends State<WorkoutAuth> {
     );
   }
 
-  void upsertSet(final index, WorkoutSet newSet) {
+  void upsertSet(int index, WorkoutSet newSet) {
     setState(() {
       if (index >= sets.length) {
         sets.add(newSet);
@@ -91,6 +116,14 @@ class _WorkoutAuthState extends State<WorkoutAuth> {
         sets[index] = newSet;
       }
     });
+  }
+
+  Future<WorkoutSet?> showSetAuthSheet(int setIndex, WorkoutSet initialSet) {
+    return showModalBottomSheet<WorkoutSet>(
+      backgroundColor: context.theme.colors.secondary,
+      context: context,
+      builder: (context) => SetAuth(set: initialSet, setNumber: setIndex + 1, formSubmitted: _formSubmitted),
+    );
   }
 
   void _onDonePressed() {

@@ -55,7 +55,7 @@ class WorkoutPageState extends State<WorkoutPage> with TickerProviderStateMixin 
         children: [
           Column(
             crossAxisAlignment: CrossAxisAlignment.start,
-            children: [Text(widget.workout.name, style: typography.xlSemibold)],
+            children: [Text(widget.workout.name, style: typography.xl3Semibold)],
           ),
           Expanded(
             child: SizedBox(
@@ -63,7 +63,9 @@ class WorkoutPageState extends State<WorkoutPage> with TickerProviderStateMixin 
               child: DecoratedBox(
                 decoration: BoxDecoration(
                   border: ProgressBorder.all(
-                    color: context.theme.colors.accent,
+                    color: status.value == WorkoutStatus.paused || status.value == WorkoutStatus.notStarted
+                        ? context.theme.colors.border
+                        : context.theme.colors.accent,
                     progress: animationController.value,
                     width: 6,
                     backgroundBorder: Border.all(color: context.theme.colors.border, width: 1),
@@ -127,7 +129,7 @@ class WorkoutPageState extends State<WorkoutPage> with TickerProviderStateMixin 
                                 ),
                               ),
                               DefaultTextStyle(
-                                style: context.theme.typography.xlSemibold,
+                                style: context.theme.typography.xl3Semibold,
                                 child: switch (status.value) {
                                   WorkoutStatus.resting => Text('Rest'),
                                   WorkoutStatus.working => Text(

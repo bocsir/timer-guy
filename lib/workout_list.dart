@@ -63,7 +63,7 @@ class _WorkoutListState extends State<WorkoutList> with SingleTickerProviderStat
               children: [
                 Padding(
                   padding: const EdgeInsets.only(bottom: 8),
-                  child: Text('Workouts', style: context.theme.typography.xlSemibold),
+                  child: Text('Workouts', style: context.theme.typography.xl3Semibold),
                 ),
                 workouts.isEmpty
                     //TODO: eventually add icon to show type of workout. idk what types will be available yet
