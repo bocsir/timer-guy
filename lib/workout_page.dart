@@ -6,6 +6,7 @@ import 'dart:async';
 import 'package:proj/models/workout.dart';
 import 'package:proj/theme/theme.dart';
 import 'package:progress_border/progress_border.dart';
+import 'package:proj/working_resting_status.dart';
 
 enum WorkoutStatus { notStarted, preparing, working, resting, paused, complete }
 
@@ -46,16 +47,35 @@ class WorkoutPageState extends State<WorkoutPage> with TickerProviderStateMixin 
   @override
   Widget build(context) {
     final typography = context.theme.typography;
+    final colors = context.theme.colors;
 
     return FScaffold(
+      childPad: false,
       header: Header(),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
-        spacing: 32,
         children: [
-          Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [Text(widget.workout.name, style: typography.xl3Semibold)],
+          Padding(
+            padding: const EdgeInsets.all(16),
+            child: Row(
+              spacing: 8,
+              children: [
+                Text(widget.workout.name, style: typography.xl3Semibold),
+                FPopover(
+                  popoverAnchor: Alignment.topCenter,
+                  childAnchor: Alignment.bottomCenter,
+                  popoverBuilder: (context, _) => Padding(
+                    padding: const EdgeInsets.symmetric(vertical: 8, horizontal: 16),
+                    child: Text('description placeholder text'),
+                  ),
+                  builder: (_, controller, _) => FButton(
+                    onPress: controller.toggle,
+                    style: FButtonStyle.ghost(),
+                    child: Icon(FIcons.info, color: colors.mutedForeground),
+                  ),
+                ),
+              ],
+            ),
           ),
           Expanded(
             child: SizedBox(
@@ -64,36 +84,46 @@ class WorkoutPageState extends State<WorkoutPage> with TickerProviderStateMixin 
                 decoration: BoxDecoration(
                   border: ProgressBorder.all(
                     color: status.value == WorkoutStatus.paused || status.value == WorkoutStatus.notStarted
-                        ? context.theme.colors.border
-                        : context.theme.colors.accent,
+                        ? colors.border
+                        : colors.accent,
                     progress: animationController.value,
                     width: 6,
-                    backgroundBorder: Border.all(color: context.theme.colors.border, width: 1),
+                    backgroundBorder: Border.symmetric(horizontal: BorderSide(color: colors.border, width: 1)),
                   ),
-                  color: context.theme.colors.secondary,
-                  borderRadius: BorderRadius.circular(16),
                 ),
                 child: Padding(
-                  padding: const EdgeInsets.all(64),
+                  padding: const EdgeInsets.symmetric(horizontal: 64, vertical: 32),
                   child: ListenableBuilder(
                     listenable: status,
                     builder: (context, child) {
                       return Column(
                         mainAxisAlignment: MainAxisAlignment.spaceBetween,
                         children: [
+                          WorkingRestingStatus(status: status.value, workout: widget.workout, currSet: currSet.value),
                           switch (status.value) {
                             WorkoutStatus.complete => Text(
                               'All done!',
                               style: typography.xl3.copyWith(fontWeight: FontWeight.bold),
                             ),
-                            _ => Row(
-                              mainAxisAlignment: MainAxisAlignment.center,
-                              crossAxisAlignment: CrossAxisAlignment.baseline,
-                              textBaseline: TextBaseline.values.first,
-                              spacing: 4,
+                            _ => Column(
                               children: [
-                                Text(currTime.toStringAsFixed(1).split('.')[0], style: typography.xl7),
-                                Text(currTime.toStringAsFixed(1).split('.')[1][0], style: typography.xl5),
+                                Row(
+                                  mainAxisAlignment: MainAxisAlignment.center,
+                                  crossAxisAlignment: CrossAxisAlignment.baseline,
+                                  textBaseline: TextBaseline.values.first,
+                                  spacing: 4,
+                                  children: [
+                                    Text(currTime.toStringAsFixed(1).split('.')[0], style: typography.xl8),
+                                    Text(currTime.toStringAsFixed(1).split('.')[1][0], style: typography.xl6),
+                                  ],
+                                ),
+                                if (status.value == WorkoutStatus.preparing)
+                                  Text('Get ready...', style: typography.xl.copyWith(fontWeight: FontWeight.bold)),
+                                if (status.value == WorkoutStatus.working)
+                                  Text(
+                                    'Go!',
+                                    style: typography.xl.copyWith(fontWeight: FontWeight.bold, color: colors.accent),
+                                  ),
                               ],
                             ),
                           },
@@ -128,73 +158,6 @@ class WorkoutPageState extends State<WorkoutPage> with TickerProviderStateMixin 
                                   ],
                                 ),
                               ),
-                              DefaultTextStyle(
-                                style: context.theme.typography.xl3Semibold,
-                                child: switch (status.value) {
-                                  WorkoutStatus.resting => Text('Rest'),
-                                  WorkoutStatus.working => Text(
-                                    'Go!',
-                                    style: TextStyle(color: context.theme.colors.accent),
-                                  ),
-                                  WorkoutStatus.preparing => Text(
-                                    'Get Ready...',
-                                    style: context.theme.typography.lgSemibold,
-                                  ),
-                                  _ => SizedBox(height: 39),
-                                },
-                              ),
-                            ],
-                          ),
-                          Row(
-                            mainAxisAlignment: MainAxisAlignment.center,
-                            spacing: 64,
-                            children: [
-                              FButton.icon(
-                                style: FButtonStyle.ghost(),
-                                onPress: () => restartSet(0),
-                                child: Icon(FIcons.refreshCw, size: 30),
-                              ),
-                              DecoratedBox(
-                                decoration: BoxDecoration(
-                                  border: BoxBorder.all(),
-                                  borderRadius: BorderRadius.circular(16),
-                                  color: context.theme.colors.accent,
-                                ),
-                                child: Padding(
-                                  padding: const EdgeInsets.all(8),
-                                  child: status.value == WorkoutStatus.working || status.value == WorkoutStatus.resting
-                                      ? // show pause
-                                        FButton.icon(
-                                          style: FButtonStyle.ghost(),
-                                          onPress: pause,
-                                          child: Icon(FIcons.pause, size: 30, color: context.theme.colors.foreground),
-                                        )
-                                      : // show play
-                                        FButton.icon(
-                                          style: FButtonStyle.ghost(),
-                                          onPress: () {
-                                            if (status.value == WorkoutStatus.preparing) return;
-                                            if (status.value == WorkoutStatus.notStarted) {
-                                              status.value = WorkoutStatus.preparing;
-                                              animationController.duration = Duration(seconds: initialDelay.toInt());
-                                              animationController.reset();
-                                              animate(WorkoutStatus.preparing);
-                                              startTimer();
-                                            } else {
-                                              // Resume from paused state
-                                              if (animationController.status == AnimationStatus.reverse) {
-                                                status.value = WorkoutStatus.resting;
-                                              } else {
-                                                status.value = WorkoutStatus.working;
-                                              }
-                                              animate(status.value);
-                                              startTimer();
-                                            }
-                                          },
-                                          child: Icon(FIcons.play, size: 30, color: context.theme.colors.foreground),
-                                        ),
-                                ),
-                              ),
                             ],
                           ),
                         ],
@@ -205,8 +168,61 @@ class WorkoutPageState extends State<WorkoutPage> with TickerProviderStateMixin 
               ),
             ),
           ),
-          //TODO: temporary
-          SizedBox(height: 16),
+          Padding(
+            padding: const EdgeInsets.only(top: 8, bottom: 16),
+            child: Row(
+              mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+              children: [
+                FButton.icon(
+                  style: FButtonStyle.ghost(),
+                  onPress: () => restartSet(0),
+                  child: Icon(FIcons.refreshCw, size: 30),
+                ),
+                DecoratedBox(
+                  decoration: BoxDecoration(
+                    border: BoxBorder.all(),
+                    borderRadius: BorderRadius.circular(16),
+                    color: colors.accent,
+                  ),
+                  child: Padding(
+                    padding: const EdgeInsets.all(8),
+                    child: status.value == WorkoutStatus.working || status.value == WorkoutStatus.resting
+                        ? // show pause
+                          FButton.icon(
+                            style: FButtonStyle.ghost(),
+                            onPress: pause,
+                            child: Icon(FIcons.pause, size: 30, color: colors.foreground),
+                          )
+                        : // show play
+                          FButton.icon(
+                            style: FButtonStyle.ghost(),
+                            onPress: () {
+                              if (status.value == WorkoutStatus.preparing) return;
+                              if (status.value == WorkoutStatus.notStarted) {
+                                status.value = WorkoutStatus.preparing;
+                                animationController.duration = Duration(seconds: initialDelay.toInt());
+                                animationController.reset();
+                                animate(WorkoutStatus.preparing);
+                                startTimer();
+                              } else {
+                                // Resume from paused state
+                                if (animationController.status == AnimationStatus.reverse) {
+                                  status.value = WorkoutStatus.resting;
+                                } else {
+                                  status.value = WorkoutStatus.working;
+                                }
+                                animate(status.value);
+                                startTimer();
+                              }
+                            },
+                            child: Icon(FIcons.play, size: 30, color: colors.foreground),
+                          ),
+                  ),
+                ),
+              ],
+            ),
+          ),
+          SizedBox(height: 4),
         ],
       ),
     );
