@@ -64,11 +64,7 @@ class WorkoutPageState extends State<WorkoutPage> with TickerProviderStateMixin 
                 ListenableBuilder(
                   listenable: Listenable.merge([currSet, currRep, status]),
                   builder: (context, child) {
-                    return Text(
-                      'Set ${currSet.value} / ${widget.workout.sets.length} - Rep ${currRep.value} / ${widget.workout.sets[currSet.value].reps}',
-
-                      style: typography.lgSemibold,
-                    );
+                    return Text('${widget.workout.sets.length} Sets', style: typography.lgSemibold);
                   },
                 ),
             ],
@@ -107,13 +103,64 @@ class WorkoutPageState extends State<WorkoutPage> with TickerProviderStateMixin 
                                     Text(currTime.toStringAsFixed(1).split('.')[1][0], style: typography.xl5),
                                   ],
                                 ),
-                          switch (status.value) {
-                            WorkoutStatus.resting => Text('Rest', style: context.theme.typography.lgSemibold),
-                            WorkoutStatus.working => Text('Go', style: context.theme.typography.lgSemibold),
-                            WorkoutStatus.paused => Text('Paused', style: context.theme.typography.lgSemibold),
-                            WorkoutStatus.preparing => Text('Get Ready', style: context.theme.typography.lgSemibold),
-                            _ => SizedBox.shrink(),
-                          },
+                          Column(
+                            spacing: 16,
+                            children: [
+                              ConstrainedBox(
+                                constraints: BoxConstraints(maxWidth: 140),
+                                child: Column(
+                                  spacing: 8,
+                                  children: [
+                                    Row(
+                                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                                      children: [
+                                        Text('Set', style: typography.lgSemibold),
+                                        Text(
+                                          '${currSet.value} | ${widget.workout.sets.length}',
+                                          style: typography.lgSemibold,
+                                        ),
+                                      ],
+                                    ),
+                                    Row(
+                                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                                      children: [
+                                        Text('Rep', style: typography.lgSemibold),
+                                        Text(
+                                          '${currRep.value} | ${widget.workout.sets[currSet.value - 1].reps}',
+                                          style: typography.lgSemibold,
+                                        ),
+                                      ],
+                                    ),
+                                  ],
+                                ),
+                              ),
+                              switch (status.value) {
+                                WorkoutStatus.resting => Text(
+                                  'Rest',
+                                  style: context.theme.typography.xlSemibold.copyWith(
+                                    color: context.theme.colors.accent,
+                                  ),
+                                ),
+                                WorkoutStatus.working => Text(
+                                  'Go!',
+                                  style: context.theme.typography.xlSemibold.copyWith(
+                                    color: context.theme.colors.accent,
+                                  ),
+                                ),
+                                WorkoutStatus.paused => Text(
+                                  '(Paused)',
+                                  style: context.theme.typography.xlSemibold.copyWith(
+                                    color: context.theme.colors.accent,
+                                  ),
+                                ),
+                                WorkoutStatus.preparing => Text(
+                                  'Get Ready...',
+                                  style: context.theme.typography.lgSemibold,
+                                ),
+                                _ => SizedBox.shrink(),
+                              },
+                            ],
+                          ),
                           Row(
                             mainAxisAlignment: MainAxisAlignment.center,
                             spacing: 64,
@@ -232,7 +279,7 @@ class WorkoutPageState extends State<WorkoutPage> with TickerProviderStateMixin 
 
   // called after an iteration completes
   void workOrRestComplete() {
-    final set = widget.workout.sets[currSet.value];
+    final set = widget.workout.sets[currSet.value - 1];
     if (status.value == WorkoutStatus.preparing) {
       // preparation complete, start working
       final newStatus = WorkoutStatus.working;
@@ -259,11 +306,11 @@ class WorkoutPageState extends State<WorkoutPage> with TickerProviderStateMixin 
       final tOff = set.timeOff;
       currTime = tOff + 0.0;
       animationController.duration = Duration(seconds: tOff);
-      animate(newStatus);
       // go to next rep / set
       if (currRep.value < set.reps) {
         currRep.value++;
         startTimer();
+        animate(newStatus);
       } else if (currSet.value < widget.workout.sets.length) {
         // pause at end of each set
         animationController.reset();
@@ -281,10 +328,10 @@ class WorkoutPageState extends State<WorkoutPage> with TickerProviderStateMixin 
   void restartWorkout() {
     timer?.cancel();
     animationController.reset();
-    animationController.duration = Duration(seconds: widget.workout.sets[currSet.value].timeOn);
+    animationController.duration = Duration(seconds: widget.workout.sets[currSet.value - 1].timeOn);
     currSet.value = 1;
     currRep.value = 1;
-    currTime = widget.workout.sets[currSet.value].timeOn + 0.0;
+    currTime = widget.workout.sets[currSet.value - 1].timeOn + 0.0;
     status.value = WorkoutStatus.paused;
     workoutOver.value = false;
   }
