@@ -2,6 +2,7 @@
 import 'package:flutter/material.dart';
 import 'package:forui/forui.dart';
 import 'package:hive_ce_flutter/hive_flutter.dart';
+import 'package:proj/dance.dart';
 import 'package:proj/hive/hive_boxes.dart';
 import 'package:proj/models/workout.dart';
 import 'package:proj/theme/theme.dart';
@@ -67,14 +68,7 @@ class _WorkoutListState extends State<WorkoutList> with SingleTickerProviderStat
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
                             Text('No workouts found', style: context.theme.typography.base),
-                            // dart format off
-                          Text('''
-       o    _ o   __|    \\ /
-      /|\\    /\\     \\o    |
-      / \\   | \\     ( \\  /o\\
-                                          ''', 
-                            style: TextStyle(fontFamily: 'IBMPlexMono', fontSize: 14)),
-                          // dart format on
+                            Dance(),
                           ],
                         )
                       : FItemGroup(

@@ -46,29 +46,19 @@ class Header extends StatelessWidget {
                         ? FButton.icon(
                             style: transparentButtonStyle,
                             onPress: () => Navigator.pop(context),
-                            child: Icon(
-                              FIcons.chevronLeft,
-                              color: colors.accent,
-                              size: 28,
-                            ),
+                            child: Icon(FIcons.chevronLeft, color: colors.accent, size: 28),
                           )
                         : FButton(
                             onPress: () => Navigator.pop(context),
                             style: transparentButtonStyle,
-                            child: Text(
-                              backBtnText!,
-                              style: TextStyle(color: colors.accent),
-                            ),
+                            child: Text(backBtnText!, style: TextStyle(color: colors.accent)),
                           ),
                   ),
                 ),
               if (title != null && title.isNotEmpty)
                 Align(
                   alignment: Alignment.center,
-                  child: Text(
-                    title,
-                    style: context.theme.typography.lgSemibold,
-                  ),
+                  child: Text(title, style: context.theme.typography.lgSemibold),
                 ),
               Align(
                 alignment: Alignment.centerRight,
@@ -80,9 +70,7 @@ class Header extends StatelessWidget {
                     if (settingsStuff != null)
                       ...settingsStuff!
                     else
-                      FItemGroup(
-                        children: [FItem(title: Text('No settings available'))],
-                      ),
+                      FItemGroup(children: [FItem(title: Text('No settings available'))]),
                   ],
                   builder: (context, controller, child) => FButton.icon(
                     onPress: controller.toggle,

@@ -1,6 +1,7 @@
 // workout_page.dart
 import 'package:flutter/material.dart';
 import 'package:forui/forui.dart';
+import 'package:proj/dance.dart';
 import 'package:proj/header.dart';
 import 'dart:async';
 import 'package:proj/models/workout.dart';
@@ -52,179 +53,201 @@ class WorkoutPageState extends State<WorkoutPage> with TickerProviderStateMixin 
     return FScaffold(
       childPad: false,
       header: Header(),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Padding(
-            padding: const EdgeInsets.all(16),
-            child: Row(
-              spacing: 8,
+      child: widget.workout.sets.isEmpty
+          ? Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              spacing: 64,
               children: [
-                Text(widget.workout.name, style: typography.xl3Semibold),
-                FPopover(
-                  popoverAnchor: Alignment.topCenter,
-                  childAnchor: Alignment.bottomCenter,
-                  popoverBuilder: (context, _) => Padding(
-                    padding: const EdgeInsets.symmetric(vertical: 8, horizontal: 16),
-                    child: Text('description placeholder text'),
-                  ),
-                  builder: (_, controller, _) => FButton(
-                    onPress: controller.toggle,
-                    style: FButtonStyle.ghost(),
-                    child: Icon(FIcons.info, color: colors.mutedForeground),
-                  ),
+                Text(
+                  "This page gets much more interesting if you add sets to the workout.",
+                  style: typography.xlSemibold,
                 ),
+                Dance(),
               ],
-            ),
-          ),
-          Expanded(
-            child: SizedBox(
-              width: double.infinity,
-              child: DecoratedBox(
-                decoration: BoxDecoration(
-                  border: ProgressBorder.all(
-                    color: status.value == WorkoutStatus.paused || status.value == WorkoutStatus.notStarted
-                        ? colors.border
-                        : colors.accent,
-                    progress: animationController.value,
-                    width: 6,
-                    backgroundBorder: Border.symmetric(horizontal: BorderSide(color: colors.border, width: 1)),
+            )
+          : Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Padding(
+                  padding: const EdgeInsets.all(16),
+                  child: Row(
+                    spacing: 8,
+                    children: [
+                      Text(widget.workout.name, style: typography.xl3Semibold),
+                      FPopover(
+                        popoverAnchor: Alignment.topCenter,
+                        childAnchor: Alignment.bottomCenter,
+                        popoverBuilder: (context, _) => Padding(
+                          padding: const EdgeInsets.symmetric(vertical: 8, horizontal: 16),
+                          child: Text('[description placeholder text]'),
+                        ),
+                        builder: (_, controller, _) => FButton(
+                          onPress: controller.toggle,
+                          style: FButtonStyle.ghost(),
+                          child: Icon(FIcons.info, color: colors.mutedForeground),
+                        ),
+                      ),
+                    ],
                   ),
                 ),
-                child: Padding(
-                  padding: const EdgeInsets.symmetric(horizontal: 64, vertical: 32),
-                  child: ListenableBuilder(
-                    listenable: status,
-                    builder: (context, child) {
-                      return Column(
-                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                        children: [
-                          WorkingRestingStatus(status: status.value, workout: widget.workout, currSet: currSet.value),
-                          switch (status.value) {
-                            WorkoutStatus.complete => Text(
-                              'All done!',
-                              style: typography.xl3.copyWith(fontWeight: FontWeight.bold),
-                            ),
-                            _ => Column(
+                Expanded(
+                  child: SizedBox(
+                    width: double.infinity,
+                    child: DecoratedBox(
+                      decoration: BoxDecoration(
+                        border: ProgressBorder.all(
+                          color: status.value == WorkoutStatus.paused || status.value == WorkoutStatus.notStarted
+                              ? colors.border
+                              : colors.accent,
+                          progress: animationController.value,
+                          width: 6,
+                          backgroundBorder: Border.symmetric(horizontal: BorderSide(color: colors.border, width: 1)),
+                        ),
+                      ),
+                      child: Padding(
+                        padding: const EdgeInsets.symmetric(horizontal: 64, vertical: 32),
+                        child: ListenableBuilder(
+                          listenable: status,
+                          builder: (context, child) {
+                            return Column(
+                              mainAxisAlignment: MainAxisAlignment.spaceBetween,
                               children: [
-                                Row(
-                                  mainAxisAlignment: MainAxisAlignment.center,
-                                  crossAxisAlignment: CrossAxisAlignment.baseline,
-                                  textBaseline: TextBaseline.values.first,
-                                  spacing: 4,
-                                  children: [
-                                    Text(currTime.toStringAsFixed(1).split('.')[0], style: typography.xl8),
-                                    Text(currTime.toStringAsFixed(1).split('.')[1][0], style: typography.xl6),
-                                  ],
+                                WorkingRestingStatus(
+                                  status: status.value,
+                                  workout: widget.workout,
+                                  currSet: currSet.value,
                                 ),
-                                if (status.value == WorkoutStatus.preparing)
-                                  Text('Get ready...', style: typography.xl.copyWith(fontWeight: FontWeight.bold)),
-                                if (status.value == WorkoutStatus.working)
-                                  Text(
-                                    'Go!',
-                                    style: typography.xl.copyWith(fontWeight: FontWeight.bold, color: colors.accent),
+                                switch (status.value) {
+                                  WorkoutStatus.complete => Text(
+                                    'All done!',
+                                    style: typography.xl3.copyWith(fontWeight: FontWeight.bold),
                                   ),
-                              ],
-                            ),
-                          },
-                          Column(
-                            spacing: 16,
-                            children: [
-                              ConstrainedBox(
-                                constraints: BoxConstraints(maxWidth: 140),
-                                child: Column(
-                                  spacing: 8,
+                                  _ => Column(
+                                    children: [
+                                      Row(
+                                        mainAxisAlignment: MainAxisAlignment.center,
+                                        crossAxisAlignment: CrossAxisAlignment.baseline,
+                                        textBaseline: TextBaseline.values.first,
+                                        spacing: 4,
+                                        children: [
+                                          Text(currTime.toStringAsFixed(1).split('.')[0], style: typography.xl8),
+                                          Text(currTime.toStringAsFixed(1).split('.')[1][0], style: typography.xl6),
+                                        ],
+                                      ),
+                                      if (status.value == WorkoutStatus.preparing)
+                                        Text(
+                                          'Get ready...',
+                                          style: typography.xl.copyWith(fontWeight: FontWeight.bold),
+                                        ),
+                                      if (status.value == WorkoutStatus.working)
+                                        Text(
+                                          'Go!',
+                                          style: typography.xl.copyWith(
+                                            fontWeight: FontWeight.bold,
+                                            color: colors.accent,
+                                          ),
+                                        ),
+                                    ],
+                                  ),
+                                },
+                                Column(
+                                  spacing: 16,
                                   children: [
-                                    Row(
-                                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                                      children: [
-                                        Text('Set', style: typography.lgSemibold),
-                                        Text(
-                                          '${currSet.value + 1} | ${widget.workout.sets.length}',
-                                          style: typography.lgSemibold,
-                                        ),
-                                      ],
-                                    ),
-                                    Row(
-                                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                                      children: [
-                                        Text('Rep', style: typography.lgSemibold),
-                                        Text(
-                                          '${currRep.value + 1} | ${widget.workout.sets[currSet.value].reps}',
-                                          style: typography.lgSemibold,
-                                        ),
-                                      ],
+                                    ConstrainedBox(
+                                      constraints: BoxConstraints(maxWidth: 140),
+                                      child: Column(
+                                        spacing: 8,
+                                        children: [
+                                          Row(
+                                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                                            children: [
+                                              Text('Set', style: typography.lgSemibold),
+                                              Text(
+                                                '${currSet.value + 1} | ${widget.workout.sets.length}',
+                                                style: typography.lgSemibold,
+                                              ),
+                                            ],
+                                          ),
+                                          Row(
+                                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                                            children: [
+                                              Text('Rep', style: typography.lgSemibold),
+                                              Text(
+                                                '${currRep.value + 1} | ${widget.workout.sets[currSet.value].reps}',
+                                                style: typography.lgSemibold,
+                                              ),
+                                            ],
+                                          ),
+                                        ],
+                                      ),
                                     ),
                                   ],
                                 ),
-                              ),
-                            ],
-                          ),
-                        ],
-                      );
-                    },
+                              ],
+                            );
+                          },
+                        ),
+                      ),
+                    ),
                   ),
                 ),
-              ),
-            ),
-          ),
-          Padding(
-            padding: const EdgeInsets.only(top: 8, bottom: 16),
-            child: Row(
-              mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-              children: [
-                FButton.icon(
-                  style: FButtonStyle.ghost(),
-                  onPress: () => restartSet(0),
-                  child: Icon(FIcons.refreshCw, size: 30),
-                ),
-                DecoratedBox(
-                  decoration: BoxDecoration(
-                    border: BoxBorder.all(),
-                    borderRadius: BorderRadius.circular(16),
-                    color: colors.accent,
+                Padding(
+                  padding: const EdgeInsets.only(top: 8, bottom: 16),
+                  child: Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                    children: [
+                      FButton.icon(
+                        style: FButtonStyle.ghost(),
+                        onPress: () => restartSet(0),
+                        child: Icon(FIcons.refreshCw, size: 30),
+                      ),
+                      DecoratedBox(
+                        decoration: BoxDecoration(
+                          border: BoxBorder.all(),
+                          borderRadius: BorderRadius.circular(16),
+                          color: colors.accent,
+                        ),
+                        child: Padding(
+                          padding: const EdgeInsets.all(8),
+                          child: status.value == WorkoutStatus.working || status.value == WorkoutStatus.resting
+                              ? // show pause
+                                FButton.icon(
+                                  style: FButtonStyle.ghost(),
+                                  onPress: pause,
+                                  child: Icon(FIcons.pause, size: 30, color: colors.foreground),
+                                )
+                              : // show play
+                                FButton.icon(
+                                  style: FButtonStyle.ghost(),
+                                  onPress: () {
+                                    if (status.value == WorkoutStatus.preparing) return;
+                                    if (status.value == WorkoutStatus.notStarted) {
+                                      status.value = WorkoutStatus.preparing;
+                                      animationController.duration = Duration(seconds: initialDelay.toInt());
+                                      animationController.reset();
+                                      animate(WorkoutStatus.preparing);
+                                      startTimer();
+                                    } else {
+                                      // Resume from paused state
+                                      if (animationController.status == AnimationStatus.reverse) {
+                                        status.value = WorkoutStatus.resting;
+                                      } else {
+                                        status.value = WorkoutStatus.working;
+                                      }
+                                      animate(status.value);
+                                      startTimer();
+                                    }
+                                  },
+                                  child: Icon(FIcons.play, size: 30, color: colors.foreground),
+                                ),
+                        ),
+                      ),
+                    ],
                   ),
-                  child: Padding(
-                    padding: const EdgeInsets.all(8),
-                    child: status.value == WorkoutStatus.working || status.value == WorkoutStatus.resting
-                        ? // show pause
-                          FButton.icon(
-                            style: FButtonStyle.ghost(),
-                            onPress: pause,
-                            child: Icon(FIcons.pause, size: 30, color: colors.foreground),
-                          )
-                        : // show play
-                          FButton.icon(
-                            style: FButtonStyle.ghost(),
-                            onPress: () {
-                              if (status.value == WorkoutStatus.preparing) return;
-                              if (status.value == WorkoutStatus.notStarted) {
-                                status.value = WorkoutStatus.preparing;
-                                animationController.duration = Duration(seconds: initialDelay.toInt());
-                                animationController.reset();
-                                animate(WorkoutStatus.preparing);
-                                startTimer();
-                              } else {
-                                // Resume from paused state
-                                if (animationController.status == AnimationStatus.reverse) {
-                                  status.value = WorkoutStatus.resting;
-                                } else {
-                                  status.value = WorkoutStatus.working;
-                                }
-                                animate(status.value);
-                                startTimer();
-                              }
-                            },
-                            child: Icon(FIcons.play, size: 30, color: colors.foreground),
-                          ),
-                  ),
                 ),
+                SizedBox(height: 4),
               ],
             ),
-          ),
-          SizedBox(height: 4),
-        ],
-      ),
     );
   }
 
