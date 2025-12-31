@@ -61,18 +61,12 @@ FButtonStyle buttonStyle({
   required Color foregroundColor,
 }) => FButtonStyle(
   decoration: FWidgetStateMap({
-    WidgetState.disabled: BoxDecoration(
-      borderRadius: style.borderRadius,
-      color: colors.disable(color),
-    ),
+    WidgetState.disabled: BoxDecoration(borderRadius: style.borderRadius, color: colors.disable(color)),
     WidgetState.hovered | WidgetState.pressed: BoxDecoration(
       borderRadius: style.borderRadius,
       color: colors.hover(color),
     ),
-    WidgetState.any: BoxDecoration(
-      borderRadius: style.borderRadius,
-      color: color,
-    ),
+    WidgetState.any: BoxDecoration(borderRadius: style.borderRadius, color: color),
   }),
   focusedOutlineStyle: style.focusedOutlineStyle,
   contentStyle: _buttonContentStyle(
@@ -82,10 +76,7 @@ FButtonStyle buttonStyle({
   ),
   iconContentStyle: FButtonIconContentStyle(
     iconStyle: FWidgetStateMap({
-      WidgetState.disabled: IconThemeData(
-        color: colors.disable(foregroundColor, colors.disable(color)),
-        size: 20,
-      ),
+      WidgetState.disabled: IconThemeData(color: colors.disable(foregroundColor, colors.disable(color)), size: 20),
       WidgetState.any: IconThemeData(color: foregroundColor, size: 20),
     }),
   ),
@@ -98,16 +89,8 @@ FButtonContentStyle _buttonContentStyle({
   required Color disabled,
 }) => FButtonContentStyle(
   textStyle: FWidgetStateMap({
-    WidgetState.disabled: typography.base.copyWith(
-      color: disabled,
-      fontWeight: FontWeight.w500,
-      height: 1,
-    ),
-    WidgetState.any: typography.base.copyWith(
-      color: enabled,
-      fontWeight: FontWeight.w500,
-      height: 1,
-    ),
+    WidgetState.disabled: typography.base.copyWith(color: disabled, fontWeight: FontWeight.w500, height: 1),
+    WidgetState.any: typography.base.copyWith(color: enabled, fontWeight: FontWeight.w500, height: 1),
   }),
   iconStyle: FWidgetStateMap({
     WidgetState.disabled: IconThemeData(color: disabled, size: 20),

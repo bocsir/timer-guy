@@ -2,6 +2,7 @@
 import 'package:flutter/material.dart';
 import 'package:forui/forui.dart';
 import 'package:proj/hive/hive_adapters.dart';
+import 'package:proj/theme/button_style.dart';
 import 'package:proj/theme/theme.dart';
 
 class SetAuth extends StatefulWidget {
@@ -57,126 +58,136 @@ class _SetAuthState extends State<SetAuth> {
       child: Form(
         key: _formKey,
         child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            Text('Set ${widget.setNumber}', style: typography.xlSemibold),
-            FTextFormField(
-              label: Text('Set Name', style: typography.lg.copyWith(fontWeight: FontWeight.normal)),
-              controller: nameController,
-              validator: (value) => _validateRequired(value),
-              autovalidateMode: _localFormSubmitted ? AutovalidateMode.onUserInteraction : AutovalidateMode.disabled,
-            ),
-            Text('Rep Count', style: typography.lg),
-            Padding(
-              padding: const EdgeInsets.symmetric(vertical: 4),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Row(
-                    children: [
-                      FButton(
-                        onPress: () {
-                          _updateRepCount(false);
-                        },
-                        style: FButtonStyle.outline(),
-                        child: Icon(FIcons.minus, color: context.theme.colors.foreground),
-                      ),
-                      SizedBox(
-                        width: 40,
-                        child: Center(child: Text(repCount.toString(), style: typography.lgSemibold)),
-                      ),
-                      FButton(
-                        onPress: () {
-                          _updateRepCount(true);
-                        },
-                        style: FButtonStyle.outline(),
-                        child: Icon(FIcons.plus, color: context.theme.colors.foreground),
-                      ),
-                    ],
-                  ),
-                  (_shouldShowRepCountError())
-                      ? SizedBox(height: 20, child: Text('0 Reps?', style: typography.smError))
-                      : SizedBox(height: 20),
-                ],
-              ),
-            ),
-
-            ConstrainedBox(
-              constraints: BoxConstraints(maxWidth: 400),
-              child: Column(
-                children: [
-                  Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                    children: [
-                      Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          Text('Time On', style: typography.lg),
-                          Text('mm:ss', style: typography.smGrey),
-                          SizedBox(
-                            height: 100,
-                            width: 150,
-                            child: FPicker(
-                              controller: repDurationController,
-                              children: [
-                                FPickerWheel.builder(
-                                  builder: (context, index) => Text((index % 60).toString().padLeft(2, '0')),
-                                ),
-                                const Text(':'),
-                                FPickerWheel.builder(
-                                  builder: (context, index) => Text((index % 60).toString().padLeft(2, '0')),
-                                ),
-                              ],
-                            ),
-                          ),
-                        ],
-                      ),
-                      Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          Text('Time Off', style: typography.lg),
-                          Text('mm:ss', style: typography.smGrey),
-                          SizedBox(
-                            height: 100,
-                            width: 150,
-                            child: FPicker(
-                              controller: restDurationController,
-                              children: [
-                                FPickerWheel.builder(
-                                  builder: (context, index) => Text((index % 60).toString().padLeft(2, '0')),
-                                ),
-                                const Text(':'),
-                                FPickerWheel.builder(
-                                  builder: (context, index) => Text((index % 60).toString().padLeft(2, '0')),
-                                ),
-                              ],
-                            ),
-                          ),
-                        ],
-                      ),
-                    ],
-                  ),
-                ],
-              ),
-            ),
-            (_shouldShowRepDurationError())
-                ? SizedBox(height: 20, child: Text('Enter rep time > 0 seconds', style: typography.smError))
-                : SizedBox(height: 20),
-            (_shouldShowRestDurationError())
-                ? SizedBox(height: 20, child: Text('Enter rest time > 0 seconds', style: typography.smError))
-                : SizedBox(height: 20),
             Expanded(
+              child: SingleChildScrollView(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text('Set ${widget.setNumber}', style: typography.xlSemibold),
+                    FTextFormField(
+                      label: Text('Set Name', style: typography.lg.copyWith(fontWeight: FontWeight.normal)),
+                      controller: nameController,
+                      validator: (value) => _validateRequired(value),
+                      autovalidateMode: _localFormSubmitted
+                          ? AutovalidateMode.onUserInteraction
+                          : AutovalidateMode.disabled,
+                    ),
+                    Text('Rep Count', style: typography.lg),
+                    Padding(
+                      padding: const EdgeInsets.symmetric(vertical: 4),
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Row(
+                            children: [
+                              FButton(
+                                onPress: () {
+                                  _updateRepCount(false);
+                                },
+                                style: FButtonStyle.outline(),
+                                child: Icon(FIcons.minus, color: context.theme.colors.foreground),
+                              ),
+                              SizedBox(
+                                width: 40,
+                                child: Center(child: Text(repCount.toString(), style: typography.lgSemibold)),
+                              ),
+                              FButton(
+                                onPress: () {
+                                  _updateRepCount(true);
+                                },
+                                style: FButtonStyle.outline(),
+                                child: Icon(FIcons.plus, color: context.theme.colors.foreground),
+                              ),
+                            ],
+                          ),
+                          (_shouldShowRepCountError())
+                              ? SizedBox(height: 20, child: Text('0 Reps?', style: typography.smError))
+                              : SizedBox(height: 20),
+                        ],
+                      ),
+                    ),
+
+                    ConstrainedBox(
+                      constraints: BoxConstraints(maxWidth: 400),
+                      child: Column(
+                        children: [
+                          Row(
+                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                            children: [
+                              Column(
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                children: [
+                                  Text('Time On', style: typography.lg),
+                                  Text('mm:ss', style: typography.smGrey),
+                                  SizedBox(
+                                    height: 100,
+                                    width: 150,
+                                    child: FPicker(
+                                      controller: repDurationController,
+                                      children: [
+                                        FPickerWheel.builder(
+                                          builder: (context, index) => Text((index % 60).toString().padLeft(2, '0')),
+                                        ),
+                                        const Text(':'),
+                                        FPickerWheel.builder(
+                                          builder: (context, index) => Text((index % 60).toString().padLeft(2, '0')),
+                                        ),
+                                      ],
+                                    ),
+                                  ),
+                                ],
+                              ),
+                              Column(
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                children: [
+                                  Text('Time Off', style: typography.lg),
+                                  Text('mm:ss', style: typography.smGrey),
+                                  SizedBox(
+                                    height: 100,
+                                    width: 150,
+                                    child: FPicker(
+                                      controller: restDurationController,
+                                      children: [
+                                        FPickerWheel.builder(
+                                          builder: (context, index) => Text((index % 60).toString().padLeft(2, '0')),
+                                        ),
+                                        const Text(':'),
+                                        FPickerWheel.builder(
+                                          builder: (context, index) => Text((index % 60).toString().padLeft(2, '0')),
+                                        ),
+                                      ],
+                                    ),
+                                  ),
+                                ],
+                              ),
+                            ],
+                          ),
+                        ],
+                      ),
+                    ),
+                    (_shouldShowRepDurationError())
+                        ? SizedBox(height: 20, child: Text('Enter rep time > 0 seconds', style: typography.smError))
+                        : SizedBox(height: 20),
+                    (_shouldShowRestDurationError())
+                        ? SizedBox(height: 20, child: Text('Enter rest time > 0 seconds', style: typography.smError))
+                        : SizedBox(height: 20),
+                  ],
+                ),
+              ),
+            ),
+            Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 16),
               child: Row(
                 mainAxisAlignment: MainAxisAlignment.end,
                 spacing: 32,
                 children: [
                   FButton(
-                    child: Text('Cancel'),
                     onPress: () => Navigator.of(context).pop(),
-                    style: FButtonStyle.ghost(),
+                    style: transparentButtonStyle,
+                    child: Text('Cancel', style: TextStyle(color: context.theme.colors.primary)),
                   ),
                   FButton(
-                    child: Text('Save'),
                     onPress: () {
                       setState(() {
                         _localFormSubmitted = true;
@@ -187,7 +198,14 @@ class _SetAuthState extends State<SetAuth> {
                         Navigator.of(context).pop(newSet);
                       }
                     },
-                    style: FButtonStyle.outline(),
+                    style: accentButtonStyle(context).call,
+                    child: Text(
+                      'Save',
+                      style: context.theme.typography.baseSemibold.copyWith(
+                        color: context.theme.colors.primary,
+                        height: 1,
+                      ),
+                    ),
                   ),
                 ],
               ),

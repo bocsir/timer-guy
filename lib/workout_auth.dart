@@ -122,7 +122,13 @@ class _WorkoutAuthState extends State<WorkoutAuth> {
     return showModalBottomSheet<WorkoutSet>(
       backgroundColor: context.theme.colors.secondary,
       context: context,
-      builder: (context) => SetAuth(set: initialSet, setNumber: setIndex + 1, formSubmitted: _formSubmitted),
+      isScrollControlled: true,
+      builder: (context) => SizedBox(
+        height: MediaQuery.of(context).size.height * 0.6,
+        child: SetAuth(set: initialSet, setNumber: setIndex + 1, formSubmitted: _formSubmitted),
+      ),
+      showDragHandle: true,
+      useSafeArea: true,
     );
   }
 
