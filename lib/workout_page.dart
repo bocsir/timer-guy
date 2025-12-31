@@ -7,7 +7,7 @@ import 'package:proj/models/workout.dart';
 import 'package:proj/theme/theme.dart';
 import 'package:progress_border/progress_border.dart';
 
-enum WorkoutStatus { notStarted, paused, working, resting, preparing }
+enum WorkoutStatus { notStarted, preparing, working, resting, paused, complete }
 
 class WorkoutPage extends StatefulWidget {
   final Workout workout;
@@ -26,24 +26,21 @@ class WorkoutPageState extends State<WorkoutPage> with TickerProviderStateMixin 
   late ValueNotifier<int> currRep;
   late ValueNotifier<int> currSet;
   late ValueNotifier<WorkoutStatus> status;
-  late ValueNotifier<bool> workoutOver;
+
+  final initialDelay = 5.0;
 
   @override
   void initState() {
     super.initState();
-    currTime = widget.workout.sets[0].timeOn + 0.0;
-    animationController = AnimationController(
-      vsync: this,
-      // duration: Duration(seconds: widget.workout.timeOn),
-    );
-    animationController.addListener(() {
-      setState(() {});
-    });
+    currTime = initialDelay;
+    animationController = AnimationController(vsync: this)
+      ..addListener(() {
+        setState(() {});
+      });
 
-    currRep = ValueNotifier(1);
-    currSet = ValueNotifier(1);
+    currRep = ValueNotifier(0);
+    currSet = ValueNotifier(0);
     status = ValueNotifier(WorkoutStatus.notStarted);
-    workoutOver = ValueNotifier(false);
   }
 
   @override
@@ -58,16 +55,7 @@ class WorkoutPageState extends State<WorkoutPage> with TickerProviderStateMixin 
         children: [
           Column(
             crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Text(widget.workout.name, style: typography.xlSemibold),
-              if (!workoutOver.value)
-                ListenableBuilder(
-                  listenable: Listenable.merge([currSet, currRep, status]),
-                  builder: (context, child) {
-                    return Text('${widget.workout.sets.length} Sets', style: typography.lgSemibold);
-                  },
-                ),
-            ],
+            children: [Text(widget.workout.name, style: typography.xlSemibold)],
           ),
           Expanded(
             child: SizedBox(
@@ -85,24 +73,28 @@ class WorkoutPageState extends State<WorkoutPage> with TickerProviderStateMixin 
                 ),
                 child: Padding(
                   padding: const EdgeInsets.all(64),
-                  child: ValueListenableBuilder(
-                    valueListenable: workoutOver,
-                    builder: (context, value, child) {
+                  child: ListenableBuilder(
+                    listenable: status,
+                    builder: (context, child) {
                       return Column(
                         mainAxisAlignment: MainAxisAlignment.spaceBetween,
                         children: [
-                          workoutOver.value
-                              ? Text('All done!', style: typography.xl3.copyWith(fontWeight: FontWeight.bold))
-                              : Row(
-                                  mainAxisAlignment: MainAxisAlignment.center,
-                                  crossAxisAlignment: CrossAxisAlignment.baseline,
-                                  textBaseline: TextBaseline.values.first,
-                                  spacing: 4,
-                                  children: [
-                                    Text(currTime.toStringAsFixed(1).split('.')[0], style: typography.xl7),
-                                    Text(currTime.toStringAsFixed(1).split('.')[1][0], style: typography.xl5),
-                                  ],
-                                ),
+                          switch (status.value) {
+                            WorkoutStatus.complete => Text(
+                              'All done!',
+                              style: typography.xl3.copyWith(fontWeight: FontWeight.bold),
+                            ),
+                            _ => Row(
+                              mainAxisAlignment: MainAxisAlignment.center,
+                              crossAxisAlignment: CrossAxisAlignment.baseline,
+                              textBaseline: TextBaseline.values.first,
+                              spacing: 4,
+                              children: [
+                                Text(currTime.toStringAsFixed(1).split('.')[0], style: typography.xl7),
+                                Text(currTime.toStringAsFixed(1).split('.')[1][0], style: typography.xl5),
+                              ],
+                            ),
+                          },
                           Column(
                             spacing: 16,
                             children: [
@@ -116,7 +108,7 @@ class WorkoutPageState extends State<WorkoutPage> with TickerProviderStateMixin 
                                       children: [
                                         Text('Set', style: typography.lgSemibold),
                                         Text(
-                                          '${currSet.value} | ${widget.workout.sets.length}',
+                                          '${currSet.value + 1} | ${widget.workout.sets.length}',
                                           style: typography.lgSemibold,
                                         ),
                                       ],
@@ -126,7 +118,7 @@ class WorkoutPageState extends State<WorkoutPage> with TickerProviderStateMixin 
                                       children: [
                                         Text('Rep', style: typography.lgSemibold),
                                         Text(
-                                          '${currRep.value} | ${widget.workout.sets[currSet.value - 1].reps}',
+                                          '${currRep.value + 1} | ${widget.workout.sets[currSet.value].reps}',
                                           style: typography.lgSemibold,
                                         ),
                                       ],
@@ -134,31 +126,21 @@ class WorkoutPageState extends State<WorkoutPage> with TickerProviderStateMixin 
                                   ],
                                 ),
                               ),
-                              switch (status.value) {
-                                WorkoutStatus.resting => Text(
-                                  'Rest',
-                                  style: context.theme.typography.xlSemibold.copyWith(
-                                    color: context.theme.colors.accent,
+                              DefaultTextStyle(
+                                style: context.theme.typography.xlSemibold,
+                                child: switch (status.value) {
+                                  WorkoutStatus.resting => Text('Rest'),
+                                  WorkoutStatus.working => Text(
+                                    'Go!',
+                                    style: TextStyle(color: context.theme.colors.accent),
                                   ),
-                                ),
-                                WorkoutStatus.working => Text(
-                                  'Go!',
-                                  style: context.theme.typography.xlSemibold.copyWith(
-                                    color: context.theme.colors.accent,
+                                  WorkoutStatus.preparing => Text(
+                                    'Get Ready...',
+                                    style: context.theme.typography.lgSemibold,
                                   ),
-                                ),
-                                WorkoutStatus.paused => Text(
-                                  '(Paused)',
-                                  style: context.theme.typography.xlSemibold.copyWith(
-                                    color: context.theme.colors.accent,
-                                  ),
-                                ),
-                                WorkoutStatus.preparing => Text(
-                                  'Get Ready...',
-                                  style: context.theme.typography.lgSemibold,
-                                ),
-                                _ => SizedBox.shrink(),
-                              },
+                                  _ => SizedBox(height: 39),
+                                },
+                              ),
                             ],
                           ),
                           Row(
@@ -167,7 +149,7 @@ class WorkoutPageState extends State<WorkoutPage> with TickerProviderStateMixin 
                             children: [
                               FButton.icon(
                                 style: FButtonStyle.ghost(),
-                                onPress: () {}, //restartWorkout,
+                                onPress: () => restartSet(0),
                                 child: Icon(FIcons.refreshCw, size: 30),
                               ),
                               DecoratedBox(
@@ -189,12 +171,11 @@ class WorkoutPageState extends State<WorkoutPage> with TickerProviderStateMixin 
                                         FButton.icon(
                                           style: FButtonStyle.ghost(),
                                           onPress: () {
+                                            if (status.value == WorkoutStatus.preparing) return;
                                             if (status.value == WorkoutStatus.notStarted) {
-                                              // Start 5 second preparation countdown
                                               status.value = WorkoutStatus.preparing;
-                                              currTime = 5.0;
-                                              animationController.duration = Duration(seconds: 5);
-                                              // animationController.reset();
+                                              animationController.duration = Duration(seconds: initialDelay.toInt());
+                                              animationController.reset();
                                               animate(WorkoutStatus.preparing);
                                               startTimer();
                                             } else {
@@ -243,6 +224,8 @@ class WorkoutPageState extends State<WorkoutPage> with TickerProviderStateMixin 
         animationController.reverse();
       case WorkoutStatus.preparing:
         animationController.reverse();
+      case WorkoutStatus.complete:
+        animationController.stop();
     }
   }
 
@@ -258,7 +241,7 @@ class WorkoutPageState extends State<WorkoutPage> with TickerProviderStateMixin 
     timer = Timer.periodic(ms, (Timer timer) {
       // if current time <= 1/10 second. this is to avoid showing negative time
       if (currTime <= ms.inMilliseconds / 1000) {
-        if (!workoutOver.value) {
+        if (status.value != WorkoutStatus.complete) {
           workOrRestComplete();
         }
         setState(() {
@@ -279,7 +262,7 @@ class WorkoutPageState extends State<WorkoutPage> with TickerProviderStateMixin 
 
   // called after an iteration completes
   void workOrRestComplete() {
-    final set = widget.workout.sets[currSet.value - 1];
+    final set = widget.workout.sets[currSet.value];
     if (status.value == WorkoutStatus.preparing) {
       // preparation complete, start working
       final newStatus = WorkoutStatus.working;
@@ -306,34 +289,32 @@ class WorkoutPageState extends State<WorkoutPage> with TickerProviderStateMixin 
       final tOff = set.timeOff;
       currTime = tOff + 0.0;
       animationController.duration = Duration(seconds: tOff);
-      // go to next rep / set
-      if (currRep.value < set.reps) {
+      if (currRep.value + 1 < set.reps) {
+        // go to next rep
         currRep.value++;
         startTimer();
         animate(newStatus);
-      } else if (currSet.value < widget.workout.sets.length) {
-        // pause at end of each set
-        animationController.reset();
-        pause();
-        currSet.value++;
-        currRep.value = 1;
+      } else if (currSet.value + 1 < widget.workout.sets.length) {
+        // go to next set
+        restartSet(currSet.value + 1);
       } else {
-        workoutOver.value = true;
+        status.value = WorkoutStatus.complete;
         animationController.reset();
         pause();
       }
     }
   }
 
-  void restartWorkout() {
+  // go to beginning of provided set (0 indexed)
+  void restartSet(int setIndex) {
     timer?.cancel();
     animationController.reset();
-    animationController.duration = Duration(seconds: widget.workout.sets[currSet.value - 1].timeOn);
-    currSet.value = 1;
-    currRep.value = 1;
-    currTime = widget.workout.sets[currSet.value - 1].timeOn + 0.0;
-    status.value = WorkoutStatus.paused;
-    workoutOver.value = false;
+    animationController.duration = Duration(seconds: widget.workout.sets[setIndex].timeOn);
+    currSet.value = setIndex;
+    currRep.value = 0;
+    currTime = initialDelay;
+    status.value = WorkoutStatus.notStarted;
+    setState(() {});
   }
 
   @override
