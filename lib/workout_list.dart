@@ -46,8 +46,7 @@ class _WorkoutListState extends State<WorkoutList> with SingleTickerProviderStat
       ),
 
       childPad: false,
-      child: Padding(
-        padding: const EdgeInsets.only(top: 64),
+      child: SafeArea(
         child: ValueListenableBuilder<Box<Workout>>(
           valueListenable: Hive.box<Workout>(workoutBox).listenable(),
           builder: (BuildContext context, Box<Workout> box, Widget? _) {

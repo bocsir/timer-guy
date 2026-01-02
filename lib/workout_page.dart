@@ -69,7 +69,7 @@ class WorkoutPageState extends State<WorkoutPage> with TickerProviderStateMixin 
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Padding(
-                  padding: const EdgeInsets.all(16),
+                  padding: const EdgeInsets.only(left: 16, right: 16, bottom: 16),
                   child: Row(
                     spacing: 8,
                     children: [
@@ -151,35 +151,63 @@ class WorkoutPageState extends State<WorkoutPage> with TickerProviderStateMixin 
                                   ),
                                 },
                                 Column(
-                                  spacing: 16,
+                                  spacing: 8,
                                   children: [
-                                    ConstrainedBox(
-                                      constraints: BoxConstraints(maxWidth: 140),
-                                      child: Column(
-                                        spacing: 8,
-                                        children: [
-                                          Row(
-                                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                                            children: [
-                                              Text('Set', style: typography.lgSemibold),
-                                              Text(
-                                                '${currSet.value + 1} | ${widget.workout.sets.length}',
-                                                style: typography.lgSemibold,
-                                              ),
-                                            ],
-                                          ),
-                                          Row(
-                                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                                            children: [
-                                              Text('Rep', style: typography.lgSemibold),
-                                              Text(
-                                                '${currRep.value + 1} | ${widget.workout.sets[currSet.value].reps}',
-                                                style: typography.lgSemibold,
-                                              ),
-                                            ],
-                                          ),
-                                        ],
-                                      ),
+                                    Row(
+                                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                                      children: [
+                                        FButton.icon(
+                                          child: Icon(FIcons.chevronLeft),
+                                          onPress: () {
+                                            pause();
+                                            if (currSet.value > 0) {
+                                              setState(() => currSet.value--);
+                                            }
+                                          },
+                                        ),
+                                        Text('Set', style: typography.lgSemibold),
+                                        Text(
+                                          '${currSet.value + 1} | ${widget.workout.sets.length}',
+                                          style: typography.lgSemibold,
+                                        ),
+                                        FButton.icon(
+                                          child: Icon(FIcons.chevronRight),
+                                          onPress: () {
+                                            pause();
+                                            if (widget.workout.sets.length - 1 > currSet.value) {
+                                              setState(() => currSet.value++);
+                                            }
+                                          },
+                                        ),
+                                      ],
+                                    ),
+                                    Row(
+                                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                                      children: [
+                                        FButton.icon(
+                                          child: Icon(FIcons.chevronLeft),
+                                          onPress: () {
+                                            pause();
+                                            if (currRep.value > 0) {
+                                              setState(() => currRep.value--);
+                                            }
+                                          },
+                                        ),
+                                        Text('Rep', style: typography.lgSemibold),
+                                        Text(
+                                          '${currRep.value + 1} | ${widget.workout.sets[currSet.value].reps}',
+                                          style: typography.lgSemibold,
+                                        ),
+                                        FButton.icon(
+                                          child: Icon(FIcons.chevronRight),
+                                          onPress: () {
+                                            pause();
+                                            if (widget.workout.sets[currSet.value].reps - 1 > currRep.value) {
+                                              setState(() => currRep.value++);
+                                            }
+                                          },
+                                        ),
+                                      ],
                                     ),
                                   ],
                                 ),
@@ -271,6 +299,7 @@ class WorkoutPageState extends State<WorkoutPage> with TickerProviderStateMixin 
   }
 
   void pause() {
+    if (status.value == WorkoutStatus.notStarted) return;
     status.value = WorkoutStatus.paused;
     animationController.stop();
     timer?.cancel();

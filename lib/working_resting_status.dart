@@ -19,50 +19,53 @@ class WorkingRestingStatus extends StatefulWidget {
 class _WorkingRestingStatusState extends State<WorkingRestingStatus> {
   @override
   Widget build(BuildContext context) {
-    return Row(
-      mainAxisAlignment: MainAxisAlignment.spaceBetween,
-      children: [
-        Column(
-          children: [
-            Text(
-              'Working',
-              style: context.theme.typography.xlSemibold.copyWith(
-                color: widget.status == WorkoutStatus.working
-                    ? context.theme.colors.accent
-                    : context.theme.colors.mutedForeground,
+    return ConstrainedBox(
+      constraints: BoxConstraints(maxWidth: 400),
+      child: Row(
+        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+        children: [
+          Column(
+            children: [
+              Text(
+                'Working',
+                style: context.theme.typography.xlSemibold.copyWith(
+                  color: widget.status == WorkoutStatus.working
+                      ? context.theme.colors.accent
+                      : context.theme.colors.mutedForeground,
+                ),
               ),
-            ),
-            Text(
-              '(${widget.workout.sets[widget.currSet].timeOn}s)',
-              style: context.theme.typography.base.copyWith(
-                color: widget.status == WorkoutStatus.working
-                    ? context.theme.colors.accent
-                    : context.theme.colors.mutedForeground,
+              Text(
+                '(${widget.workout.sets[widget.currSet].timeOn}s)',
+                style: context.theme.typography.base.copyWith(
+                  color: widget.status == WorkoutStatus.working
+                      ? context.theme.colors.accent
+                      : context.theme.colors.mutedForeground,
+                ),
               ),
-            ),
-          ],
-        ),
-        Column(
-          children: [
-            Text(
-              'Resting',
-              style: context.theme.typography.xlSemibold.copyWith(
-                color: widget.status == WorkoutStatus.resting
-                    ? context.theme.colors.accent
-                    : context.theme.colors.mutedForeground,
+            ],
+          ),
+          Column(
+            children: [
+              Text(
+                'Resting',
+                style: context.theme.typography.xlSemibold.copyWith(
+                  color: widget.status == WorkoutStatus.resting
+                      ? context.theme.colors.accent
+                      : context.theme.colors.mutedForeground,
+                ),
               ),
-            ),
-            Text(
-              '(${widget.workout.sets[widget.currSet].timeOff}s)',
-              style: context.theme.typography.base.copyWith(
-                color: widget.status == WorkoutStatus.resting
-                    ? context.theme.colors.accent
-                    : context.theme.colors.mutedForeground,
+              Text(
+                '(${widget.workout.sets[widget.currSet].timeOff}s)',
+                style: context.theme.typography.base.copyWith(
+                  color: widget.status == WorkoutStatus.resting
+                      ? context.theme.colors.accent
+                      : context.theme.colors.mutedForeground,
+                ),
               ),
-            ),
-          ],
-        ),
-      ],
+            ],
+          ),
+        ],
+      ),
     );
   }
 }
