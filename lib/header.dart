@@ -7,6 +7,7 @@ import 'package:flutter_svg/flutter_svg.dart';
 
 class Header extends StatelessWidget {
   final bool? hideBackBtn;
+  final bool? hideSettingsBtn;
   final String? backBtnText;
   final String? titleText;
 
@@ -17,6 +18,7 @@ class Header extends StatelessWidget {
   const Header({
     super.key,
     this.hideBackBtn,
+    this.hideSettingsBtn,
     this.backBtnText,
     this.titleText,
     this.popoverController,
@@ -60,30 +62,31 @@ class Header extends StatelessWidget {
                   alignment: Alignment.center,
                   child: Text(title, style: context.theme.typography.lgSemibold),
                 ),
-              Align(
-                alignment: Alignment.centerRight,
-                child: FPopoverMenu(
-                  popoverController: popoverController,
-                  menuAnchor: Alignment.topRight,
-                  childAnchor: Alignment.bottomRight,
-                  menu: [
-                    if (settingsStuff != null)
-                      ...settingsStuff!
-                    else
-                      FItemGroup(children: [FItem(title: Text('No settings available'))]),
-                  ],
-                  builder: (context, controller, child) => FButton.icon(
-                    onPress: controller.toggle,
-                    style: transparentButtonStyle,
-                    child: SvgPicture.asset(
-                      'lib/assets/circle-ellipsis.svg',
-                      width: 24,
-                      height: 24,
-                      theme: SvgTheme(currentColor: colors.accent),
+              if (hideSettingsBtn != true)
+                Align(
+                  alignment: Alignment.centerRight,
+                  child: FPopoverMenu(
+                    popoverController: popoverController,
+                    menuAnchor: Alignment.topRight,
+                    childAnchor: Alignment.bottomRight,
+                    menu: [
+                      if (settingsStuff != null)
+                        ...settingsStuff!
+                      else
+                        FItemGroup(children: [FItem(title: Text('No settings available'))]),
+                    ],
+                    builder: (context, controller, child) => FButton.icon(
+                      onPress: controller.toggle,
+                      style: transparentButtonStyle,
+                      child: SvgPicture.asset(
+                        'lib/assets/circle-ellipsis.svg',
+                        width: 24,
+                        height: 24,
+                        theme: SvgTheme(currentColor: colors.accent),
+                      ),
                     ),
                   ),
                 ),
-              ),
             ],
           ),
         ),

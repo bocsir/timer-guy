@@ -52,7 +52,7 @@ class WorkoutPageState extends State<WorkoutPage> with TickerProviderStateMixin 
 
     return FScaffold(
       childPad: false,
-      header: Header(),
+      header: Header(hideSettingsBtn: true),
       child: widget.workout.sets.isEmpty
           ? Column(
               crossAxisAlignment: CrossAxisAlignment.start,
@@ -154,9 +154,39 @@ class WorkoutPageState extends State<WorkoutPage> with TickerProviderStateMixin 
                                   spacing: 8,
                                   children: [
                                     Row(
+                                      mainAxisAlignment: MainAxisAlignment.center,
+                                      children: [
+                                        Row(
+                                          children: [
+                                            Text('Current Set: ', style: typography.sm.copyWith(height: 20 / 14)),
+                                            Text(
+                                              widget.workout.sets[currSet.value].name,
+                                              style: typography.xlSemibold.copyWith(height: 1),
+                                            ),
+                                          ],
+                                        ),
+                                        //if (widget.workout.sets[currSet.value].description != null)
+                                        // FPopover(
+                                        //   popoverAnchor: Alignment.topCenter,
+                                        //   childAnchor: Alignment.bottomCenter,
+                                        //   popoverBuilder: (context, _) => Padding(
+                                        //     padding: const EdgeInsets.symmetric(vertical: 8, horizontal: 16),
+                                        //     child: Text('[description placeholder text]'),
+                                        //   ),
+                                        //   builder: (_, controller, _) => FButton(
+                                        //     onPress: controller.toggle,
+                                        //     style: FButtonStyle.ghost(),
+                                        //     child: Icon(FIcons.info, color: colors.mutedForeground),
+                                        //   ),
+                                        // ),
+                                      ],
+                                    ),
+
+                                    Row(
                                       mainAxisAlignment: MainAxisAlignment.spaceBetween,
                                       children: [
                                         FButton.icon(
+                                          style: FButtonStyle.ghost(),
                                           child: Icon(FIcons.chevronLeft),
                                           onPress: () {
                                             pause();
@@ -171,6 +201,7 @@ class WorkoutPageState extends State<WorkoutPage> with TickerProviderStateMixin 
                                           style: typography.lgSemibold,
                                         ),
                                         FButton.icon(
+                                          style: FButtonStyle.ghost(),
                                           child: Icon(FIcons.chevronRight),
                                           onPress: () {
                                             pause();
@@ -185,6 +216,7 @@ class WorkoutPageState extends State<WorkoutPage> with TickerProviderStateMixin 
                                       mainAxisAlignment: MainAxisAlignment.spaceBetween,
                                       children: [
                                         FButton.icon(
+                                          style: FButtonStyle.ghost(),
                                           child: Icon(FIcons.chevronLeft),
                                           onPress: () {
                                             pause();
@@ -199,6 +231,7 @@ class WorkoutPageState extends State<WorkoutPage> with TickerProviderStateMixin 
                                           style: typography.lgSemibold,
                                         ),
                                         FButton.icon(
+                                          style: FButtonStyle.ghost(),
                                           child: Icon(FIcons.chevronRight),
                                           onPress: () {
                                             pause();
