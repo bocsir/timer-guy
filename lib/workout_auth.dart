@@ -121,10 +121,13 @@ class _WorkoutAuthState extends State<WorkoutAuth> {
   Future<WorkoutSet?> showSetAuthSheet(int setIndex, WorkoutSet initialSet) {
     return showModalBottomSheet<WorkoutSet>(
       backgroundColor: context.theme.colors.secondary,
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.only(topLeft: Radius.circular(16), topRight: Radius.circular(16)),
+      ),
       context: context,
       isScrollControlled: true,
-      builder: (context) => SizedBox(
-        height: MediaQuery.of(context).size.height * 0.6,
+      builder: (context) => ConstrainedBox(
+        constraints: BoxConstraints(maxHeight: MediaQuery.of(context).size.height * 0.7),
         child: SetAuth(set: initialSet, setNumber: setIndex + 1, formSubmitted: _formSubmitted),
       ),
       showDragHandle: true,
