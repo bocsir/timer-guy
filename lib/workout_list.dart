@@ -57,7 +57,7 @@ class _WorkoutListState extends State<WorkoutList> with SingleTickerProviderStat
                 crossAxisAlignment: CrossAxisAlignment.stretch,
                 children: [
                   Padding(
-                    padding: const EdgeInsets.only(bottom: 8),
+                    padding: const EdgeInsets.symmetric(vertical: 8),
                     child: Text('Workouts', style: context.theme.typography.xl3Semibold),
                   ),
                   workouts.isEmpty
