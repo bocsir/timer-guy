@@ -12,7 +12,7 @@ build_flutter_web() {
 
     rm -rf $BUILD_DIR
 
-    if ! flutter build web \
+    if ! flutter build web --wasm \
         --base-href=$BASE_HREF \
         --release; then
         echo "Build failed :("
