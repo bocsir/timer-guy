@@ -26,6 +26,7 @@ extension TextExtension on FTypography {
     fontWeight: FontWeight.bold,
     color: Color(0xFF991b1b), // red-80
   );
+  TextStyle get baseAccent => _withMonoFont(base, color: const Color(0xFF38bdf8));
 }
 
 /// See https://forui.dev/docs/themes#customize-themes for more information.
@@ -68,12 +69,12 @@ FThemeData get zincDark {
 }
 
 FTypography _typography({required FColors colors, String defaultFontFamily = 'IBMPlexMono'}) => FTypography(
-  xs: TextStyle(color: colors.foreground, fontFamily: defaultFontFamily, fontSize: 12, height: 1),
-  sm: TextStyle(color: colors.foreground, fontFamily: defaultFontFamily, fontSize: 14, height: 1.25),
-  base: TextStyle(color: colors.foreground, fontFamily: defaultFontFamily, fontSize: 16, height: 1.5),
-  lg: TextStyle(color: colors.foreground, fontFamily: defaultFontFamily, fontSize: 18, height: 1.75),
-  xl: TextStyle(color: colors.foreground, fontFamily: defaultFontFamily, fontSize: 20, height: 1.75),
-  xl2: TextStyle(color: colors.foreground, fontFamily: defaultFontFamily, fontSize: 22, height: 2),
+  xs: TextStyle(color: colors.foreground, fontFamily: defaultFontFamily, fontSize: 14, height: 1),
+  sm: TextStyle(color: colors.foreground, fontFamily: defaultFontFamily, fontSize: 16, height: 1.25),
+  base: TextStyle(color: colors.foreground, fontFamily: defaultFontFamily, fontSize: 18, height: 1.5),
+  lg: TextStyle(color: colors.foreground, fontFamily: defaultFontFamily, fontSize: 20, height: 1.75),
+  xl: TextStyle(color: colors.foreground, fontFamily: defaultFontFamily, fontSize: 22, height: 1.75),
+  xl2: TextStyle(color: colors.foreground, fontFamily: defaultFontFamily, fontSize: 24, height: 2),
   xl3: TextStyle(color: colors.foreground, fontFamily: defaultFontFamily, fontSize: 30, height: 2.25),
   xl4: TextStyle(color: colors.foreground, fontFamily: defaultFontFamily, fontSize: 36, height: 2.5),
   xl5: TextStyle(color: colors.foreground, fontFamily: defaultFontFamily, fontSize: 48, height: 1),

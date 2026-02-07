@@ -36,25 +36,28 @@ class Header extends StatelessWidget {
         padding: const EdgeInsets.symmetric(horizontal: 4),
         child: SizedBox(
           // make stack a fixed height
-          height: 40,
+          height: 60,
           child: Stack(
             alignment: Alignment.center,
             children: [
               if (hideBackBtn != true)
                 Align(
                   alignment: Alignment.centerLeft,
-                  child: IntrinsicWidth(
-                    child: backBtnText == null
-                        ? FButton.icon(
-                            style: transparentButtonStyle,
-                            onPress: () => Navigator.pop(context),
-                            child: Icon(FIcons.chevronLeft, color: colors.accent, size: 28),
-                          )
-                        : FButton(
-                            onPress: () => Navigator.pop(context),
-                            style: transparentButtonStyle,
-                            child: Text(backBtnText!, style: TextStyle(color: colors.accent)),
-                          ),
+                  child: Padding(
+                    padding: const EdgeInsets.symmetric(horizontal: 8),
+                    child: IntrinsicWidth(
+                      child: backBtnText == null
+                          ? FButton.icon(
+                              style: transparentButtonStyle,
+                              onPress: () => Navigator.pop(context),
+                              child: Icon(FIcons.chevronLeft, color: colors.accent, size: 28),
+                            )
+                          : FButton(
+                              onPress: () => Navigator.pop(context),
+                              style: transparentButtonStyle,
+                              child: Text(backBtnText!, style: context.theme.typography.baseAccent),
+                            ),
+                    ),
                   ),
                 ),
               if (title != null && title.isNotEmpty)
@@ -62,19 +65,14 @@ class Header extends StatelessWidget {
                   alignment: Alignment.center,
                   child: Text(title, style: context.theme.typography.lgSemibold),
                 ),
-              if (hideSettingsBtn != true)
+              if (hideSettingsBtn != true && settingsStuff != null)
                 Align(
                   alignment: Alignment.centerRight,
                   child: FPopoverMenu(
                     popoverController: popoverController,
                     menuAnchor: Alignment.topRight,
                     childAnchor: Alignment.bottomRight,
-                    menu: [
-                      if (settingsStuff != null)
-                        ...settingsStuff!
-                      else
-                        FItemGroup(children: [FItem(title: Text('No settings available'))]),
-                    ],
+                    menu: [...settingsStuff!],
                     builder: (context, controller, child) => FButton.icon(
                       onPress: controller.toggle,
                       style: transparentButtonStyle,

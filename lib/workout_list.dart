@@ -66,7 +66,13 @@ class _WorkoutListState extends State<WorkoutList> with SingleTickerProviderStat
                           spacing: 8,
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
-                            Text('No workouts found', style: context.theme.typography.base),
+                            Row(
+                              spacing: 8,
+                              children: [
+                                Text('No workouts found... add one', style: context.theme.typography.base),
+                                Icon(FIcons.arrowDown),
+                              ],
+                            ),
                             Dance(),
                           ],
                         )
