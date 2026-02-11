@@ -1,9 +1,9 @@
 // set_auth.dart
 import 'package:flutter/material.dart';
 import 'package:forui/forui.dart';
-import 'package:proj/hive/hive_adapters.dart';
-import 'package:proj/theme/button_style.dart';
-import 'package:proj/theme/theme.dart';
+import 'package:timer_guy/hive/hive_adapters.dart';
+import 'package:timer_guy/theme/button_style.dart';
+import 'package:timer_guy/theme/theme.dart';
 
 class SetAuth extends StatefulWidget {
   final WorkoutSet set;

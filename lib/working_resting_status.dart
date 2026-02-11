@@ -1,9 +1,9 @@
 // working_resting_status.dart
 import 'package:flutter/material.dart';
 import 'package:forui/forui.dart';
-import 'package:proj/models/workout.dart';
-import 'package:proj/theme/theme.dart';
-import 'package:proj/workout_page.dart';
+import 'package:timer_guy/models/workout.dart';
+import 'package:timer_guy/theme/theme.dart';
+import 'package:timer_guy/workout_page.dart';
 
 class WorkingRestingStatus extends StatefulWidget {
   final WorkoutStatus status;

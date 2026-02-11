@@ -1,2 +1,2 @@
 // hive/hive_adapters.dart
-export 'package:proj/models/workout.dart';
+export 'package:timer_guy/models/workout.dart';

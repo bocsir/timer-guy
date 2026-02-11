@@ -4,9 +4,9 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 
 // my customized stuff
-import 'package:proj/theme/divider_styles.dart';
-import 'package:proj/theme/picker_style.dart';
-import 'package:proj/theme/text_field_style.dart';
+import 'package:timer_guy/theme/divider_styles.dart';
+import 'package:timer_guy/theme/picker_style.dart';
+import 'package:timer_guy/theme/text_field_style.dart';
 
 extension ColorsExtension on FColors {
   Color get accent => const Color(0xFF38bdf8); // sky-something

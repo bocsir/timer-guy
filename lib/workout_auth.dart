@@ -2,10 +2,10 @@
 import 'package:flutter/material.dart';
 import 'package:forui/forui.dart';
 import 'package:hive_ce_flutter/hive_flutter.dart';
-import 'package:proj/header.dart';
-import 'package:proj/models/workout.dart';
-import 'package:proj/theme/theme.dart';
-import 'package:proj/set_auth.dart';
+import 'package:timer_guy/header.dart';
+import 'package:timer_guy/models/workout.dart';
+import 'package:timer_guy/theme/theme.dart';
+import 'package:timer_guy/set_auth.dart';
 
 class WorkoutAuth extends StatefulWidget {
   final Box<Workout> workoutBox;

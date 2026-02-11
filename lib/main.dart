@@ -2,11 +2,11 @@
 import 'package:flutter/material.dart';
 import 'package:forui/forui.dart';
 import 'package:hive_ce_flutter/hive_flutter.dart';
-import 'package:proj/hive/hive_boxes.dart';
-import 'package:proj/hive/hive_registrar.g.dart';
-import 'package:proj/models/workout.dart';
-import 'package:proj/theme/theme.dart';
-import 'package:proj/workout_list.dart';
+import 'package:timer_guy/hive/hive_boxes.dart';
+import 'package:timer_guy/hive/hive_registrar.g.dart';
+import 'package:timer_guy/models/workout.dart';
+import 'package:timer_guy/theme/theme.dart';
+import 'package:timer_guy/workout_list.dart';
 
 Future<void> main() async {
   // hive setup
@@ -28,9 +28,7 @@ class MyApp extends StatelessWidget {
     return MaterialApp(
       builder: (_, child) => FTheme(data: theme, child: child!),
       theme: theme.toApproximateMaterialTheme().copyWith(
-        textTheme: theme.toApproximateMaterialTheme().textTheme.apply(
-          fontFamily: 'IBMPlexMono',
-        ),
+        textTheme: theme.toApproximateMaterialTheme().textTheme.apply(fontFamily: 'IBMPlexMono'),
       ),
       home: const FScaffold(child: HomePage()),
       debugShowCheckedModeBanner: false,

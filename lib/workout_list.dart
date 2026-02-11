@@ -2,12 +2,12 @@
 import 'package:flutter/material.dart';
 import 'package:forui/forui.dart';
 import 'package:hive_ce_flutter/hive_flutter.dart';
-import 'package:proj/dance.dart';
-import 'package:proj/hive/hive_boxes.dart';
-import 'package:proj/models/workout.dart';
-import 'package:proj/theme/theme.dart';
-import 'package:proj/workout_auth.dart';
-import 'package:proj/workout_page.dart';
+import 'package:timer_guy/dance.dart';
+import 'package:timer_guy/hive/hive_boxes.dart';
+import 'package:timer_guy/models/workout.dart';
+import 'package:timer_guy/theme/theme.dart';
+import 'package:timer_guy/workout_auth.dart';
+import 'package:timer_guy/workout_page.dart';
 
 class WorkoutList extends StatefulWidget {
   const WorkoutList({super.key});

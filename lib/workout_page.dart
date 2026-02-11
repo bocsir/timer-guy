@@ -1,13 +1,13 @@
 // workout_page.dart
 import 'package:flutter/material.dart';
 import 'package:forui/forui.dart';
-import 'package:proj/dance.dart';
-import 'package:proj/header.dart';
+import 'package:timer_guy/dance.dart';
+import 'package:timer_guy/header.dart';
 import 'dart:async';
-import 'package:proj/models/workout.dart';
-import 'package:proj/theme/theme.dart';
+import 'package:timer_guy/models/workout.dart';
+import 'package:timer_guy/theme/theme.dart';
 import 'package:progress_border/progress_border.dart';
-import 'package:proj/working_resting_status.dart';
+import 'package:timer_guy/working_resting_status.dart';
 
 enum WorkoutStatus { notStarted, preparing, working, resting, paused, complete }
 
