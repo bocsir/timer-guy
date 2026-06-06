@@ -432,7 +432,8 @@ class WorkoutPageState extends State<WorkoutPage>
         currTime -= (ms.inMilliseconds / 1000);
 
         // beep beep beep
-        if (status.value == WorkoutStatus.resting) {
+        if (status.value == WorkoutStatus.resting ||
+            status.value == WorkoutStatus.preparing) {
           final t = (currTime * 10).round() / 10;
           if (t == 3.0 || t == 2.0 || t == 1.0) {
             BeepPlayer.playNormal();
@@ -460,6 +461,7 @@ class WorkoutPageState extends State<WorkoutPage>
       currTime = tOn + 0.0;
       animationController.duration = Duration(seconds: tOn);
       animationController.reset();
+      BeepPlayer.playHigh();
       animate(newStatus);
       startTimer();
     } else if (status.value == WorkoutStatus.resting) {
