@@ -5,7 +5,7 @@ set -e
 BUILD_DIR="build/web"
 DEPLOY_DIR="docs"
 COMMIT_MSG="deploy to pages"
-BASE_HREF="/timer_guy/"
+BASE_HREF="/timer-guy/"
 
 build_flutter_web() {
     echo "Building web app..."
