@@ -2,6 +2,7 @@
 import 'package:flutter/material.dart';
 import 'package:forui/forui.dart';
 import 'package:hive_ce_flutter/hive_flutter.dart';
+import 'package:timer_guy/audio/beep_player.dart';
 import 'package:timer_guy/hive/hive_boxes.dart';
 import 'package:timer_guy/hive/hive_registrar.g.dart';
 import 'package:timer_guy/models/workout.dart';
@@ -13,6 +14,8 @@ Future<void> main() async {
   await Hive.initFlutter();
   Hive.registerAdapters();
   await Hive.openBox<Workout>(workoutBox);
+
+  await BeepPlayer.init();
 
   runApp(const MyApp());
 }
@@ -28,7 +31,9 @@ class MyApp extends StatelessWidget {
     return MaterialApp(
       builder: (_, child) => FTheme(data: theme, child: child!),
       theme: theme.toApproximateMaterialTheme().copyWith(
-        textTheme: theme.toApproximateMaterialTheme().textTheme.apply(fontFamily: 'IBMPlexMono'),
+        textTheme: theme.toApproximateMaterialTheme().textTheme.apply(
+          fontFamily: 'IBMPlexMono',
+        ),
       ),
       home: const FScaffold(child: HomePage()),
       debugShowCheckedModeBanner: false,
