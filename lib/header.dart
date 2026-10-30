@@ -59,7 +59,10 @@ class Header extends StatelessWidget {
                           : FButton(
                               onPress: () => Navigator.pop(context),
                               style: transparentButtonStyle,
-                              child: Text(backBtnText!, style: context.theme.typography.baseAccent),
+                              child: Text(
+                                backBtnText!,
+                                style: context.theme.typography.base.copyWith(color: colors.accent),
+                              ),
                             ),
                     ),
                   ),

@@ -38,17 +38,23 @@ class MyApp extends StatelessWidget {
   // root widget
   @override
   Widget build(BuildContext context) {
-    final theme = zincDark;
+    return ValueListenableBuilder<ThemeMode>(
+      valueListenable: appThemeMode,
+      builder: (context, mode, __) {
+        final theme = mode == ThemeMode.light ? zincLight : zincDark;
+        final materialTheme = theme.toApproximateMaterialTheme().copyWith(
+          textTheme: theme.toApproximateMaterialTheme().textTheme.apply(
+            fontFamily: 'IBMPlexMono',
+          ),
+        );
 
-    return MaterialApp(
-      builder: (_, child) => FTheme(data: theme, child: child!),
-      theme: theme.toApproximateMaterialTheme().copyWith(
-        textTheme: theme.toApproximateMaterialTheme().textTheme.apply(
-          fontFamily: 'IBMPlexMono',
-        ),
-      ),
-      home: const FScaffold(child: HomePage()),
-      debugShowCheckedModeBanner: false,
+        return MaterialApp(
+          builder: (_, child) => FTheme(data: theme, child: child!),
+          theme: materialTheme,
+          home: const FScaffold(child: HomePage()),
+          debugShowCheckedModeBanner: false,
+        );
+      },
     );
   }
 }

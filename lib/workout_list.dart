@@ -25,12 +25,32 @@ class WorkoutList extends StatelessWidget {
           header: Header(
             hideBackBtn: true,
             titleText: 'Workouts',
-            trailing: FButton.icon(
-              style: FButtonStyle.ghost(),
-              onPress: () => Navigator.of(
-                context,
-              ).push(MaterialPageRoute(builder: (context) => WorkoutAuth(workoutBox: box))),
-              child: Icon(FIcons.plus, color: context.theme.colors.accent, size: 28),
+            trailing: Row(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                ValueListenableBuilder<ThemeMode>(
+                  valueListenable: appThemeMode,
+                  builder: (context, mode, _) {
+                    final isDark = mode != ThemeMode.light;
+                    return FButton.icon(
+                      style: FButtonStyle.ghost(),
+                      onPress: () => appThemeMode.value = isDark ? ThemeMode.light : ThemeMode.dark,
+                      child: Icon(
+                        isDark ? FIcons.sun : FIcons.moon,
+                        color: context.theme.colors.mutedForeground,
+                        size: 24,
+                      ),
+                    );
+                  },
+                ),
+                FButton.icon(
+                  style: FButtonStyle.ghost(),
+                  onPress: () => Navigator.of(
+                    context,
+                  ).push(MaterialPageRoute(builder: (context) => WorkoutAuth(workoutBox: box))),
+                  child: Icon(FIcons.plus, color: context.theme.colors.accent, size: 28),
+                ),
+              ],
             ),
           ),
           // The dancing guys keep us company at the bottom of the list.
