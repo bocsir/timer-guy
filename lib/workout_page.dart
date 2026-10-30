@@ -9,6 +9,7 @@ import 'package:timer_guy/models/workout.dart';
 import 'package:timer_guy/theme/theme.dart';
 import 'package:progress_border/progress_border.dart';
 import 'package:timer_guy/audio/beep_player.dart';
+import 'package:timer_guy/services/analytics_service.dart';
 import 'package:timer_guy/working_resting_status.dart';
 
 enum WorkoutStatus { notStarted, preparing, working, resting, paused, complete }
@@ -44,6 +45,14 @@ class WorkoutPageState extends State<WorkoutPage>
   /// restored when the workout resumes.
   WorkoutStatus? _statusBeforePause;
 
+  /// Tracks time spent actively working out (pauses are excluded) for
+  /// analytics.
+  final Stopwatch _sessionWatch = Stopwatch();
+  bool _sessionStarted = false;
+
+  /// Whether the current run has already been stored in analytics.
+  bool _sessionRecorded = false;
+
   final initialDelay = 5.0;
 
   @override
@@ -65,10 +74,10 @@ class WorkoutPageState extends State<WorkoutPage>
     if (widget.workout.sets.isEmpty || _phaseDuration <= 0) return 0;
 
     final remaining =
-        (_phaseDuration - _phaseWatch.elapsedMicroseconds / Duration.microsecondsPerSecond).clamp(
-          0.0,
-          _phaseDuration,
-        );
+        (_phaseDuration -
+                _phaseWatch.elapsedMicroseconds /
+                    Duration.microsecondsPerSecond)
+            .clamp(0.0, _phaseDuration);
 
     final phase = status.value == WorkoutStatus.paused
         ? (_statusBeforePause ?? WorkoutStatus.working)
@@ -143,7 +152,8 @@ class WorkoutPageState extends State<WorkoutPage>
                     spacing: 8,
                     children: [
                       Text(widget.workout.name, style: typography.xl3Semibold),
-                      if (widget.workout.description case final description? when description.isNotEmpty)
+                      if (widget.workout.description case final description?
+                          when description.isNotEmpty)
                         FPopover(
                           popoverAnchor: Alignment.topCenter,
                           childAnchor: Alignment.bottomCenter,
@@ -417,20 +427,34 @@ class WorkoutPageState extends State<WorkoutPage>
                                 FButton.icon(
                                   style: FButtonStyle.ghost(),
                                   onPress: () {
-                                    if (status.value == WorkoutStatus.preparing) {
+                                    if (status.value ==
+                                        WorkoutStatus.preparing) {
                                       return;
                                     }
                                     setState(() {
                                       if (status.value ==
                                           WorkoutStatus.complete) {
+                                        _sessionStarted = false;
+                                        _sessionRecorded = false;
+                                        _sessionWatch
+                                          ..stop()
+                                          ..reset();
                                         restartSet(0);
                                       } else if (status.value ==
                                           WorkoutStatus.notStarted) {
+                                        _sessionStarted = true;
+                                        _sessionWatch
+                                          ..reset()
+                                          ..start();
                                         status.value = WorkoutStatus.preparing;
-                                        _startPhase(initialDelay, animate: false);
+                                        _startPhase(
+                                          initialDelay,
+                                          animate: false,
+                                        );
                                         startTimer();
                                       } else {
                                         // Resume from paused state.
+                                        _sessionWatch.start();
                                         status.value =
                                             _statusBeforePause ??
                                             WorkoutStatus.working;
@@ -463,6 +487,7 @@ class WorkoutPageState extends State<WorkoutPage>
       _statusBeforePause = status.value;
     }
     status.value = WorkoutStatus.paused;
+    _sessionWatch.stop();
     _stopPhase();
     timer?.cancel();
     setState(() {});
@@ -522,12 +547,33 @@ class WorkoutPageState extends State<WorkoutPage>
         restartSet(currSet.value + 1);
       } else {
         status.value = WorkoutStatus.complete;
+        _sessionWatch.stop();
+        _recordSession(completed: true);
         _stopPhase();
         _phaseDuration = 0;
         timer?.cancel();
         setState(() {});
       }
     }
+  }
+
+  /// Stores the run in analytics once, either when it completes or when the
+  /// user leaves early.
+  void _recordSession({required bool completed}) {
+    if (_sessionRecorded || !_sessionStarted) return;
+
+    final workoutKey = widget.workout.key;
+    if (workoutKey is! int) return;
+
+    final duration = _sessionWatch.elapsed.inSeconds;
+    if (duration <= 0) return;
+
+    AnalyticsService.instance.recordSession(
+      workoutKey: workoutKey,
+      durationSeconds: duration,
+      completed: completed,
+    );
+    _sessionRecorded = true;
   }
 
   // go to beginning of provided set (0 indexed)
@@ -544,6 +590,7 @@ class WorkoutPageState extends State<WorkoutPage>
 
   @override
   void dispose() {
+    _recordSession(completed: false);
     timer?.cancel();
     _ticker.dispose();
     currRep.dispose();

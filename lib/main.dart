@@ -6,7 +6,10 @@ import 'package:timer_guy/audio/beep_player.dart';
 import 'package:timer_guy/hive/hive_boxes.dart';
 import 'package:timer_guy/hive/register_adapters.dart';
 import 'package:timer_guy/hive/workout_adapter.dart';
+import 'package:timer_guy/hive/workout_set_adapter.dart';
 import 'package:timer_guy/models/workout.dart';
+import 'package:timer_guy/models/workout_session.dart';
+import 'package:timer_guy/services/analytics_service.dart';
 import 'package:timer_guy/theme/theme.dart';
 import 'package:timer_guy/workout_list.dart';
 
@@ -15,6 +18,8 @@ Future<void> main() async {
   await Hive.initFlutter();
   registerAdapters();
   final box = await Hive.openBox<Workout>(workoutBox);
+  await Hive.openBox<WorkoutSession>(workoutSessionBox);
+  AnalyticsService.instance.initialize();
 
   // Load the persisted theme preference and save future changes.
   final settings = await Hive.openBox<bool>(settingsBox);
@@ -26,14 +31,17 @@ Future<void> main() async {
   });
 
   // Rewrite records read with the old schema in the current format so the
-  // migration only has to run once. See MigratingWorkoutAdapter.read.
-  if (MigratingWorkoutAdapter.migratedLegacyData) {
+  // migration only has to run once. See MigratingWorkoutAdapter.read and
+  // MigratingWorkoutSetAdapter.read.
+  if (MigratingWorkoutAdapter.migratedLegacyData ||
+      MigratingWorkoutSetAdapter.migratedLegacyData) {
     await box.putAll({
       for (final entry in box.toMap().entries) entry.key: entry.value,
     });
     // Drop the now-unused frames written with the old schema.
     await box.compact();
     MigratingWorkoutAdapter.migratedLegacyData = false;
+    MigratingWorkoutSetAdapter.migratedLegacyData = false;
   }
 
   await BeepPlayer.init();
