@@ -1,5 +1,6 @@
 // workout_page.dart
 import 'package:flutter/material.dart';
+import 'package:flutter/scheduler.dart';
 import 'package:forui/forui.dart';
 import 'package:timer_guy/dance.dart';
 import 'package:timer_guy/header.dart';
@@ -22,14 +23,26 @@ class WorkoutPage extends StatefulWidget {
 }
 
 class WorkoutPageState extends State<WorkoutPage>
-    with TickerProviderStateMixin {
-  late final AnimationController animationController;
+    with SingleTickerProviderStateMixin {
   Timer? timer;
   late double currTime;
+
+  /// Drives 60fps rebuilds of the progress border. Purely visual; the timer
+  /// remains the source of truth for the workout's logic.
+  late final Ticker _ticker;
+
+  /// Wall-clock time elapsed in the current phase, used to interpolate the
+  /// border between the timer's 100ms ticks.
+  final Stopwatch _phaseWatch = Stopwatch();
+  double _phaseDuration = 0;
 
   late ValueNotifier<int> currRep;
   late ValueNotifier<int> currSet;
   late ValueNotifier<WorkoutStatus> status;
+
+  /// The status that was active before [pause] was called, so it can be
+  /// restored when the workout resumes.
+  WorkoutStatus? _statusBeforePause;
 
   final initialDelay = 5.0;
 
@@ -37,14 +50,64 @@ class WorkoutPageState extends State<WorkoutPage>
   void initState() {
     super.initState();
     currTime = initialDelay;
-    animationController = AnimationController(vsync: this)
-      ..addListener(() {
-        setState(() {});
-      });
+    _ticker = createTicker((_) => setState(() {}));
 
     currRep = ValueNotifier(0);
     currSet = ValueNotifier(0);
     status = ValueNotifier(WorkoutStatus.notStarted);
+  }
+
+  /// Progress of the current phase (0..1).
+  ///
+  /// Derived from the phase's wall-clock elapsed time so the border moves
+  /// smoothly at 60fps while staying in lockstep with the countdown.
+  double get progress {
+    if (widget.workout.sets.isEmpty || _phaseDuration <= 0) return 0;
+
+    final remaining =
+        (_phaseDuration - _phaseWatch.elapsedMicroseconds / Duration.microsecondsPerSecond).clamp(
+          0.0,
+          _phaseDuration,
+        );
+
+    final phase = status.value == WorkoutStatus.paused
+        ? (_statusBeforePause ?? WorkoutStatus.working)
+        : status.value;
+
+    switch (phase) {
+      case WorkoutStatus.working:
+        return (1 - remaining / _phaseDuration).clamp(0.0, 1.0);
+      case WorkoutStatus.resting:
+        return (remaining / _phaseDuration).clamp(0.0, 1.0);
+      case WorkoutStatus.paused:
+      case WorkoutStatus.preparing:
+      case WorkoutStatus.notStarted:
+      case WorkoutStatus.complete:
+        return 0;
+    }
+  }
+
+  void _startPhase(double duration, {bool animate = true}) {
+    _phaseDuration = duration;
+    _phaseWatch
+      ..reset()
+      ..start();
+
+    if (animate) {
+      if (!_ticker.isActive) _ticker.start();
+    } else {
+      _ticker.stop();
+    }
+  }
+
+  void _resumePhase() {
+    _phaseWatch.start();
+    if (!_ticker.isActive) _ticker.start();
+  }
+
+  void _stopPhase() {
+    _phaseWatch.stop();
+    _ticker.stop();
   }
 
   @override
@@ -117,7 +180,7 @@ class WorkoutPageState extends State<WorkoutPage>
                                   status.value == WorkoutStatus.notStarted
                               ? colors.border
                               : colors.accent,
-                          progress: animationController.value,
+                          progress: progress,
                           width: 6,
                           backgroundBorder: Border.symmetric(
                             horizontal: BorderSide(
@@ -354,28 +417,27 @@ class WorkoutPageState extends State<WorkoutPage>
                                 FButton.icon(
                                   style: FButtonStyle.ghost(),
                                   onPress: () {
-                                    if (status.value == WorkoutStatus.preparing)
+                                    if (status.value == WorkoutStatus.preparing) {
                                       return;
-                                    if (status.value ==
-                                        WorkoutStatus.notStarted) {
-                                      status.value = WorkoutStatus.preparing;
-                                      animationController.duration = Duration(
-                                        seconds: initialDelay.toInt(),
-                                      );
-                                      animationController.reset();
-                                      animate(WorkoutStatus.preparing);
-                                      startTimer();
-                                    } else {
-                                      // Resume from paused state
-                                      if (animationController.status ==
-                                          AnimationStatus.reverse) {
-                                        status.value = WorkoutStatus.resting;
-                                      } else {
-                                        status.value = WorkoutStatus.working;
-                                      }
-                                      animate(status.value);
-                                      startTimer();
                                     }
+                                    setState(() {
+                                      if (status.value ==
+                                          WorkoutStatus.complete) {
+                                        restartSet(0);
+                                      } else if (status.value ==
+                                          WorkoutStatus.notStarted) {
+                                        status.value = WorkoutStatus.preparing;
+                                        _startPhase(initialDelay, animate: false);
+                                        startTimer();
+                                      } else {
+                                        // Resume from paused state.
+                                        status.value =
+                                            _statusBeforePause ??
+                                            WorkoutStatus.working;
+                                        _resumePhase();
+                                        startTimer();
+                                      }
+                                    });
                                   },
                                   child: Icon(
                                     FIcons.play,
@@ -394,29 +456,14 @@ class WorkoutPageState extends State<WorkoutPage>
     );
   }
 
-  void animate(WorkoutStatus status) {
-    switch (status) {
-      case WorkoutStatus.working:
-        animationController.forward();
-      case WorkoutStatus.paused:
-        animationController.status == AnimationStatus.reverse
-            ? animationController.reverse()
-            : animationController.forward();
-      case WorkoutStatus.notStarted:
-        animationController.forward();
-      case WorkoutStatus.resting:
-        animationController.reverse();
-      case WorkoutStatus.preparing:
-        animationController.reverse();
-      case WorkoutStatus.complete:
-        animationController.stop();
-    }
-  }
-
   void pause() {
     if (status.value == WorkoutStatus.notStarted) return;
+    if (status.value == WorkoutStatus.working ||
+        status.value == WorkoutStatus.resting) {
+      _statusBeforePause = status.value;
+    }
     status.value = WorkoutStatus.paused;
-    animationController.stop();
+    _stopPhase();
     timer?.cancel();
     setState(() {});
   }
@@ -444,12 +491,7 @@ class WorkoutPageState extends State<WorkoutPage>
           }
         }
 
-        // hack for if user pauses a bunch and creates animation syncing issues
-        // animationController listener was initially doing a bunch of setStates.
-        // if it gets out of sync, this is needed:
-        if (!animationController.isAnimating) {
-          setState(() {});
-        }
+        setState(() {});
       }
     });
   }
@@ -457,47 +499,33 @@ class WorkoutPageState extends State<WorkoutPage>
   // called after an iteration completes
   void workOrRestComplete() {
     final set = widget.workout.sets[currSet.value];
-    if (status.value == WorkoutStatus.preparing) {
-      // preparation complete, start working
-      final newStatus = WorkoutStatus.working;
-      status.value = newStatus;
-      final tOn = set.timeOn;
-      currTime = tOn + 0.0;
-      animationController.duration = Duration(seconds: tOn);
-      animationController.reset();
+    if (status.value == WorkoutStatus.preparing ||
+        status.value == WorkoutStatus.resting) {
+      // preparation/rest complete, start working
+      status.value = WorkoutStatus.working;
+      currTime = set.timeOn + 0.0;
+      _startPhase(set.timeOn + 0.0);
       BeepPlayer.playHigh();
-      animate(newStatus);
-      startTimer();
-    } else if (status.value == WorkoutStatus.resting) {
-      // set up working stuff
-      final newStatus = WorkoutStatus.working;
-      status.value = newStatus;
-      final tOn = set.timeOn;
-      currTime = tOn + 0.0;
-      animationController.duration = Duration(seconds: tOn);
-      BeepPlayer.playHigh();
-      animate(newStatus);
       startTimer();
     } else {
       // set up resting stuff
-      final newStatus = WorkoutStatus.resting;
-      status.value = newStatus;
-      final tOff = set.timeOff;
-      currTime = tOff + 0.0;
-      animationController.duration = Duration(seconds: tOff);
+      status.value = WorkoutStatus.resting;
+      currTime = set.timeOff + 0.0;
+      _startPhase(set.timeOff + 0.0);
       if (currRep.value + 1 < set.reps) {
         // go to next rep
         BeepPlayer.playHigh();
         currRep.value++;
         startTimer();
-        animate(newStatus);
       } else if (currSet.value + 1 < widget.workout.sets.length) {
         // go to next set
         restartSet(currSet.value + 1);
       } else {
         status.value = WorkoutStatus.complete;
-        animationController.reset();
-        pause();
+        _stopPhase();
+        _phaseDuration = 0;
+        timer?.cancel();
+        setState(() {});
       }
     }
   }
@@ -505,10 +533,8 @@ class WorkoutPageState extends State<WorkoutPage>
   // go to beginning of provided set (0 indexed)
   void restartSet(int setIndex) {
     timer?.cancel();
-    animationController.reset();
-    animationController.duration = Duration(
-      seconds: widget.workout.sets[setIndex].timeOn,
-    );
+    _stopPhase();
+    _phaseDuration = 0;
     currSet.value = setIndex;
     currRep.value = 0;
     currTime = initialDelay;
@@ -519,7 +545,7 @@ class WorkoutPageState extends State<WorkoutPage>
   @override
   void dispose() {
     timer?.cancel();
-    animationController.dispose();
+    _ticker.dispose();
     currRep.dispose();
     currSet.dispose();
     status.dispose();
