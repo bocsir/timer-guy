@@ -4,7 +4,8 @@ import 'package:forui/forui.dart';
 import 'package:hive_ce_flutter/hive_flutter.dart';
 import 'package:timer_guy/audio/beep_player.dart';
 import 'package:timer_guy/hive/hive_boxes.dart';
-import 'package:timer_guy/hive/hive_registrar.g.dart';
+import 'package:timer_guy/hive/register_adapters.dart';
+import 'package:timer_guy/hive/workout_adapter.dart';
 import 'package:timer_guy/models/workout.dart';
 import 'package:timer_guy/theme/theme.dart';
 import 'package:timer_guy/workout_list.dart';
@@ -12,8 +13,19 @@ import 'package:timer_guy/workout_list.dart';
 Future<void> main() async {
   // hive setup
   await Hive.initFlutter();
-  Hive.registerAdapters();
-  await Hive.openBox<Workout>(workoutBox);
+  registerAdapters();
+  final box = await Hive.openBox<Workout>(workoutBox);
+
+  // Rewrite records read with the old schema in the current format so the
+  // migration only has to run once. See MigratingWorkoutAdapter.read.
+  if (MigratingWorkoutAdapter.migratedLegacyData) {
+    await box.putAll({
+      for (final entry in box.toMap().entries) entry.key: entry.value,
+    });
+    // Drop the now-unused frames written with the old schema.
+    await box.compact();
+    MigratingWorkoutAdapter.migratedLegacyData = false;
+  }
 
   await BeepPlayer.init();
 
