@@ -81,10 +81,21 @@ class _WorkoutListState extends State<WorkoutList> with SingleTickerProviderStat
                           children: [
                             ...workouts.map(
                               (w) => FItem(
-                                //TODO:
-                                // Title           (sets, reps)
-                                // description
                                 title: Text(w.name, style: context.theme.typography.baseSemibold),
+                                subtitle: w.description == null || w.description!.isEmpty
+                                    ? null
+                                    : Text(
+                                        w.description!,
+                                        style: context.theme.typography.sm.copyWith(
+                                          color: context.theme.colors.mutedForeground,
+                                        ),
+                                      ),
+                                details: Text(
+                                  '${w.sets.length} sets · ${w.totalReps} reps',
+                                  style: context.theme.typography.sm.copyWith(
+                                    color: context.theme.colors.mutedForeground,
+                                  ),
+                                ),
                                 suffix: Row(
                                   spacing: 16,
                                   mainAxisSize: MainAxisSize.min,

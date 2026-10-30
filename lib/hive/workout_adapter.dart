@@ -30,7 +30,11 @@ class MigratingWorkoutAdapter extends WorkoutAdapter {
     // Current schema.
     final sets = fields[1];
     if (sets is List) {
-      return Workout(name: fields[0] as String, sets: sets.cast<WorkoutSet>());
+      return Workout(
+        name: fields[0] as String,
+        sets: sets.cast<WorkoutSet>(),
+        description: fields[2] as String?,
+      );
     }
 
     // An intermediate schema stored the set list in field 2.

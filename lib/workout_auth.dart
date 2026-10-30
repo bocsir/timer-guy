@@ -24,6 +24,7 @@ class WorkoutAuth extends StatefulWidget {
 class _WorkoutAuthState extends State<WorkoutAuth> {
   late List<WorkoutSet> sets;
   late final TextEditingController nameController;
+  late final TextEditingController descriptionController;
 
   final _formKey = GlobalKey<FormState>();
   bool _formSubmitted = false;
@@ -34,6 +35,7 @@ class _WorkoutAuthState extends State<WorkoutAuth> {
     final workout = widget.workout;
     sets = workout == null ? [] : List.of(workout.sets);
     nameController = TextEditingController(text: workout?.name ?? '');
+    descriptionController = TextEditingController(text: workout?.description ?? '');
   }
 
   @override
@@ -68,6 +70,14 @@ class _WorkoutAuthState extends State<WorkoutAuth> {
                     controller: nameController,
                     validator: _validateRequired,
                     autovalidateMode: _formSubmitted ? AutovalidateMode.onUserInteraction : AutovalidateMode.disabled,
+                  ),
+                  FTextFormField(
+                    label: Text('Description', style: typography.lg),
+                    hint: 'Optional',
+                    controller: descriptionController,
+                    maxLines: 3,
+                    minLines: 2,
+                    textInputAction: TextInputAction.newline,
                   ),
                   if (sets.isNotEmpty) Text('Sets', style: typography.lgSemibold),
                   for (var i = 0; i < sets.length; i++)
@@ -124,6 +134,7 @@ class _WorkoutAuthState extends State<WorkoutAuth> {
   @override
   void dispose() {
     nameController.dispose();
+    descriptionController.dispose();
     super.dispose();
   }
 
@@ -160,7 +171,12 @@ class _WorkoutAuthState extends State<WorkoutAuth> {
     });
 
     if (_validateForm()) {
-      final workout = Workout(name: nameController.text.trim(), sets: List.of(sets));
+      final description = descriptionController.text.trim();
+      final workout = Workout(
+        name: nameController.text.trim(),
+        sets: List.of(sets),
+        description: description.isEmpty ? null : description,
+      );
       final existing = widget.workout;
       if (existing == null) {
         widget.workoutBox.add(workout);

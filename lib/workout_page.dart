@@ -80,25 +80,29 @@ class WorkoutPageState extends State<WorkoutPage>
                     spacing: 8,
                     children: [
                       Text(widget.workout.name, style: typography.xl3Semibold),
-                      FPopover(
-                        popoverAnchor: Alignment.topCenter,
-                        childAnchor: Alignment.bottomCenter,
-                        popoverBuilder: (context, _) => Padding(
-                          padding: const EdgeInsets.symmetric(
-                            vertical: 8,
-                            horizontal: 16,
+                      if (widget.workout.description case final description? when description.isNotEmpty)
+                        FPopover(
+                          popoverAnchor: Alignment.topCenter,
+                          childAnchor: Alignment.bottomCenter,
+                          popoverBuilder: (context, _) => ConstrainedBox(
+                            constraints: const BoxConstraints(maxWidth: 300),
+                            child: Padding(
+                              padding: const EdgeInsets.symmetric(
+                                vertical: 8,
+                                horizontal: 16,
+                              ),
+                              child: Text(description),
+                            ),
                           ),
-                          child: Text('[description placeholder text]'),
-                        ),
-                        builder: (_, controller, _) => FButton(
-                          onPress: controller.toggle,
-                          style: FButtonStyle.ghost(),
-                          child: Icon(
-                            FIcons.info,
-                            color: colors.mutedForeground,
+                          builder: (_, controller, _) => FButton(
+                            onPress: controller.toggle,
+                            style: FButtonStyle.ghost(),
+                            child: Icon(
+                              FIcons.info,
+                              color: colors.mutedForeground,
+                            ),
                           ),
                         ),
-                      ),
                     ],
                   ),
                 ),
