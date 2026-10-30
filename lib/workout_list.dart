@@ -85,7 +85,22 @@ class _WorkoutListState extends State<WorkoutList> with SingleTickerProviderStat
                                 // Title           (sets, reps)
                                 // description
                                 title: Text(w.name, style: context.theme.typography.baseSemibold),
-                                suffix: Icon(FIcons.chevronRight, size: 25, color: context.theme.colors.foreground),
+                                suffix: Row(
+                                  spacing: 16,
+                                  mainAxisSize: MainAxisSize.min,
+                                  children: [
+                                    FButton.icon(
+                                      style: FButtonStyle.ghost(),
+                                      onPress: () => Navigator.of(context).push(
+                                        MaterialPageRoute(
+                                          builder: (context) => WorkoutAuth(workoutBox: box, workout: w),
+                                        ),
+                                      ),
+                                      child: Icon(FIcons.pencil, color: context.theme.colors.mutedForeground),
+                                    ),
+                                    Icon(FIcons.chevronRight, size: 25, color: context.theme.colors.foreground),
+                                  ],
+                                ),
                                 onPress: () => Navigator.of(
                                   context,
                                 ).push(MaterialPageRoute(builder: (context) => WorkoutPage(workout: w))),
