@@ -16,6 +16,15 @@ Future<void> main() async {
   registerAdapters();
   final box = await Hive.openBox<Workout>(workoutBox);
 
+  // Load the persisted theme preference and save future changes.
+  final settings = await Hive.openBox<bool>(settingsBox);
+  appThemeMode.value = (settings.get(darkModeKey, defaultValue: true) ?? true)
+      ? ThemeMode.dark
+      : ThemeMode.light;
+  appThemeMode.addListener(() {
+    settings.put(darkModeKey, appThemeMode.value == ThemeMode.dark);
+  });
+
   // Rewrite records read with the old schema in the current format so the
   // migration only has to run once. See MigratingWorkoutAdapter.read.
   if (MigratingWorkoutAdapter.migratedLegacyData) {
