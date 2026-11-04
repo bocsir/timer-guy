@@ -95535,7 +95535,7 @@ s=s.jC()
 r=A.a3(s,A.j(s).i("r.E"))
 s=A.fa()
 q=t.p
-s=A.aHV(o,!0,o,"Workouts",A.dC(A.b([B.Hb,A.fT(A.dz(B.qG,A.az(a).c.a===B.W?B.aQ:B.aR,o,28),new A.asT(a,b),s)],q),B.S,B.U,B.c1,0,o))
+s=A.aHV(o,!0,o,"Timer Guy",A.dC(A.b([B.Hb,A.fT(A.dz(B.qG,A.az(a).c.a===B.W?B.aQ:B.aR,o,28),new A.asT(a,b),s)],q),B.S,B.U,B.c1,0,o))
 p=A.b([],q)
 if(r.length===0)p.push(A.dC(A.b([A.aV("No workouts found... add one",o,o,o,A.az(a).d.d,o,o),A.dz(B.NM,o,o,o)],q),B.S,B.U,B.P,8,o))
 else{q=A.a3(new A.ah(r,new A.asU(a,b),A.a0(r).i("ah<1,pt>")),t.Wa)
