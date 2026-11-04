@@ -26,7 +26,7 @@ class WorkoutList extends StatelessWidget {
         return FScaffold(
           header: Header(
             hideBackBtn: true,
-            titleText: 'Workouts',
+            titleText: 'Timer Guy',
             trailing: Row(
               mainAxisSize: MainAxisSize.min,
               children: [
