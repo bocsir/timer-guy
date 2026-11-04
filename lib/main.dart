@@ -10,6 +10,7 @@ import 'package:timer_guy/hive/workout_set_adapter.dart';
 import 'package:timer_guy/models/workout.dart';
 import 'package:timer_guy/models/workout_session.dart';
 import 'package:timer_guy/services/analytics_service.dart';
+import 'package:timer_guy/settings.dart';
 import 'package:timer_guy/theme/theme.dart';
 import 'package:timer_guy/workout_list.dart';
 
@@ -28,6 +29,12 @@ Future<void> main() async {
       : ThemeMode.light;
   appThemeMode.addListener(() {
     settings.put(darkModeKey, appThemeMode.value == ThemeMode.dark);
+  });
+
+  animatedBackgroundEnabled.value =
+      settings.get(animatedBackgroundKey, defaultValue: true) ?? true;
+  animatedBackgroundEnabled.addListener(() {
+    settings.put(animatedBackgroundKey, animatedBackgroundEnabled.value);
   });
 
   // Rewrite records read with the old schema in the current format so the

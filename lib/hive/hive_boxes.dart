@@ -5,3 +5,4 @@ const settingsBox = 'settings_box';
 
 // Keys used in [settingsBox].
 const darkModeKey = 'dark_mode';
+const animatedBackgroundKey = 'animated_background';

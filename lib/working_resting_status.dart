@@ -3,14 +3,19 @@ import 'package:flutter/material.dart';
 import 'package:forui/forui.dart';
 import 'package:timer_guy/models/workout.dart';
 import 'package:timer_guy/theme/theme.dart';
-import 'package:timer_guy/workout_page.dart';
+import 'package:timer_guy/workout_status.dart';
 
 class WorkingRestingStatus extends StatefulWidget {
   final WorkoutStatus status;
   final Workout workout;
   final int currSet;
 
-  const WorkingRestingStatus({super.key, required this.status, required this.workout, required this.currSet});
+  const WorkingRestingStatus({
+    super.key,
+    required this.status,
+    required this.workout,
+    required this.currSet,
+  });
 
   @override
   State<WorkingRestingStatus> createState() => _WorkingRestingStatusState();

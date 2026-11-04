@@ -10,9 +10,10 @@ import 'package:timer_guy/theme/theme.dart';
 import 'package:progress_border/progress_border.dart';
 import 'package:timer_guy/audio/beep_player.dart';
 import 'package:timer_guy/services/analytics_service.dart';
+import 'package:timer_guy/widgets/settings_menu_button.dart';
+import 'package:timer_guy/widgets/workout_background.dart';
 import 'package:timer_guy/working_resting_status.dart';
-
-enum WorkoutStatus { notStarted, preparing, working, resting, paused, complete }
+import 'package:timer_guy/workout_status.dart';
 
 class WorkoutPage extends StatefulWidget {
   final Workout workout;
@@ -53,6 +54,11 @@ class WorkoutPageState extends State<WorkoutPage>
   /// Whether the current run has already been stored in analytics.
   bool _sessionRecorded = false;
 
+  /// The random colors used by this run's animated background. A fresh palette
+  /// is generated whenever a new run starts.
+  late WorkoutPalette _palette;
+  bool _paletteInitialized = false;
+
   final initialDelay = 5.0;
 
   @override
@@ -64,6 +70,22 @@ class WorkoutPageState extends State<WorkoutPage>
     currRep = ValueNotifier(0);
     currSet = ValueNotifier(0);
     status = ValueNotifier(WorkoutStatus.notStarted);
+  }
+
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    if (_paletteInitialized) return;
+
+    // Generated here rather than initState because the palette depends on the
+    // active theme's brightness.
+    _palette = _newPalette();
+    _paletteInitialized = true;
+  }
+
+  WorkoutPalette _newPalette() {
+    final isDark = context.theme.colors.brightness == Brightness.dark;
+    return WorkoutPalette.random(isDark: isDark);
   }
 
   /// Progress of the current phase (0..1).
@@ -121,7 +143,7 @@ class WorkoutPageState extends State<WorkoutPage>
 
     return FScaffold(
       childPad: false,
-      header: Header(hideSettingsBtn: true),
+      header: Header(hideSettingsBtn: true, trailing: const SettingsMenuButton()),
       child: widget.workout.sets.isEmpty
           ? Column(
               crossAxisAlignment: CrossAxisAlignment.start,
@@ -134,346 +156,352 @@ class WorkoutPageState extends State<WorkoutPage>
                 Dance(),
               ],
             )
-          : Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Padding(
-                  padding: const EdgeInsets.only(
-                    left: 16,
-                    right: 16,
-                    bottom: 16,
-                  ),
-                  child: Row(
-                    spacing: 8,
-                    children: [
-                      Text(widget.workout.name, style: typography.xl3Semibold),
-                      if (widget.workout.description case final description?
-                          when description.isNotEmpty)
-                        FPopover(
-                          popoverAnchor: Alignment.topCenter,
-                          childAnchor: Alignment.bottomCenter,
-                          popoverBuilder: (context, _) => ConstrainedBox(
-                            constraints: const BoxConstraints(maxWidth: 300),
-                            child: Padding(
-                              padding: const EdgeInsets.symmetric(
-                                vertical: 8,
-                                horizontal: 16,
-                              ),
-                              child: Text(description),
-                            ),
-                          ),
-                          builder: (_, controller, _) => FButton(
-                            onPress: controller.toggle,
-                            style: FButtonStyle.ghost(),
-                            child: Icon(
-                              FIcons.info,
-                              color: colors.mutedForeground,
-                            ),
-                          ),
-                        ),
-                    ],
-                  ),
-                ),
-                Expanded(
-                  child: SizedBox(
-                    width: double.infinity,
-                    child: DecoratedBox(
-                      decoration: BoxDecoration(
-                        border: ProgressBorder.all(
-                          color:
-                              status.value == WorkoutStatus.paused ||
-                                  status.value == WorkoutStatus.notStarted
-                              ? colors.border
-                              : colors.accent,
-                          progress: progress,
-                          width: 6,
-                          backgroundBorder: Border.symmetric(
-                            horizontal: BorderSide(
-                              color: colors.border,
-                              width: 1,
-                            ),
-                          ),
-                        ),
-                      ),
-                      child: Padding(
-                        padding: const EdgeInsets.symmetric(
-                          horizontal: 64,
-                          vertical: 32,
-                        ),
-                        child: ListenableBuilder(
-                          listenable: status,
-                          builder: (context, child) {
-                            return Column(
-                              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                              children: [
-                                WorkingRestingStatus(
-                                  status: status.value,
-                                  workout: widget.workout,
-                                  currSet: currSet.value,
+          : WorkoutBackgroundFrame(
+              palette: _palette,
+              status: status,
+              progress: progress,
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Padding(
+                    padding: const EdgeInsets.only(
+                      left: 16,
+                      right: 16,
+                      bottom: 16,
+                    ),
+                    child: Row(
+                      spacing: 8,
+                      children: [
+                        Text(widget.workout.name, style: typography.xl3Semibold),
+                        if (widget.workout.description case final description?
+                            when description.isNotEmpty)
+                          FPopover(
+                            popoverAnchor: Alignment.topCenter,
+                            childAnchor: Alignment.bottomCenter,
+                            popoverBuilder: (context, _) => ConstrainedBox(
+                              constraints: const BoxConstraints(maxWidth: 300),
+                              child: Padding(
+                                padding: const EdgeInsets.symmetric(
+                                  vertical: 8,
+                                  horizontal: 16,
                                 ),
-                                switch (status.value) {
-                                  WorkoutStatus.complete => Text(
-                                    'All done!',
-                                    style: typography.xl3.copyWith(
-                                      fontWeight: FontWeight.bold,
-                                    ),
+                                child: Text(description),
+                              ),
+                            ),
+                            builder: (_, controller, _) => FButton(
+                              onPress: controller.toggle,
+                              style: FButtonStyle.ghost(),
+                              child: Icon(
+                                FIcons.info,
+                                color: colors.mutedForeground,
+                              ),
+                            ),
+                          ),
+                      ],
+                    ),
+                  ),
+                  Expanded(
+                    child: SizedBox(
+                      width: double.infinity,
+                      child: DecoratedBox(
+                        decoration: BoxDecoration(
+                          border: ProgressBorder.all(
+                            color:
+                                status.value == WorkoutStatus.paused ||
+                                    status.value == WorkoutStatus.notStarted
+                                ? colors.border
+                                : colors.accent,
+                            progress: progress,
+                            width: 6,
+                            backgroundBorder: Border.symmetric(
+                              horizontal: BorderSide(
+                                color: colors.border,
+                                width: 1,
+                              ),
+                            ),
+                          ),
+                        ),
+                        child: Padding(
+                          padding: const EdgeInsets.symmetric(
+                            horizontal: 64,
+                            vertical: 32,
+                          ),
+                          child: ListenableBuilder(
+                            listenable: status,
+                            builder: (context, child) {
+                              return Column(
+                                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                                children: [
+                                  WorkingRestingStatus(
+                                    status: status.value,
+                                    workout: widget.workout,
+                                    currSet: currSet.value,
                                   ),
-                                  _ => Column(
+                                  switch (status.value) {
+                                    WorkoutStatus.complete => Text(
+                                      'All done!',
+                                      style: typography.xl3.copyWith(
+                                        fontWeight: FontWeight.bold,
+                                      ),
+                                    ),
+                                    _ => Column(
+                                      children: [
+                                        Row(
+                                          mainAxisAlignment:
+                                              MainAxisAlignment.center,
+                                          crossAxisAlignment:
+                                              CrossAxisAlignment.baseline,
+                                          textBaseline: TextBaseline.values.first,
+                                          spacing: 4,
+                                          children: [
+                                            Text(
+                                              currTime
+                                                  .toStringAsFixed(1)
+                                                  .split('.')[0],
+                                              style: typography.xl8,
+                                            ),
+                                            Text(
+                                              currTime
+                                                  .toStringAsFixed(1)
+                                                  .split('.')[1][0],
+                                              style: typography.xl6,
+                                            ),
+                                          ],
+                                        ),
+                                        if (status.value ==
+                                            WorkoutStatus.preparing)
+                                          Text(
+                                            'Get ready...',
+                                            style: typography.xl.copyWith(
+                                              fontWeight: FontWeight.bold,
+                                            ),
+                                          ),
+                                        if (status.value == WorkoutStatus.working)
+                                          Text(
+                                            'Go!',
+                                            style: typography.xl.copyWith(
+                                              fontWeight: FontWeight.bold,
+                                              color: colors.accent,
+                                            ),
+                                          ),
+                                      ],
+                                    ),
+                                  },
+                                  Column(
+                                    spacing: 8,
                                     children: [
                                       Row(
                                         mainAxisAlignment:
                                             MainAxisAlignment.center,
-                                        crossAxisAlignment:
-                                            CrossAxisAlignment.baseline,
-                                        textBaseline: TextBaseline.values.first,
-                                        spacing: 4,
                                         children: [
-                                          Text(
-                                            currTime
-                                                .toStringAsFixed(1)
-                                                .split('.')[0],
-                                            style: typography.xl8,
+                                          Row(
+                                            children: [
+                                              Text(
+                                                'Current Set: ',
+                                                style: typography.sm.copyWith(
+                                                  height: 20 / 14,
+                                                ),
+                                              ),
+                                              Text(
+                                                widget
+                                                    .workout
+                                                    .sets[currSet.value]
+                                                    .name,
+                                                style: typography.xlSemibold
+                                                    .copyWith(height: 1),
+                                              ),
+                                            ],
+                                          ),
+                                          //if (widget.workout.sets[currSet.value].description != null)
+                                          // FPopover(
+                                          //   popoverAnchor: Alignment.topCenter,
+                                          //   childAnchor: Alignment.bottomCenter,
+                                          //   popoverBuilder: (context, _) => Padding(
+                                          //     padding: const EdgeInsets.symmetric(vertical: 8, horizontal: 16),
+                                          //     child: Text('[description placeholder text]'),
+                                          //   ),
+                                          //   builder: (_, controller, _) => FButton(
+                                          //     onPress: controller.toggle,
+                                          //     style: FButtonStyle.ghost(),
+                                          //     child: Icon(FIcons.info, color: colors.mutedForeground),
+                                          //   ),
+                                          // ),
+                                        ],
+                                      ),
+
+                                      Row(
+                                        mainAxisAlignment:
+                                            MainAxisAlignment.spaceBetween,
+                                        children: [
+                                          FButton.icon(
+                                            style: FButtonStyle.ghost(),
+                                            child: Icon(FIcons.chevronLeft),
+                                            onPress: () {
+                                              pause();
+                                              if (currSet.value > 0) {
+                                                setState(() => currSet.value--);
+                                              }
+                                            },
                                           ),
                                           Text(
-                                            currTime
-                                                .toStringAsFixed(1)
-                                                .split('.')[1][0],
-                                            style: typography.xl6,
+                                            'Set',
+                                            style: typography.lgSemibold,
+                                          ),
+                                          Text(
+                                            '${currSet.value + 1} | ${widget.workout.sets.length}',
+                                            style: typography.lgSemibold,
+                                          ),
+                                          FButton.icon(
+                                            style: FButtonStyle.ghost(),
+                                            child: Icon(FIcons.chevronRight),
+                                            onPress: () {
+                                              pause();
+                                              if (widget.workout.sets.length - 1 >
+                                                  currSet.value) {
+                                                setState(() => currSet.value++);
+                                              }
+                                            },
                                           ),
                                         ],
                                       ),
-                                      if (status.value ==
-                                          WorkoutStatus.preparing)
-                                        Text(
-                                          'Get ready...',
-                                          style: typography.xl.copyWith(
-                                            fontWeight: FontWeight.bold,
+                                      Row(
+                                        mainAxisAlignment:
+                                            MainAxisAlignment.spaceBetween,
+                                        children: [
+                                          FButton.icon(
+                                            style: FButtonStyle.ghost(),
+                                            child: Icon(FIcons.chevronLeft),
+                                            onPress: () {
+                                              pause();
+                                              if (currRep.value > 0) {
+                                                setState(() => currRep.value--);
+                                              }
+                                            },
                                           ),
-                                        ),
-                                      if (status.value == WorkoutStatus.working)
-                                        Text(
-                                          'Go!',
-                                          style: typography.xl.copyWith(
-                                            fontWeight: FontWeight.bold,
-                                            color: colors.accent,
+                                          Text(
+                                            'Rep',
+                                            style: typography.lgSemibold,
                                           ),
-                                        ),
+                                          Text(
+                                            '${currRep.value + 1} | ${widget.workout.sets[currSet.value].reps}',
+                                            style: typography.lgSemibold,
+                                          ),
+                                          FButton.icon(
+                                            style: FButtonStyle.ghost(),
+                                            child: Icon(FIcons.chevronRight),
+                                            onPress: () {
+                                              pause();
+                                              if (widget
+                                                          .workout
+                                                          .sets[currSet.value]
+                                                          .reps -
+                                                      1 >
+                                                  currRep.value) {
+                                                setState(() => currRep.value++);
+                                              }
+                                            },
+                                          ),
+                                        ],
+                                      ),
                                     ],
                                   ),
-                                },
-                                Column(
-                                  spacing: 8,
-                                  children: [
-                                    Row(
-                                      mainAxisAlignment:
-                                          MainAxisAlignment.center,
-                                      children: [
-                                        Row(
-                                          children: [
-                                            Text(
-                                              'Current Set: ',
-                                              style: typography.sm.copyWith(
-                                                height: 20 / 14,
-                                              ),
-                                            ),
-                                            Text(
-                                              widget
-                                                  .workout
-                                                  .sets[currSet.value]
-                                                  .name,
-                                              style: typography.xlSemibold
-                                                  .copyWith(height: 1),
-                                            ),
-                                          ],
-                                        ),
-                                        //if (widget.workout.sets[currSet.value].description != null)
-                                        // FPopover(
-                                        //   popoverAnchor: Alignment.topCenter,
-                                        //   childAnchor: Alignment.bottomCenter,
-                                        //   popoverBuilder: (context, _) => Padding(
-                                        //     padding: const EdgeInsets.symmetric(vertical: 8, horizontal: 16),
-                                        //     child: Text('[description placeholder text]'),
-                                        //   ),
-                                        //   builder: (_, controller, _) => FButton(
-                                        //     onPress: controller.toggle,
-                                        //     style: FButtonStyle.ghost(),
-                                        //     child: Icon(FIcons.info, color: colors.mutedForeground),
-                                        //   ),
-                                        // ),
-                                      ],
-                                    ),
-
-                                    Row(
-                                      mainAxisAlignment:
-                                          MainAxisAlignment.spaceBetween,
-                                      children: [
-                                        FButton.icon(
-                                          style: FButtonStyle.ghost(),
-                                          child: Icon(FIcons.chevronLeft),
-                                          onPress: () {
-                                            pause();
-                                            if (currSet.value > 0) {
-                                              setState(() => currSet.value--);
-                                            }
-                                          },
-                                        ),
-                                        Text(
-                                          'Set',
-                                          style: typography.lgSemibold,
-                                        ),
-                                        Text(
-                                          '${currSet.value + 1} | ${widget.workout.sets.length}',
-                                          style: typography.lgSemibold,
-                                        ),
-                                        FButton.icon(
-                                          style: FButtonStyle.ghost(),
-                                          child: Icon(FIcons.chevronRight),
-                                          onPress: () {
-                                            pause();
-                                            if (widget.workout.sets.length - 1 >
-                                                currSet.value) {
-                                              setState(() => currSet.value++);
-                                            }
-                                          },
-                                        ),
-                                      ],
-                                    ),
-                                    Row(
-                                      mainAxisAlignment:
-                                          MainAxisAlignment.spaceBetween,
-                                      children: [
-                                        FButton.icon(
-                                          style: FButtonStyle.ghost(),
-                                          child: Icon(FIcons.chevronLeft),
-                                          onPress: () {
-                                            pause();
-                                            if (currRep.value > 0) {
-                                              setState(() => currRep.value--);
-                                            }
-                                          },
-                                        ),
-                                        Text(
-                                          'Rep',
-                                          style: typography.lgSemibold,
-                                        ),
-                                        Text(
-                                          '${currRep.value + 1} | ${widget.workout.sets[currSet.value].reps}',
-                                          style: typography.lgSemibold,
-                                        ),
-                                        FButton.icon(
-                                          style: FButtonStyle.ghost(),
-                                          child: Icon(FIcons.chevronRight),
-                                          onPress: () {
-                                            pause();
-                                            if (widget
-                                                        .workout
-                                                        .sets[currSet.value]
-                                                        .reps -
-                                                    1 >
-                                                currRep.value) {
-                                              setState(() => currRep.value++);
-                                            }
-                                          },
-                                        ),
-                                      ],
-                                    ),
-                                  ],
-                                ),
-                              ],
-                            );
-                          },
+                                ],
+                              );
+                            },
+                          ),
                         ),
                       ),
                     ),
                   ),
-                ),
-                Padding(
-                  padding: const EdgeInsets.only(top: 8, bottom: 16),
-                  child: Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                    children: [
-                      FButton.icon(
-                        style: FButtonStyle.ghost(),
-                        onPress: () => restartSet(0),
-                        child: Icon(FIcons.refreshCw, size: 30),
-                      ),
-                      DecoratedBox(
-                        decoration: BoxDecoration(
-                          border: BoxBorder.all(),
-                          borderRadius: BorderRadius.circular(16),
-                          color: colors.accent,
+                  Padding(
+                    padding: const EdgeInsets.only(top: 8, bottom: 16),
+                    child: Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                      children: [
+                        FButton.icon(
+                          style: FButtonStyle.ghost(),
+                          onPress: () => restartSet(0),
+                          child: Icon(FIcons.refreshCw, size: 30),
                         ),
-                        child: Padding(
-                          padding: const EdgeInsets.all(8),
-                          child:
-                              status.value == WorkoutStatus.working ||
-                                  status.value == WorkoutStatus.resting
-                              ? // show pause
-                                FButton.icon(
-                                  style: FButtonStyle.ghost(),
-                                  onPress: pause,
-                                  child: Icon(
-                                    FIcons.pause,
-                                    size: 30,
-                                    color: colors.foreground,
-                                  ),
-                                )
-                              : // show play
-                                FButton.icon(
-                                  style: FButtonStyle.ghost(),
-                                  onPress: () {
-                                    if (status.value ==
-                                        WorkoutStatus.preparing) {
-                                      return;
-                                    }
-                                    setState(() {
+                        DecoratedBox(
+                          decoration: BoxDecoration(
+                            border: BoxBorder.all(),
+                            borderRadius: BorderRadius.circular(16),
+                            color: colors.accent,
+                          ),
+                          child: Padding(
+                            padding: const EdgeInsets.all(8),
+                            child:
+                                status.value == WorkoutStatus.working ||
+                                    status.value == WorkoutStatus.resting
+                                ? // show pause
+                                  FButton.icon(
+                                    style: FButtonStyle.ghost(),
+                                    onPress: pause,
+                                    child: Icon(
+                                      FIcons.pause,
+                                      size: 30,
+                                      color: colors.foreground,
+                                    ),
+                                  )
+                                : // show play
+                                  FButton.icon(
+                                    style: FButtonStyle.ghost(),
+                                    onPress: () {
                                       if (status.value ==
-                                          WorkoutStatus.complete) {
-                                        _sessionStarted = false;
-                                        _sessionRecorded = false;
-                                        _sessionWatch
-                                          ..stop()
-                                          ..reset();
-                                        restartSet(0);
-                                      } else if (status.value ==
-                                          WorkoutStatus.notStarted) {
-                                        _sessionStarted = true;
-                                        _sessionWatch
-                                          ..reset()
-                                          ..start();
-                                        status.value = WorkoutStatus.preparing;
-                                        _startPhase(
-                                          initialDelay,
-                                          animate: false,
-                                        );
-                                        startTimer();
-                                      } else {
-                                        // Resume from paused state with the
-                                        // same countdown as a fresh start.
-                                        _sessionWatch.start();
-                                        status.value = WorkoutStatus.preparing;
-                                        currTime = initialDelay;
-                                        _startPhase(
-                                          initialDelay,
-                                          animate: false,
-                                        );
-                                        startTimer();
+                                          WorkoutStatus.preparing) {
+                                        return;
                                       }
-                                    });
-                                  },
-                                  child: Icon(
-                                    FIcons.play,
-                                    size: 30,
-                                    color: colors.foreground,
+                                      setState(() {
+                                        if (status.value ==
+                                            WorkoutStatus.complete) {
+                                          _sessionStarted = false;
+                                          _sessionRecorded = false;
+                                          _sessionWatch
+                                            ..stop()
+                                            ..reset();
+                                          restartSet(0);
+                                        } else if (status.value ==
+                                            WorkoutStatus.notStarted) {
+                                          _palette = _newPalette();
+                                          _sessionStarted = true;
+                                          _sessionWatch
+                                            ..reset()
+                                            ..start();
+                                          status.value = WorkoutStatus.preparing;
+                                          _startPhase(
+                                            initialDelay,
+                                            animate: false,
+                                          );
+                                          startTimer();
+                                        } else {
+                                          // Resume from paused state with the
+                                          // same countdown as a fresh start.
+                                          _sessionWatch.start();
+                                          status.value = WorkoutStatus.preparing;
+                                          currTime = initialDelay;
+                                          _startPhase(
+                                            initialDelay,
+                                            animate: false,
+                                          );
+                                          startTimer();
+                                        }
+                                      });
+                                    },
+                                    child: Icon(
+                                      FIcons.play,
+                                      size: 30,
+                                      color: colors.foreground,
+                                    ),
                                   ),
-                                ),
+                          ),
                         ),
-                      ),
-                    ],
+                      ],
+                    ),
                   ),
-                ),
-                SizedBox(height: 4),
-              ],
+                  SizedBox(height: 4),
+                ],
+              ),
             ),
     );
   }
@@ -579,6 +607,8 @@ class WorkoutPageState extends State<WorkoutPage>
     timer?.cancel();
     _stopPhase();
     _phaseDuration = 0;
+    // Restarting the whole workout counts as a new run, so give it new colors.
+    if (setIndex == 0) _palette = _newPalette();
     currSet.value = setIndex;
     currRep.value = 0;
     currTime = initialDelay;
