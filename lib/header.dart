@@ -11,6 +11,9 @@ class Header extends StatelessWidget {
   final String? backBtnText;
   final String? titleText;
 
+  /// A widget shown at the top right, replacing the settings button when set.
+  final Widget? trailing;
+
   // settings stuff
   final FPopoverController? popoverController;
   final List<FItemGroup>? settingsStuff;
@@ -21,6 +24,7 @@ class Header extends StatelessWidget {
     this.hideSettingsBtn,
     this.backBtnText,
     this.titleText,
+    this.trailing,
     this.popoverController,
     this.settingsStuff,
   });
@@ -55,7 +59,10 @@ class Header extends StatelessWidget {
                           : FButton(
                               onPress: () => Navigator.pop(context),
                               style: transparentButtonStyle,
-                              child: Text(backBtnText!, style: context.theme.typography.baseAccent),
+                              child: Text(
+                                backBtnText!,
+                                style: context.theme.typography.base.copyWith(color: colors.accent),
+                              ),
                             ),
                     ),
                   ),
@@ -65,7 +72,15 @@ class Header extends StatelessWidget {
                   alignment: Alignment.center,
                   child: Text(title, style: context.theme.typography.lgSemibold),
                 ),
-              if (hideSettingsBtn != true && settingsStuff != null)
+              if (trailing != null)
+                Align(
+                  alignment: Alignment.centerRight,
+                  child: Padding(
+                    padding: const EdgeInsets.symmetric(horizontal: 8),
+                    child: trailing,
+                  ),
+                )
+              else if (hideSettingsBtn != true && settingsStuff != null)
                 Align(
                   alignment: Alignment.centerRight,
                   child: FPopoverMenu(

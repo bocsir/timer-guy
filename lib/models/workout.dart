@@ -16,10 +16,26 @@ class Workout extends HiveObject {
   @HiveField(1)
   final List<WorkoutSet> sets;
 
-  Workout({required this.name, required this.sets});
+  @HiveField(2)
+  final String? description;
 
-  Workout copyWith({String? name, int? reps, List<WorkoutSet>? sets, int? timeOn, int? timeOff}) {
-    return Workout(name: name ?? this.name, sets: sets ?? this.sets);
+  Workout({required this.name, required this.sets, this.description});
+
+  int get totalReps => sets.fold(0, (sum, set) => sum + set.reps);
+
+  Workout copyWith({
+    String? name,
+    List<WorkoutSet>? sets,
+    String? description,
+    int? reps,
+    int? timeOn,
+    int? timeOff,
+  }) {
+    return Workout(
+      name: name ?? this.name,
+      sets: sets ?? this.sets,
+      description: description ?? this.description,
+    );
   }
 }
 

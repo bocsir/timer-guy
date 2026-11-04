@@ -9,8 +9,13 @@ import 'package:timer_guy/theme/picker_style.dart';
 import 'package:timer_guy/theme/text_field_style.dart';
 
 extension ColorsExtension on FColors {
-  Color get accent => const Color(0xFF38bdf8); // sky-something
+  Color get accent => brightness == Brightness.dark
+      ? const Color(0xFF38bdf8) // sky-400
+      : const Color(0xFF0284c7); // sky-600
 }
+
+/// The app's current theme mode. Defaults to dark.
+final ValueNotifier<ThemeMode> appThemeMode = ValueNotifier(ThemeMode.dark);
 
 extension TextExtension on FTypography {
   TextStyle _withMonoFont(TextStyle base, {FontWeight? fontWeight, Color? color}) =>
@@ -26,7 +31,6 @@ extension TextExtension on FTypography {
     fontWeight: FontWeight.bold,
     color: Color(0xFF991b1b), // red-80
   );
-  TextStyle get baseAccent => _withMonoFont(base, color: const Color(0xFF38bdf8));
 }
 
 /// See https://forui.dev/docs/themes#customize-themes for more information.
@@ -50,6 +54,12 @@ FThemeData get zincDark {
     border: Color(0xFF404040), // neutral-700
   );
 
+  return _theme(colors: colors);
+}
+
+FThemeData get zincLight => _theme(colors: FThemes.zinc.light.colors);
+
+FThemeData _theme({required FColors colors}) {
   final typography = _typography(colors: colors);
   final style = _style(colors: colors, typography: typography);
 

@@ -10,18 +10,33 @@ import 'package:timer_guy/set_auth.dart';
 class WorkoutAuth extends StatefulWidget {
   final Box<Workout> workoutBox;
 
-  const WorkoutAuth({super.key, required this.workoutBox});
+  /// The workout being edited. When null, a new workout is created.
+  final Workout? workout;
+
+  const WorkoutAuth({super.key, required this.workoutBox, this.workout});
+
+  bool get isEditing => workout != null;
 
   @override
   State<WorkoutAuth> createState() => _WorkoutAuthState();
 }
 
 class _WorkoutAuthState extends State<WorkoutAuth> {
-  List<WorkoutSet> sets = [];
-  final nameController = TextEditingController();
+  late List<WorkoutSet> sets;
+  late final TextEditingController nameController;
+  late final TextEditingController descriptionController;
 
   final _formKey = GlobalKey<FormState>();
   bool _formSubmitted = false;
+
+  @override
+  void initState() {
+    super.initState();
+    final workout = widget.workout;
+    sets = workout == null ? [] : List.of(workout.sets);
+    nameController = TextEditingController(text: workout?.name ?? '');
+    descriptionController = TextEditingController(text: workout?.description ?? '');
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -49,12 +64,20 @@ class _WorkoutAuthState extends State<WorkoutAuth> {
                 crossAxisAlignment: CrossAxisAlignment.start,
                 spacing: 8,
                 children: [
-                  Text('Create Workout', style: typography.xl3Semibold),
+                  Text(widget.isEditing ? 'Edit Workout' : 'Create Workout', style: typography.xl3Semibold),
                   FTextFormField(
                     label: Text('Workout Name', style: typography.lg),
                     controller: nameController,
                     validator: _validateRequired,
                     autovalidateMode: _formSubmitted ? AutovalidateMode.onUserInteraction : AutovalidateMode.disabled,
+                  ),
+                  FTextFormField(
+                    label: Text('Description', style: typography.lg),
+                    hint: 'Optional',
+                    controller: descriptionController,
+                    maxLines: 3,
+                    minLines: 2,
+                    textInputAction: TextInputAction.newline,
                   ),
                   if (sets.isNotEmpty) Text('Sets', style: typography.lgSemibold),
                   for (var i = 0; i < sets.length; i++)
@@ -108,6 +131,13 @@ class _WorkoutAuthState extends State<WorkoutAuth> {
     );
   }
 
+  @override
+  void dispose() {
+    nameController.dispose();
+    descriptionController.dispose();
+    super.dispose();
+  }
+
   void upsertSet(int index, WorkoutSet newSet) {
     setState(() {
       if (index >= sets.length) {
@@ -141,8 +171,18 @@ class _WorkoutAuthState extends State<WorkoutAuth> {
     });
 
     if (_validateForm()) {
-      final workout = Workout(name: nameController.text.trim(), sets: sets);
-      widget.workoutBox.add(workout);
+      final description = descriptionController.text.trim();
+      final workout = Workout(
+        name: nameController.text.trim(),
+        sets: List.of(sets),
+        description: description.isEmpty ? null : description,
+      );
+      final existing = widget.workout;
+      if (existing == null) {
+        widget.workoutBox.add(workout);
+      } else {
+        widget.workoutBox.put(existing.key, workout);
+      }
       Navigator.of(context).pop();
     }
   }
