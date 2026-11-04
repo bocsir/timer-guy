@@ -109,11 +109,6 @@ class WorkoutPageState extends State<WorkoutPage>
     }
   }
 
-  void _resumePhase() {
-    _phaseWatch.start();
-    if (!_ticker.isActive) _ticker.start();
-  }
-
   void _stopPhase() {
     _phaseWatch.stop();
     _ticker.stop();
@@ -453,12 +448,15 @@ class WorkoutPageState extends State<WorkoutPage>
                                         );
                                         startTimer();
                                       } else {
-                                        // Resume from paused state.
+                                        // Resume from paused state with the
+                                        // same countdown as a fresh start.
                                         _sessionWatch.start();
-                                        status.value =
-                                            _statusBeforePause ??
-                                            WorkoutStatus.working;
-                                        _resumePhase();
+                                        status.value = WorkoutStatus.preparing;
+                                        currTime = initialDelay;
+                                        _startPhase(
+                                          initialDelay,
+                                          animate: false,
+                                        );
                                         startTimer();
                                       }
                                     });
