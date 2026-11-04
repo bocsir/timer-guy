@@ -1,0 +1,68 @@
+name: Deploy web to GitHub Pages
+
+on:
+  push:
+    branches: [main]
+    paths-ignore:
+      - "docs/**"
+      - "**.md"
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+concurrency:
+  group: pages-deploy
+  cancel-in-progress: false
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v6
+        with:
+          fetch-depth: 0
+
+      - uses: subosito/flutter-action@v2
+        with:
+          flutter-version: "3.x"
+          channel: stable
+          cache: true
+
+      - name: Install dependencies
+        run: flutter pub get
+
+      - name: Build web
+        run: |
+          flutter build web \
+            --wasm \
+            --release \
+            --base-href=/timer-guy/
+
+      - name: Publish build to docs/
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+
+          find docs -mindepth 1 -maxdepth 1 -exec rm -rf -- {} +
+          cp -a build/web/. docs/
+
+          git add docs
+          if git diff --staged --quiet; then
+            echo "No changes to deploy."
+            exit 0
+          fi
+
+          git commit -m "deploy to pages"
+
+          # The branch may have moved while the web build was running.
+          for attempt in 1 2 3; do
+            if git push origin HEAD:main; then
+              exit 0
+            fi
+            git pull --rebase origin main
+          done
+
+          echo "Failed to push the Pages build." >&2
+          exit 1
