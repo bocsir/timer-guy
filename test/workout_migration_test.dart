@@ -2,13 +2,15 @@ import 'dart:io';
 
 import 'package:flutter_test/flutter_test.dart';
 import 'package:hive_ce/hive.dart';
+import 'package:timer_guy/hive/exercise_adapter.dart';
 import 'package:timer_guy/hive/hive_boxes.dart';
 import 'package:timer_guy/hive/register_adapters.dart';
 import 'package:timer_guy/hive/workout_adapter.dart';
-import 'package:timer_guy/hive/workout_set_adapter.dart';
+import 'package:timer_guy/models/exercise.dart';
 import 'package:timer_guy/models/workout.dart';
 
-/// Writes records using the schema from before `Workout.sets` became a list:
+/// Writes records using the schema from before `Workout.exercises` became a
+/// list of exercises:
 /// 0: name, 1: reps, 2: number of sets, 3: timeOn, 4: timeOff.
 class LegacyWorkout {
   LegacyWorkout(this.name, this.reps, this.sets, this.timeOn, this.timeOff);
@@ -44,16 +46,16 @@ class LegacyWorkoutAdapter extends TypeAdapter<LegacyWorkout> {
 }
 
 /// Writes records using the set-creator branch's layout:
-/// Workout: 0: name, 2: sets
-/// WorkoutSet: 0: reps, 1: timeOn, 2: timeOff, 3: enableGetReady, 4: name.
+/// Workout: 0: name, 2: exercises
+/// Exercise: 0: reps, 1: timeOn, 2: timeOff, 3: enableGetReady, 4: name.
 class SetCreatorWorkout {
-  SetCreatorWorkout(this.name, this.sets);
+  SetCreatorWorkout(this.name, this.exercises);
   final String name;
-  final List<SetCreatorSet> sets;
+  final List<SetCreatorExercise> exercises;
 }
 
-class SetCreatorSet {
-  SetCreatorSet(this.name, this.reps, this.timeOn, this.timeOff);
+class SetCreatorExercise {
+  SetCreatorExercise(this.name, this.reps, this.timeOn, this.timeOff);
   final String name;
   final int reps;
   final int timeOn;
@@ -74,19 +76,19 @@ class SetCreatorWorkoutAdapter extends TypeAdapter<SetCreatorWorkout> {
       ..writeByte(0)
       ..write(obj.name)
       ..writeByte(2)
-      ..write(obj.sets);
+      ..write(obj.exercises);
   }
 }
 
-class SetCreatorSetAdapter extends TypeAdapter<SetCreatorSet> {
+class SetCreatorExerciseAdapter extends TypeAdapter<SetCreatorExercise> {
   @override
   final typeId = 1;
 
   @override
-  SetCreatorSet read(BinaryReader reader) => throw UnimplementedError();
+  SetCreatorExercise read(BinaryReader reader) => throw UnimplementedError();
 
   @override
-  void write(BinaryWriter writer, SetCreatorSet obj) {
+  void write(BinaryWriter writer, SetCreatorExercise obj) {
     writer
       ..writeByte(5)
       ..writeByte(0)
@@ -99,6 +101,84 @@ class SetCreatorSetAdapter extends TypeAdapter<SetCreatorSet> {
       ..write(false)
       ..writeByte(4)
       ..write(obj.name);
+  }
+}
+
+/// Writes records using the previous schema, where the workout itself had a
+/// type:
+/// Workout: 0: name, 1: exercises, 2: description, 3: type
+/// Exercise: 0: name, 1: reps, 2: timeOn, 3: timeOff.
+enum LegacyWorkoutType { interval, reps }
+
+class TypedWorkout {
+  TypedWorkout(this.name, this.exercises, this.type);
+  final String name;
+  final List<TypedExercise> exercises;
+  final LegacyWorkoutType type;
+}
+
+class TypedExercise {
+  TypedExercise(this.name, this.reps, this.timeOn, this.timeOff);
+  final String name;
+  final int reps;
+  final int timeOn;
+  final int timeOff;
+}
+
+class TypedWorkoutAdapter extends TypeAdapter<TypedWorkout> {
+  @override
+  final typeId = 0;
+
+  @override
+  TypedWorkout read(BinaryReader reader) => throw UnimplementedError();
+
+  @override
+  void write(BinaryWriter writer, TypedWorkout obj) {
+    writer
+      ..writeByte(4)
+      ..writeByte(0)
+      ..write(obj.name)
+      ..writeByte(1)
+      ..write(obj.exercises)
+      ..writeByte(2)
+      ..write(null)
+      ..writeByte(3)
+      ..write(obj.type);
+  }
+}
+
+class TypedExerciseAdapter extends TypeAdapter<TypedExercise> {
+  @override
+  final typeId = 1;
+
+  @override
+  TypedExercise read(BinaryReader reader) => throw UnimplementedError();
+
+  @override
+  void write(BinaryWriter writer, TypedExercise obj) {
+    writer
+      ..writeByte(4)
+      ..writeByte(0)
+      ..write(obj.name)
+      ..writeByte(1)
+      ..write(obj.reps)
+      ..writeByte(2)
+      ..write(obj.timeOn)
+      ..writeByte(3)
+      ..write(obj.timeOff);
+  }
+}
+
+class LegacyWorkoutTypeAdapter extends TypeAdapter<LegacyWorkoutType> {
+  @override
+  final typeId = 3;
+
+  @override
+  LegacyWorkoutType read(BinaryReader reader) => throw UnimplementedError();
+
+  @override
+  void write(BinaryWriter writer, LegacyWorkoutType obj) {
+    writer.writeByte(obj.index);
   }
 }
 
@@ -122,13 +202,14 @@ void main() {
     final workout = box.values.single;
 
     expect(workout.name, 'emil');
-    expect(workout.sets, hasLength(2));
-    expect(workout.sets.first.name, 'Set 1');
-    expect(workout.sets.first.reps, 6);
-    expect(workout.sets.first.timeOn, 10);
-    expect(workout.sets.first.timeOff, 20);
-    expect(workout.type, WorkoutType.interval);
-    expect(workout.sets.last.name, 'Set 2');
+    expect(workout.exercises, hasLength(2));
+    expect(workout.exercises.first.name, 'Set 1');
+    expect(workout.exercises.first.reps, 6);
+    expect(workout.exercises.first.timeOn, 10);
+    expect(workout.exercises.first.timeOff, 20);
+    expect(workout.exercises.first.sets, 1);
+    expect(workout.exercises.first.type, ExerciseType.interval);
+    expect(workout.exercises.last.name, 'Set 2');
     expect(MigratingWorkoutAdapter.migratedLegacyData, isTrue);
 
     // Persist the converted records, then reopen to check they are in the
@@ -141,8 +222,8 @@ void main() {
 
     MigratingWorkoutAdapter.migratedLegacyData = false;
     final reopened = await Hive.openBox<Workout>(workoutBox);
-    expect(reopened.values.single.sets, hasLength(2));
-    expect(reopened.values.single.sets.first.name, 'Set 1');
+    expect(reopened.values.single.exercises, hasLength(2));
+    expect(reopened.values.single.exercises.first.name, 'Set 1');
     expect(MigratingWorkoutAdapter.migratedLegacyData, isFalse);
 
     await reopened.close();
@@ -157,12 +238,12 @@ void main() {
     Hive.init(dir.path);
     Hive.resetAdapters();
     Hive.registerAdapter(SetCreatorWorkoutAdapter());
-    Hive.registerAdapter(SetCreatorSetAdapter());
+    Hive.registerAdapter(SetCreatorExerciseAdapter());
     final legacyBox = await Hive.openBox<SetCreatorWorkout>(workoutBox);
     await legacyBox.add(
       SetCreatorWorkout('emil', [
-        SetCreatorSet('Warmup', 6, 10, 20),
-        SetCreatorSet('Work', 8, 30, 15),
+        SetCreatorExercise('Warmup', 6, 10, 20),
+        SetCreatorExercise('Work', 8, 30, 15),
       ]),
     );
     await legacyBox.close();
@@ -175,14 +256,14 @@ void main() {
     final workout = box.values.single;
 
     expect(workout.name, 'emil');
-    expect(workout.sets, hasLength(2));
-    expect(workout.sets.first.name, 'Warmup');
-    expect(workout.sets.first.reps, 6);
-    expect(workout.sets.first.timeOn, 10);
-    expect(workout.sets.first.timeOff, 20);
-    expect(workout.type, WorkoutType.interval);
-    expect(workout.sets.last.name, 'Work');
-    expect(MigratingWorkoutSetAdapter.migratedLegacyData, isTrue);
+    expect(workout.exercises, hasLength(2));
+    expect(workout.exercises.first.name, 'Warmup');
+    expect(workout.exercises.first.reps, 6);
+    expect(workout.exercises.first.timeOn, 10);
+    expect(workout.exercises.first.timeOff, 20);
+    expect(workout.exercises.first.type, ExerciseType.interval);
+    expect(workout.exercises.last.name, 'Work');
+    expect(MigratingExerciseAdapter.migratedLegacyData, isTrue);
 
     // Persist the converted records, then reopen to check they are in the
     // current format.
@@ -192,18 +273,65 @@ void main() {
     await box.compact();
     await box.close();
 
-    MigratingWorkoutSetAdapter.migratedLegacyData = false;
+    MigratingExerciseAdapter.migratedLegacyData = false;
     final reopened = await Hive.openBox<Workout>(workoutBox);
-    expect(reopened.values.single.sets.first.name, 'Warmup');
-    expect(reopened.values.single.sets.last.reps, 8);
-    expect(MigratingWorkoutSetAdapter.migratedLegacyData, isFalse);
+    expect(reopened.values.single.exercises.first.name, 'Warmup');
+    expect(reopened.values.single.exercises.last.reps, 8);
+    expect(MigratingExerciseAdapter.migratedLegacyData, isFalse);
 
     await reopened.close();
     await Hive.close();
     dir.deleteSync(recursive: true);
   });
 
-  test('persists sets & reps workout type', () async {
+  test('moves the workout-level type onto each exercise', () async {
+    final dir = Directory.systemTemp.createTempSync('timer_guy_hive_test');
+
+    Hive.init(dir.path);
+    Hive.resetAdapters();
+    Hive.registerAdapter(TypedWorkoutAdapter());
+    Hive.registerAdapter(TypedExerciseAdapter());
+    Hive.registerAdapter(LegacyWorkoutTypeAdapter());
+    final legacyBox = await Hive.openBox<TypedWorkout>(workoutBox);
+    await legacyBox.add(
+      TypedWorkout('strength', [
+        TypedExercise('Push Ups', 12, 0, 90),
+        TypedExercise('Squats', 10, 0, 60),
+      ], LegacyWorkoutType.reps),
+    );
+    await legacyBox.close();
+
+    Hive.resetAdapters();
+    registerAdapters();
+
+    final box = await Hive.openBox<Workout>(workoutBox);
+    final workout = box.values.single;
+
+    expect(workout.exercises, hasLength(2));
+    expect(workout.exercises.first.type, ExerciseType.reps);
+    expect(workout.exercises.last.type, ExerciseType.reps);
+    expect(workout.exercises.first.reps, 12);
+    expect(MigratingWorkoutAdapter.migratedLegacyData, isTrue);
+
+    await box.putAll({
+      for (final entry in box.toMap().entries) entry.key: entry.value,
+    });
+    await box.compact();
+    await box.close();
+
+    MigratingWorkoutAdapter.migratedLegacyData = false;
+    final reopened = await Hive.openBox<Workout>(workoutBox);
+    final reopenedWorkout = reopened.values.single;
+    expect(reopenedWorkout.exercises.first.type, ExerciseType.reps);
+    expect(reopenedWorkout.exercises.last.type, ExerciseType.reps);
+    expect(MigratingWorkoutAdapter.migratedLegacyData, isFalse);
+
+    await reopened.close();
+    await Hive.close();
+    dir.deleteSync(recursive: true);
+  });
+
+  test('persists per-exercise types and set counts', () async {
     final dir = Directory.systemTemp.createTempSync('timer_guy_hive_test');
 
     Hive.init(dir.path);
@@ -213,9 +341,24 @@ void main() {
     final box = await Hive.openBox<Workout>(workoutBox);
     await box.add(
       Workout(
-        name: 'strength',
-        type: WorkoutType.reps,
-        sets: [WorkoutSet(name: 'Push Ups', reps: 12, timeOn: 0, timeOff: 90)],
+        name: 'mixed',
+        exercises: [
+          Exercise(
+            name: 'Plank',
+            reps: 4,
+            timeOn: 30,
+            timeOff: 15,
+            type: ExerciseType.interval,
+          ),
+          Exercise(
+            name: 'Push Ups',
+            reps: 12,
+            timeOn: 0,
+            timeOff: 90,
+            sets: 3,
+            type: ExerciseType.reps,
+          ),
+        ],
       ),
     );
     await box.close();
@@ -223,11 +366,16 @@ void main() {
     final reopened = await Hive.openBox<Workout>(workoutBox);
     final workout = reopened.values.single;
 
-    expect(workout.type, WorkoutType.reps);
-    expect(workout.isReps, isTrue);
-    expect(workout.sets.single.name, 'Push Ups');
-    expect(workout.sets.single.reps, 12);
-    expect(workout.sets.single.timeOff, 90);
+    expect(workout.exercises, hasLength(2));
+    expect(workout.exercises.first.isInterval, isTrue);
+    expect(workout.exercises.first.sets, 1);
+    expect(workout.exercises.last.isReps, isTrue);
+    expect(workout.exercises.last.name, 'Push Ups');
+    expect(workout.exercises.last.reps, 12);
+    expect(workout.exercises.last.sets, 3);
+    expect(workout.exercises.last.timeOff, 90);
+    expect(workout.totalSets, 4);
+    expect(workout.totalReps, 4 + 12 * 3);
 
     await reopened.close();
     await Hive.close();

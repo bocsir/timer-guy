@@ -6,7 +6,6 @@ import 'package:timer_guy/dance.dart';
 import 'package:timer_guy/hive/hive_boxes.dart';
 import 'package:timer_guy/header.dart';
 import 'package:timer_guy/models/workout.dart';
-import 'package:timer_guy/reps_workout_page.dart';
 import 'package:timer_guy/theme/theme.dart';
 import 'package:timer_guy/widgets/settings_menu_button.dart';
 import 'package:timer_guy/widgets/workout_analytics.dart';
@@ -34,9 +33,16 @@ class WorkoutList extends StatelessWidget {
                 const SettingsMenuButton(),
                 FButton.icon(
                   style: FButtonStyle.ghost(),
-                  onPress: () =>
-                      Navigator.of(context).push(MaterialPageRoute(builder: (context) => WorkoutAuth(workoutBox: box))),
-                  child: Icon(FIcons.plus, color: context.theme.colors.accent, size: 28),
+                  onPress: () => Navigator.of(context).push(
+                    MaterialPageRoute(
+                      builder: (context) => WorkoutAuth(workoutBox: box),
+                    ),
+                  ),
+                  child: Icon(
+                    FIcons.plus,
+                    color: context.theme.colors.accent,
+                    size: 28,
+                  ),
                 ),
               ],
             ),
@@ -49,7 +55,8 @@ class WorkoutList extends StatelessWidget {
             child: Center(heightFactor: 1, child: Dance()),
           ),
           // The default footer decoration draws a divider line above it.
-          scaffoldStyle: (style) => style.copyWith(footerDecoration: const BoxDecoration()),
+          scaffoldStyle: (style) =>
+              style.copyWith(footerDecoration: const BoxDecoration()),
 
           childPad: false,
           child: SafeArea(
@@ -63,7 +70,10 @@ class WorkoutList extends StatelessWidget {
                     Row(
                       spacing: 8,
                       children: [
-                        Text('No workouts found... add one', style: context.theme.typography.base),
+                        Text(
+                          'No workouts found... add one',
+                          style: context.theme.typography.base,
+                        ),
                         Icon(FIcons.arrowUpRight),
                       ],
                     )
@@ -73,18 +83,25 @@ class WorkoutList extends StatelessWidget {
                       children: [
                         ...workouts.map(
                           (w) => FItem(
-                            title: Text(w.name, style: context.theme.typography.baseSemibold),
-                            subtitle: w.description == null || w.description!.isEmpty
+                            title: Text(
+                              w.name,
+                              style: context.theme.typography.baseSemibold,
+                            ),
+                            subtitle:
+                                w.description == null || w.description!.isEmpty
                                 ? null
                                 : Text(
                                     w.description!,
                                     style: context.theme.typography.sm.copyWith(
-                                      color: context.theme.colors.mutedForeground,
+                                      color:
+                                          context.theme.colors.mutedForeground,
                                     ),
                                   ),
                             details: Text(
-                              '${w.sets.length} sets · ${w.totalReps} reps',
-                              style: context.theme.typography.sm.copyWith(color: context.theme.colors.mutedForeground),
+                              '${w.exercises.length} exercises · ${w.totalSets} sets · ${w.totalReps} reps',
+                              style: context.theme.typography.sm.copyWith(
+                                color: context.theme.colors.mutedForeground,
+                              ),
                             ),
                             suffix: Padding(
                               padding: EdgeInsetsGeometry.only(left: 32),
@@ -96,28 +113,43 @@ class WorkoutList extends StatelessWidget {
                                     message: 'View analytics',
                                     child: FButton.icon(
                                       style: FButtonStyle.ghost(),
-                                      onPress: () => Navigator.of(
-                                        context,
-                                      ).push(MaterialPageRoute(builder: (context) => WorkoutAnalyticsPage(workout: w))),
-                                      child: Icon(FIcons.chartBar, color: context.theme.colors.mutedForeground),
+                                      onPress: () => Navigator.of(context).push(
+                                        MaterialPageRoute(
+                                          builder: (context) =>
+                                              WorkoutAnalyticsPage(workout: w),
+                                        ),
+                                      ),
+                                      child: Icon(
+                                        FIcons.chartBar,
+                                        color: context
+                                            .theme
+                                            .colors
+                                            .mutedForeground,
+                                      ),
                                     ),
                                   ),
                                   FButton.icon(
                                     style: FButtonStyle.ghost(),
                                     onPress: () => Navigator.of(context).push(
                                       MaterialPageRoute(
-                                        builder: (context) => WorkoutAuth(workoutBox: box, workout: w),
+                                        builder: (context) => WorkoutAuth(
+                                          workoutBox: box,
+                                          workout: w,
+                                        ),
                                       ),
                                     ),
-                                    child: Icon(FIcons.pencil, color: context.theme.colors.mutedForeground),
+                                    child: Icon(
+                                      FIcons.pencil,
+                                      color:
+                                          context.theme.colors.mutedForeground,
+                                    ),
                                   ),
                                 ],
                               ),
                             ),
                             onPress: () => Navigator.of(context).push(
                               MaterialPageRoute(
-                                builder: (context) =>
-                                    w.isReps ? RepsWorkoutPage(workout: w) : WorkoutPage(workout: w),
+                                builder: (context) => WorkoutPage(workout: w),
                               ),
                             ),
                           ),

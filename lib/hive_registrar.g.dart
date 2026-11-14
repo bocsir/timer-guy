@@ -3,23 +3,24 @@
 // Check in to version control
 
 import 'package:hive_ce/hive_ce.dart';
+import 'package:timer_guy/models/exercise.dart';
 import 'package:timer_guy/models/workout.dart';
 import 'package:timer_guy/models/workout_session.dart';
 
 extension HiveRegistrar on HiveInterface {
   void registerAdapters() {
+    registerAdapter(ExerciseAdapter());
+    registerAdapter(ExerciseTypeAdapter());
     registerAdapter(WorkoutAdapter());
     registerAdapter(WorkoutSessionAdapter());
-    registerAdapter(WorkoutSetAdapter());
-    registerAdapter(WorkoutTypeAdapter());
   }
 }
 
 extension IsolatedHiveRegistrar on IsolatedHiveInterface {
   void registerAdapters() {
+    registerAdapter(ExerciseAdapter());
+    registerAdapter(ExerciseTypeAdapter());
     registerAdapter(WorkoutAdapter());
     registerAdapter(WorkoutSessionAdapter());
-    registerAdapter(WorkoutSetAdapter());
-    registerAdapter(WorkoutTypeAdapter());
   }
 }

@@ -2,10 +2,11 @@
 import 'package:flutter/material.dart';
 import 'package:forui/forui.dart';
 import 'package:hive_ce_flutter/hive_flutter.dart';
+import 'package:timer_guy/exercise_auth.dart';
 import 'package:timer_guy/header.dart';
+import 'package:timer_guy/models/exercise.dart';
 import 'package:timer_guy/models/workout.dart';
 import 'package:timer_guy/theme/theme.dart';
-import 'package:timer_guy/set_auth.dart';
 
 class WorkoutAuth extends StatefulWidget {
   final Box<Workout> workoutBox;
@@ -22,28 +23,22 @@ class WorkoutAuth extends StatefulWidget {
 }
 
 class _WorkoutAuthState extends State<WorkoutAuth> {
-  late List<WorkoutSet> sets;
+  late List<Exercise> exercises;
   late final TextEditingController nameController;
   late final TextEditingController descriptionController;
-  late WorkoutType _type;
-  late final FSelectGroupController<WorkoutType> _typeController;
 
   final _formKey = GlobalKey<FormState>();
   bool _formSubmitted = false;
-
-  bool get _isReps => _type == WorkoutType.reps;
 
   @override
   void initState() {
     super.initState();
     final workout = widget.workout;
-    sets = workout == null ? [] : List.of(workout.sets);
+    exercises = workout == null ? [] : List.of(workout.exercises);
     nameController = TextEditingController(text: workout?.name ?? '');
     descriptionController = TextEditingController(
       text: workout?.description ?? '',
     );
-    _type = workout?.type ?? WorkoutType.interval;
-    _typeController = FMultiValueNotifier.radio(_type);
   }
 
   @override
@@ -79,35 +74,6 @@ class _WorkoutAuthState extends State<WorkoutAuth> {
                     widget.isEditing ? 'Edit Workout' : 'Create Workout',
                     style: typography.xl3Semibold,
                   ),
-                  FSelectGroup<WorkoutType>(
-                    label: Text('Workout Type', style: typography.lg),
-                    controller: _typeController,
-                    children: [
-                      FRadio.grouped(
-                        value: WorkoutType.interval,
-                        label: Text('Interval', style: typography.base),
-                        description: Text(
-                          'Timed work and rest',
-                          style: typography.smGrey,
-                        ),
-                      ),
-                      FRadio.grouped(
-                        value: WorkoutType.reps,
-                        label: Text('Sets & reps', style: typography.base),
-                        description: Text(
-                          'Do your reps, then tap Done to start the rest timer',
-                          style: typography.smGrey,
-                        ),
-                      ),
-                    ],
-                    onChange: (values) {
-                      setState(
-                        () => _type = values.isEmpty
-                            ? WorkoutType.interval
-                            : values.first,
-                      );
-                    },
-                  ),
                   FTextFormField(
                     label: Text('Workout Name', style: typography.lg),
                     controller: nameController,
@@ -124,12 +90,9 @@ class _WorkoutAuthState extends State<WorkoutAuth> {
                     minLines: 2,
                     textInputAction: TextInputAction.newline,
                   ),
-                  if (sets.isNotEmpty)
-                    Text(
-                      _isReps ? 'Exercises' : 'Sets',
-                      style: typography.lgSemibold,
-                    ),
-                  for (var i = 0; i < sets.length; i++)
+                  if (exercises.isNotEmpty)
+                    Text('Exercises', style: typography.lgSemibold),
+                  for (var i = 0; i < exercises.length; i++)
                     Row(
                       mainAxisAlignment: MainAxisAlignment.spaceBetween,
                       children: [
@@ -138,16 +101,13 @@ class _WorkoutAuthState extends State<WorkoutAuth> {
                             crossAxisAlignment: CrossAxisAlignment.start,
                             children: [
                               Text(
-                                _isReps
-                                    ? '${sets[i].name} - ${sets[i].reps} reps'
-                                    : sets[i].name,
+                                exercises[i].name,
                                 style: context.theme.typography.sm,
                               ),
-                              if (_isReps)
-                                Text(
-                                  'Rest ${_formatDuration(sets[i].timeOff)}',
-                                  style: typography.smGrey,
-                                ),
+                              Text(
+                                _exerciseSummary(exercises[i]),
+                                style: typography.smGrey,
+                              ),
                             ],
                           ),
                         ),
@@ -155,12 +115,12 @@ class _WorkoutAuthState extends State<WorkoutAuth> {
                           children: [
                             FButton(
                               onPress: () async {
-                                final updatedSet = await showSetAuthSheet(
+                                final updated = await showExerciseAuthSheet(
                                   i,
-                                  sets[i],
+                                  exercises[i],
                                 );
-                                if (updatedSet != null) {
-                                  upsertSet(i, updatedSet);
+                                if (updated != null) {
+                                  upsertExercise(i, updated);
                                 }
                               },
                               style: FButtonStyle.ghost(),
@@ -168,7 +128,7 @@ class _WorkoutAuthState extends State<WorkoutAuth> {
                             ),
                             FButton(
                               onPress: () {
-                                setState(() => sets.removeAt(i));
+                                setState(() => exercises.removeAt(i));
                               },
                               style: FButtonStyle.ghost(),
                               child: Icon(FIcons.x),
@@ -180,19 +140,23 @@ class _WorkoutAuthState extends State<WorkoutAuth> {
                   FButton(
                     style: FButtonStyle.outline(),
                     onPress: () async {
-                      final index = sets.length;
-                      final newSet = await showSetAuthSheet(
+                      final index = exercises.length;
+                      final newExercise = await showExerciseAuthSheet(
                         index,
-                        WorkoutSet(name: '', reps: 0, timeOn: 0, timeOff: 0),
+                        Exercise(
+                          name: '',
+                          reps: 1,
+                          timeOn: 0,
+                          timeOff: 0,
+                          sets: 3,
+                          type: ExerciseType.interval,
+                        ),
                       );
-                      if (newSet != null) {
-                        upsertSet(index, newSet);
+                      if (newExercise != null) {
+                        upsertExercise(index, newExercise);
                       }
                     },
-                    child: Text(
-                      _isReps ? 'Add Exercise' : 'Add Set',
-                      style: typography.lg,
-                    ),
+                    child: Text('Add Exercise', style: typography.lg),
                   ),
                 ],
               ),
@@ -207,8 +171,18 @@ class _WorkoutAuthState extends State<WorkoutAuth> {
   void dispose() {
     nameController.dispose();
     descriptionController.dispose();
-    _typeController.dispose();
     super.dispose();
+  }
+
+  String _exerciseSummary(Exercise exercise) {
+    if (exercise.isInterval) {
+      return 'Interval · ${_formatDuration(exercise.timeOn)} work · '
+          '${_formatDuration(exercise.timeOff)} rest · '
+          '${exercise.reps} ${exercise.reps == 1 ? 'rep' : 'reps'}';
+    }
+
+    return '${exercise.sets} ${exercise.sets == 1 ? 'set' : 'sets'} × '
+        '${exercise.reps} reps · ${_formatDuration(exercise.timeOff)} rest';
   }
 
   String _formatDuration(int seconds) {
@@ -218,18 +192,21 @@ class _WorkoutAuthState extends State<WorkoutAuth> {
     return '$minutes:${remainingSeconds.toString().padLeft(2, '0')}';
   }
 
-  void upsertSet(int index, WorkoutSet newSet) {
+  void upsertExercise(int index, Exercise newExercise) {
     setState(() {
-      if (index >= sets.length) {
-        sets.add(newSet);
+      if (index >= exercises.length) {
+        exercises.add(newExercise);
       } else {
-        sets[index] = newSet;
+        exercises[index] = newExercise;
       }
     });
   }
 
-  Future<WorkoutSet?> showSetAuthSheet(int setIndex, WorkoutSet initialSet) {
-    return showModalBottomSheet<WorkoutSet>(
+  Future<Exercise?> showExerciseAuthSheet(
+    int exerciseIndex,
+    Exercise initialExercise,
+  ) {
+    return showModalBottomSheet<Exercise>(
       backgroundColor: context.theme.colors.secondary,
       shape: RoundedRectangleBorder(
         borderRadius: BorderRadius.only(
@@ -243,11 +220,9 @@ class _WorkoutAuthState extends State<WorkoutAuth> {
         constraints: BoxConstraints(
           maxHeight: MediaQuery.of(context).size.height * 0.7,
         ),
-        child: SetAuth(
-          set: initialSet,
-          setNumber: setIndex + 1,
-          formSubmitted: _formSubmitted,
-          type: _type,
+        child: ExerciseAuth(
+          exercise: initialExercise,
+          exerciseNumber: exerciseIndex + 1,
         ),
       ),
       showDragHandle: true,
@@ -264,9 +239,8 @@ class _WorkoutAuthState extends State<WorkoutAuth> {
       final description = descriptionController.text.trim();
       final workout = Workout(
         name: nameController.text.trim(),
-        sets: List.of(sets),
+        exercises: List.of(exercises),
         description: description.isEmpty ? null : description,
-        type: _type,
       );
       final existing = widget.workout;
       if (existing == null) {
@@ -280,13 +254,7 @@ class _WorkoutAuthState extends State<WorkoutAuth> {
 
   bool _validateForm() {
     // trigger validator functions on built in form fields (non FPicker fields)
-    final state = _formKey.currentState;
-    bool isFormValid = state?.validate() ?? false;
-    if (!isFormValid) {
-      return false;
-    }
-
-    return true;
+    return _formKey.currentState?.validate() ?? false;
   }
 
   String? _validateRequired(String? value) {

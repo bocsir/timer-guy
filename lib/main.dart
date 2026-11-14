@@ -3,10 +3,10 @@ import 'package:flutter/material.dart';
 import 'package:forui/forui.dart';
 import 'package:hive_ce_flutter/hive_flutter.dart';
 import 'package:timer_guy/audio/beep_player.dart';
+import 'package:timer_guy/hive/exercise_adapter.dart';
 import 'package:timer_guy/hive/hive_boxes.dart';
 import 'package:timer_guy/hive/register_adapters.dart';
 import 'package:timer_guy/hive/workout_adapter.dart';
-import 'package:timer_guy/hive/workout_set_adapter.dart';
 import 'package:timer_guy/models/workout.dart';
 import 'package:timer_guy/models/workout_session.dart';
 import 'package:timer_guy/services/analytics_service.dart';
@@ -39,16 +39,16 @@ Future<void> main() async {
 
   // Rewrite records read with the old schema in the current format so the
   // migration only has to run once. See MigratingWorkoutAdapter.read and
-  // MigratingWorkoutSetAdapter.read.
+  // MigratingExerciseAdapter.read.
   if (MigratingWorkoutAdapter.migratedLegacyData ||
-      MigratingWorkoutSetAdapter.migratedLegacyData) {
+      MigratingExerciseAdapter.migratedLegacyData) {
     await box.putAll({
       for (final entry in box.toMap().entries) entry.key: entry.value,
     });
     // Drop the now-unused frames written with the old schema.
     await box.compact();
     MigratingWorkoutAdapter.migratedLegacyData = false;
-    MigratingWorkoutSetAdapter.migratedLegacyData = false;
+    MigratingExerciseAdapter.migratedLegacyData = false;
   }
 
   await BeepPlayer.init();

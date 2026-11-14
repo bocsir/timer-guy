@@ -1,29 +1,27 @@
 // working_resting_status.dart
 import 'package:flutter/material.dart';
 import 'package:forui/forui.dart';
-import 'package:timer_guy/models/workout.dart';
+import 'package:timer_guy/models/exercise.dart';
 import 'package:timer_guy/theme/theme.dart';
 import 'package:timer_guy/workout_status.dart';
 
-class WorkingRestingStatus extends StatefulWidget {
+class WorkingRestingStatus extends StatelessWidget {
   final WorkoutStatus status;
-  final Workout workout;
-  final int currSet;
+  final Exercise exercise;
 
   const WorkingRestingStatus({
     super.key,
     required this.status,
-    required this.workout,
-    required this.currSet,
+    required this.exercise,
   });
 
   @override
-  State<WorkingRestingStatus> createState() => _WorkingRestingStatusState();
-}
-
-class _WorkingRestingStatusState extends State<WorkingRestingStatus> {
-  @override
   Widget build(BuildContext context) {
+    final workingLabel = 'Working';
+    final workingDetail = exercise.isReps
+        ? '${exercise.reps} reps'
+        : '${exercise.timeOn}s';
+
     return ConstrainedBox(
       constraints: BoxConstraints(maxWidth: 400),
       child: Row(
@@ -32,17 +30,17 @@ class _WorkingRestingStatusState extends State<WorkingRestingStatus> {
           Column(
             children: [
               Text(
-                'Working',
+                workingLabel,
                 style: context.theme.typography.xlSemibold.copyWith(
-                  color: widget.status == WorkoutStatus.working
+                  color: status == WorkoutStatus.working
                       ? context.theme.colors.accent
                       : context.theme.colors.mutedForeground,
                 ),
               ),
               Text(
-                '(${widget.workout.sets[widget.currSet].timeOn}s)',
+                '($workingDetail)',
                 style: context.theme.typography.base.copyWith(
-                  color: widget.status == WorkoutStatus.working
+                  color: status == WorkoutStatus.working
                       ? context.theme.colors.accent
                       : context.theme.colors.mutedForeground,
                 ),
@@ -54,15 +52,15 @@ class _WorkingRestingStatusState extends State<WorkingRestingStatus> {
               Text(
                 'Resting',
                 style: context.theme.typography.xlSemibold.copyWith(
-                  color: widget.status == WorkoutStatus.resting
+                  color: status == WorkoutStatus.resting
                       ? context.theme.colors.accent
                       : context.theme.colors.mutedForeground,
                 ),
               ),
               Text(
-                '(${widget.workout.sets[widget.currSet].timeOff}s)',
+                '(${exercise.timeOff}s)',
                 style: context.theme.typography.base.copyWith(
-                  color: widget.status == WorkoutStatus.resting
+                  color: status == WorkoutStatus.resting
                       ? context.theme.colors.accent
                       : context.theme.colors.mutedForeground,
                 ),
