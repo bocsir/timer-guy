@@ -9,6 +9,7 @@ import 'package:timer_guy/models/workout.dart';
 import 'package:timer_guy/theme/theme.dart';
 import 'package:timer_guy/widgets/settings_menu_button.dart';
 import 'package:timer_guy/widgets/workout_analytics.dart';
+import 'package:timer_guy/widgets/workout_yaml_actions.dart';
 import 'package:timer_guy/workout_auth.dart';
 import 'package:timer_guy/workout_page.dart';
 
@@ -31,6 +32,20 @@ class WorkoutList extends StatelessWidget {
               mainAxisSize: MainAxisSize.min,
               children: [
                 const SettingsMenuButton(),
+                Builder(
+                  builder: (context) => Tooltip(
+                    message: 'Import workout from YAML',
+                    child: FButton.icon(
+                      style: FButtonStyle.ghost(),
+                      onPress: () => importWorkoutsFromYaml(context, box),
+                      child: Icon(
+                        FIcons.upload,
+                        color: context.theme.colors.mutedForeground,
+                        size: 24,
+                      ),
+                    ),
+                  ),
+                ),
                 FButton.icon(
                   style: FButtonStyle.ghost(),
                   onPress: () => Navigator.of(context).push(
@@ -105,46 +120,68 @@ class WorkoutList extends StatelessWidget {
                             ),
                             suffix: Padding(
                               padding: EdgeInsetsGeometry.only(left: 32),
-                              child: Row(
-                                spacing: 16,
-                                mainAxisSize: MainAxisSize.min,
-                                children: [
-                                  Tooltip(
-                                    message: 'View analytics',
-                                    child: FButton.icon(
+                              child: Builder(
+                                builder: (context) => Row(
+                                  spacing: 16,
+                                  mainAxisSize: MainAxisSize.min,
+                                  children: [
+                                    Tooltip(
+                                      message: 'View analytics',
+                                      child: FButton.icon(
+                                        style: FButtonStyle.ghost(),
+                                        onPress: () =>
+                                            Navigator.of(context).push(
+                                              MaterialPageRoute(
+                                                builder: (context) =>
+                                                    WorkoutAnalyticsPage(
+                                                      workout: w,
+                                                    ),
+                                              ),
+                                            ),
+                                        child: Icon(
+                                          FIcons.chartBar,
+                                          color: context
+                                              .theme
+                                              .colors
+                                              .mutedForeground,
+                                        ),
+                                      ),
+                                    ),
+                                    Tooltip(
+                                      message: 'Export as YAML',
+                                      child: FButton.icon(
+                                        style: FButtonStyle.ghost(),
+                                        onPress: () =>
+                                            exportWorkoutAsYaml(context, w),
+                                        child: Icon(
+                                          FIcons.download,
+                                          color: context
+                                              .theme
+                                              .colors
+                                              .mutedForeground,
+                                        ),
+                                      ),
+                                    ),
+                                    FButton.icon(
                                       style: FButtonStyle.ghost(),
                                       onPress: () => Navigator.of(context).push(
                                         MaterialPageRoute(
-                                          builder: (context) =>
-                                              WorkoutAnalyticsPage(workout: w),
+                                          builder: (context) => WorkoutAuth(
+                                            workoutBox: box,
+                                            workout: w,
+                                          ),
                                         ),
                                       ),
                                       child: Icon(
-                                        FIcons.chartBar,
+                                        FIcons.pencil,
                                         color: context
                                             .theme
                                             .colors
                                             .mutedForeground,
                                       ),
                                     ),
-                                  ),
-                                  FButton.icon(
-                                    style: FButtonStyle.ghost(),
-                                    onPress: () => Navigator.of(context).push(
-                                      MaterialPageRoute(
-                                        builder: (context) => WorkoutAuth(
-                                          workoutBox: box,
-                                          workout: w,
-                                        ),
-                                      ),
-                                    ),
-                                    child: Icon(
-                                      FIcons.pencil,
-                                      color:
-                                          context.theme.colors.mutedForeground,
-                                    ),
-                                  ),
-                                ],
+                                  ],
+                                ),
                               ),
                             ),
                             onPress: () => Navigator.of(context).push(

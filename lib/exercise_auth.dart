@@ -78,113 +78,139 @@ class _ExerciseAuthState extends State<ExerciseAuth> {
         child: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
-            SingleChildScrollView(
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text(
-                    'Exercise ${widget.exerciseNumber}',
-                    style: typography.xlSemibold,
-                  ),
-                  FTextFormField(
-                    label: Text(
-                      'Exercise Name',
-                      style: typography.lg.copyWith(
-                        fontWeight: FontWeight.normal,
+            Flexible(
+              child: SingleChildScrollView(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      'Exercise ${widget.exerciseNumber}',
+                      style: typography.xlSemibold,
+                    ),
+                    FTextFormField(
+                      label: Text(
+                        'Exercise Name',
+                        style: typography.lg.copyWith(
+                          fontWeight: FontWeight.normal,
+                        ),
+                      ),
+                      controller: nameController,
+                      validator: (value) => _validateRequired(value),
+                      autovalidateMode: _localFormSubmitted
+                          ? AutovalidateMode.onUserInteraction
+                          : AutovalidateMode.disabled,
+                    ),
+                    Padding(
+                      padding: const EdgeInsets.only(top: 16),
+                      child: FSelectGroup<ExerciseType>(
+                        label: Text('Exercise Type', style: typography.lg),
+                        controller: _typeController,
+                        children: [
+                          FRadio.grouped(
+                            value: ExerciseType.interval,
+                            label: Text('Interval', style: typography.base),
+                            description: Text(
+                              'Timed work and rest',
+                              style: typography.smGrey,
+                            ),
+                          ),
+                          FRadio.grouped(
+                            value: ExerciseType.reps,
+                            label: Text('Sets & reps', style: typography.base),
+                            description: Text(
+                              'Do your reps, then tap Done to start the rest timer',
+                              style: typography.smGrey,
+                            ),
+                          ),
+                        ],
+                        onChange: (values) {
+                          setState(
+                            () => type = values.isEmpty
+                                ? ExerciseType.interval
+                                : values.first,
+                          );
+                        },
                       ),
                     ),
-                    controller: nameController,
-                    validator: (value) => _validateRequired(value),
-                    autovalidateMode: _localFormSubmitted
-                        ? AutovalidateMode.onUserInteraction
-                        : AutovalidateMode.disabled,
-                  ),
-                  FSelectGroup<ExerciseType>(
-                    label: Text('Exercise Type', style: typography.lg),
-                    controller: _typeController,
-                    children: [
-                      FRadio.grouped(
-                        value: ExerciseType.interval,
-                        label: Text('Interval', style: typography.base),
-                        description: Text(
-                          'Timed work and rest',
-                          style: typography.smGrey,
-                        ),
+                    if (_isInterval) ...[
+                      _buildCountStepper(
+                        label: 'Reps',
+                        value: repCount,
+                        onDecrement: () => _updateRepCount(false),
+                        onIncrement: () => _updateRepCount(true),
+                        error: _shouldShowRepCountError() ? '0 Reps?' : null,
                       ),
-                      FRadio.grouped(
-                        value: ExerciseType.reps,
-                        label: Text('Sets & reps', style: typography.base),
-                        description: Text(
-                          'Do your reps, then tap Done to start the rest timer',
-                          style: typography.smGrey,
-                        ),
+                      Row(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        spacing: 16,
+                        children: [
+                          Expanded(
+                            child: _buildDurationPicker(
+                              label: 'Time On',
+                              controller: workDurationController,
+                              width: double.infinity,
+                            ),
+                          ),
+                          Expanded(
+                            child: _buildDurationPicker(
+                              label: 'Time Off',
+                              controller: restDurationController,
+                              width: double.infinity,
+                            ),
+                          ),
+                        ],
                       ),
+                      if (_shouldShowWorkDurationError())
+                        Text(
+                          'Enter rep time > 0 seconds',
+                          style: typography.smError,
+                        ),
+                      if (_shouldShowRestDurationError())
+                        Text(
+                          'Enter rest time > 0 seconds',
+                          style: typography.smError,
+                        ),
+                    ] else ...[
+                      Row(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        spacing: 16,
+                        children: [
+                          Expanded(
+                            child: _buildCountStepper(
+                              label: 'Sets',
+                              value: setCount,
+                              onDecrement: () => _updateSetCount(false),
+                              onIncrement: () => _updateSetCount(true),
+                              error: _shouldShowSetCountError()
+                                  ? 'At least 1 set'
+                                  : null,
+                            ),
+                          ),
+                          Expanded(
+                            child: _buildCountStepper(
+                              label: 'Reps per set',
+                              value: repCount,
+                              onDecrement: () => _updateRepCount(false),
+                              onIncrement: () => _updateRepCount(true),
+                              error: _shouldShowRepCountError()
+                                  ? '0 Reps?'
+                                  : null,
+                            ),
+                          ),
+                        ],
+                      ),
+                      _buildDurationPicker(
+                        label: 'Rest',
+                        controller: restDurationController,
+                      ),
+                      if (_shouldShowRestDurationError())
+                        Text(
+                          'Enter rest time > 0 seconds',
+                          style: typography.smError,
+                        ),
                     ],
-                    onChange: (values) {
-                      setState(
-                        () => type = values.isEmpty
-                            ? ExerciseType.interval
-                            : values.first,
-                      );
-                    },
-                  ),
-                  if (_isInterval) ...[
-                    _buildCountStepper(
-                      label: 'Reps',
-                      value: repCount,
-                      onDecrement: () => _updateRepCount(false),
-                      onIncrement: () => _updateRepCount(true),
-                      error: _shouldShowRepCountError() ? '0 Reps?' : null,
-                    ),
-                    _buildDurationPicker(
-                      label: 'Time On',
-                      controller: workDurationController,
-                    ),
-                  ] else ...[
-                    Row(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      spacing: 16,
-                      children: [
-                        Expanded(
-                          child: _buildCountStepper(
-                            label: 'Sets',
-                            value: setCount,
-                            onDecrement: () => _updateSetCount(false),
-                            onIncrement: () => _updateSetCount(true),
-                            error: _shouldShowSetCountError()
-                                ? 'At least 1 set'
-                                : null,
-                          ),
-                        ),
-                        Expanded(
-                          child: _buildCountStepper(
-                            label: 'Reps per set',
-                            value: repCount,
-                            onDecrement: () => _updateRepCount(false),
-                            onIncrement: () => _updateRepCount(true),
-                            error: _shouldShowRepCountError()
-                                ? '0 Reps?'
-                                : null,
-                          ),
-                        ),
-                      ],
-                    ),
                   ],
-                  _buildDurationPicker(
-                    label: _isInterval ? 'Time Off' : 'Rest',
-                    controller: restDurationController,
-                  ),
-                  if (_isInterval && _shouldShowWorkDurationError())
-                    Text(
-                      'Enter rep time > 0 seconds',
-                      style: typography.smError,
-                    ),
-                  if (_shouldShowRestDurationError())
-                    Text(
-                      'Enter rest time > 0 seconds',
-                      style: typography.smError,
-                    ),
-                ],
+                ),
               ),
             ),
             Padding(
@@ -284,6 +310,7 @@ class _ExerciseAuthState extends State<ExerciseAuth> {
   Widget _buildDurationPicker({
     required String label,
     required FPickerController controller,
+    double width = 150,
   }) {
     final typography = context.theme.typography;
 
@@ -294,7 +321,7 @@ class _ExerciseAuthState extends State<ExerciseAuth> {
         Text('mm:ss', style: typography.smGrey),
         SizedBox(
           height: 100,
-          width: 150,
+          width: width,
           child: FPicker(
             controller: controller,
             children: [
