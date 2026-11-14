@@ -9,7 +9,16 @@ class SetAuth extends StatefulWidget {
   final WorkoutSet set;
   final bool formSubmitted;
   final int setNumber;
-  const SetAuth({super.key, required this.set, this.formSubmitted = false, required this.setNumber});
+  final WorkoutType type;
+  const SetAuth({
+    super.key,
+    required this.set,
+    this.formSubmitted = false,
+    required this.setNumber,
+    this.type = WorkoutType.interval,
+  });
+
+  bool get isReps => type == WorkoutType.reps;
 
   @override
   State<SetAuth> createState() => _SetAuthState();
@@ -31,11 +40,15 @@ class _SetAuthState extends State<SetAuth> {
 
     final timeOnMinutes = widget.set.timeOn ~/ 60;
     final timeOnSeconds = widget.set.timeOn % 60;
-    repDurationController = FPickerController(initialIndexes: [timeOnMinutes, timeOnSeconds]);
+    repDurationController = FPickerController(
+      initialIndexes: [timeOnMinutes, timeOnSeconds],
+    );
 
     final timeOffMinutes = widget.set.timeOff ~/ 60;
     final timeOffSeconds = widget.set.timeOff % 60;
-    restDurationController = FPickerController(initialIndexes: [timeOffMinutes, timeOffSeconds]);
+    restDurationController = FPickerController(
+      initialIndexes: [timeOffMinutes, timeOffSeconds],
+    );
 
     repDurationController.addListener(() => setState(() {}));
     restDurationController.addListener(() => setState(() {}));
@@ -64,9 +77,19 @@ class _SetAuthState extends State<SetAuth> {
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  Text('Set ${widget.setNumber}', style: typography.xlSemibold),
+                  Text(
+                    widget.isReps
+                        ? 'Exercise ${widget.setNumber}'
+                        : 'Set ${widget.setNumber}',
+                    style: typography.xlSemibold,
+                  ),
                   FTextFormField(
-                    label: Text('Set Name', style: typography.lg.copyWith(fontWeight: FontWeight.normal)),
+                    label: Text(
+                      widget.isReps ? 'Exercise Name' : 'Set Name',
+                      style: typography.lg.copyWith(
+                        fontWeight: FontWeight.normal,
+                      ),
+                    ),
                     controller: nameController,
                     validator: (value) => _validateRequired(value),
                     autovalidateMode: _localFormSubmitted
@@ -86,23 +109,40 @@ class _SetAuthState extends State<SetAuth> {
                                 _updateRepCount(false);
                               },
                               style: FButtonStyle.outline(),
-                              child: Icon(FIcons.minus, color: context.theme.colors.foreground),
+                              child: Icon(
+                                FIcons.minus,
+                                color: context.theme.colors.foreground,
+                              ),
                             ),
                             SizedBox(
                               width: 40,
-                              child: Center(child: Text(repCount.toString(), style: typography.lgSemibold)),
+                              child: Center(
+                                child: Text(
+                                  repCount.toString(),
+                                  style: typography.lgSemibold,
+                                ),
+                              ),
                             ),
                             FButton(
                               onPress: () {
                                 _updateRepCount(true);
                               },
                               style: FButtonStyle.outline(),
-                              child: Icon(FIcons.plus, color: context.theme.colors.foreground),
+                              child: Icon(
+                                FIcons.plus,
+                                color: context.theme.colors.foreground,
+                              ),
                             ),
                           ],
                         ),
                         (_shouldShowRepCountError())
-                            ? SizedBox(height: 20, child: Text('0 Reps?', style: typography.smError))
+                            ? SizedBox(
+                                height: 20,
+                                child: Text(
+                                  '0 Reps?',
+                                  style: typography.smError,
+                                ),
+                              )
                             : SizedBox(height: 20),
                       ],
                     ),
@@ -113,35 +153,51 @@ class _SetAuthState extends State<SetAuth> {
                     child: Column(
                       children: [
                         Row(
-                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                          mainAxisAlignment: widget.isReps
+                              ? MainAxisAlignment.start
+                              : MainAxisAlignment.spaceBetween,
                           children: [
-                            Column(
-                              crossAxisAlignment: CrossAxisAlignment.start,
-                              children: [
-                                Text('Time On', style: typography.lg),
-                                Text('mm:ss', style: typography.smGrey),
-                                SizedBox(
-                                  height: 100,
-                                  width: 150,
-                                  child: FPicker(
-                                    controller: repDurationController,
-                                    children: [
-                                      FPickerWheel.builder(
-                                        builder: (context, index) => Text((index % 60).toString().padLeft(2, '0')),
-                                      ),
-                                      const Text(':'),
-                                      FPickerWheel.builder(
-                                        builder: (context, index) => Text((index % 60).toString().padLeft(2, '0')),
-                                      ),
-                                    ],
+                            if (!widget.isReps)
+                              Column(
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                children: [
+                                  Text('Time On', style: typography.lg),
+                                  Text('mm:ss', style: typography.smGrey),
+                                  SizedBox(
+                                    height: 100,
+                                    width: 150,
+                                    child: FPicker(
+                                      controller: repDurationController,
+                                      children: [
+                                        FPickerWheel.builder(
+                                          builder: (context, index) => Text(
+                                            (index % 60).toString().padLeft(
+                                              2,
+                                              '0',
+                                            ),
+                                          ),
+                                        ),
+                                        const Text(':'),
+                                        FPickerWheel.builder(
+                                          builder: (context, index) => Text(
+                                            (index % 60).toString().padLeft(
+                                              2,
+                                              '0',
+                                            ),
+                                          ),
+                                        ),
+                                      ],
+                                    ),
                                   ),
-                                ),
-                              ],
-                            ),
+                                ],
+                              ),
                             Column(
                               crossAxisAlignment: CrossAxisAlignment.start,
                               children: [
-                                Text('Time Off', style: typography.lg),
+                                Text(
+                                  widget.isReps ? 'Rest' : 'Time Off',
+                                  style: typography.lg,
+                                ),
                                 Text('mm:ss', style: typography.smGrey),
                                 SizedBox(
                                   height: 100,
@@ -150,11 +206,21 @@ class _SetAuthState extends State<SetAuth> {
                                     controller: restDurationController,
                                     children: [
                                       FPickerWheel.builder(
-                                        builder: (context, index) => Text((index % 60).toString().padLeft(2, '0')),
+                                        builder: (context, index) => Text(
+                                          (index % 60).toString().padLeft(
+                                            2,
+                                            '0',
+                                          ),
+                                        ),
                                       ),
                                       const Text(':'),
                                       FPickerWheel.builder(
-                                        builder: (context, index) => Text((index % 60).toString().padLeft(2, '0')),
+                                        builder: (context, index) => Text(
+                                          (index % 60).toString().padLeft(
+                                            2,
+                                            '0',
+                                          ),
+                                        ),
                                       ),
                                     ],
                                   ),
@@ -166,11 +232,24 @@ class _SetAuthState extends State<SetAuth> {
                       ],
                     ),
                   ),
-                  (_shouldShowRepDurationError())
-                      ? SizedBox(height: 20, child: Text('Enter rep time > 0 seconds', style: typography.smError))
-                      : SizedBox(height: 20),
+                  if (!widget.isReps)
+                    (_shouldShowRepDurationError())
+                        ? SizedBox(
+                            height: 20,
+                            child: Text(
+                              'Enter rep time > 0 seconds',
+                              style: typography.smError,
+                            ),
+                          )
+                        : SizedBox(height: 20),
                   (_shouldShowRestDurationError())
-                      ? SizedBox(height: 20, child: Text('Enter rest time > 0 seconds', style: typography.smError))
+                      ? SizedBox(
+                          height: 20,
+                          child: Text(
+                            'Enter rest time > 0 seconds',
+                            style: typography.smError,
+                          ),
+                        )
                       : SizedBox(height: 20),
                 ],
               ),
@@ -184,7 +263,10 @@ class _SetAuthState extends State<SetAuth> {
                   FButton(
                     onPress: () => Navigator.of(context).pop(),
                     style: transparentButtonStyle,
-                    child: Text('Cancel', style: TextStyle(color: context.theme.colors.primary)),
+                    child: Text(
+                      'Cancel',
+                      style: TextStyle(color: context.theme.colors.primary),
+                    ),
                   ),
                   FButton(
                     onPress: () {
@@ -222,7 +304,9 @@ class _SetAuthState extends State<SetAuth> {
     return WorkoutSet(
       name: nameController.text,
       reps: repCount,
-      timeOn: (repDuration[0] % 60) * 60 + (repDuration[1] % 60),
+      timeOn: widget.isReps
+          ? widget.set.timeOn
+          : (repDuration[0] % 60) * 60 + (repDuration[1] % 60),
       timeOff: (restDuration[0] % 60) * 60 + (restDuration[1] % 60),
     );
   }
@@ -237,7 +321,8 @@ class _SetAuthState extends State<SetAuth> {
       return false;
     }
 
-    if (_validateTimeSelection(repDurationController.value) != null) {
+    if (!widget.isReps &&
+        _validateTimeSelection(repDurationController.value) != null) {
       return false;
     }
 
@@ -275,11 +360,13 @@ class _SetAuthState extends State<SetAuth> {
   }
 
   bool _shouldShowRepDurationError() {
-    return _localFormSubmitted && _validateTimeSelection(repDurationController.value) != null;
+    return _localFormSubmitted &&
+        _validateTimeSelection(repDurationController.value) != null;
   }
 
   bool _shouldShowRestDurationError() {
-    return _localFormSubmitted && _validateTimeSelection(restDurationController.value) != null;
+    return _localFormSubmitted &&
+        _validateTimeSelection(restDurationController.value) != null;
   }
 
   bool _shouldShowRepCountError() {

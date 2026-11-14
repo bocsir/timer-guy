@@ -34,6 +34,8 @@ class MigratingWorkoutAdapter extends WorkoutAdapter {
         name: fields[0] as String,
         sets: sets.cast<WorkoutSet>(),
         description: fields[2] as String?,
+        // Workouts written before the reps mode was added have no type field.
+        type: fields[3] as WorkoutType? ?? WorkoutType.interval,
       );
     }
 

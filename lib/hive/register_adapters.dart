@@ -9,10 +9,12 @@
 import 'package:hive_ce/hive.dart';
 import 'package:timer_guy/hive/workout_adapter.dart';
 import 'package:timer_guy/hive/workout_set_adapter.dart';
+import 'package:timer_guy/models/workout.dart';
 import 'package:timer_guy/models/workout_session.dart';
 
 void registerAdapters() {
   Hive.registerAdapter(MigratingWorkoutAdapter());
   Hive.registerAdapter(MigratingWorkoutSetAdapter());
   Hive.registerAdapter(WorkoutSessionAdapter());
+  Hive.registerAdapter(WorkoutTypeAdapter());
 }

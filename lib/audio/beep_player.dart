@@ -1,7 +1,8 @@
 // beep_player.dart
 
 import 'beep_player_io.dart'
-    if (dart.library.js_interop) 'beep_player_web.dart' as impl;
+    if (dart.library.js_interop) 'beep_player_web.dart'
+    as impl;
 
 /// Plays short synthesised beep tones for the workout countdown.
 ///
@@ -22,4 +23,8 @@ class BeepPlayer {
 
   /// High beep: played at 0 s (rest over) and at the end of each working period.
   static void playHigh() => impl.BeepPlayer.playHigh();
+
+  /// Two high beeps in quick succession. Used when a reps-mode rest timer ends
+  /// to signal that it is time for the next set.
+  static void playDouble() => impl.BeepPlayer.playDouble();
 }

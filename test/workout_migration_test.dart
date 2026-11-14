@@ -127,6 +127,7 @@ void main() {
     expect(workout.sets.first.reps, 6);
     expect(workout.sets.first.timeOn, 10);
     expect(workout.sets.first.timeOff, 20);
+    expect(workout.type, WorkoutType.interval);
     expect(workout.sets.last.name, 'Set 2');
     expect(MigratingWorkoutAdapter.migratedLegacyData, isTrue);
 
@@ -179,6 +180,7 @@ void main() {
     expect(workout.sets.first.reps, 6);
     expect(workout.sets.first.timeOn, 10);
     expect(workout.sets.first.timeOff, 20);
+    expect(workout.type, WorkoutType.interval);
     expect(workout.sets.last.name, 'Work');
     expect(MigratingWorkoutSetAdapter.migratedLegacyData, isTrue);
 
@@ -195,6 +197,37 @@ void main() {
     expect(reopened.values.single.sets.first.name, 'Warmup');
     expect(reopened.values.single.sets.last.reps, 8);
     expect(MigratingWorkoutSetAdapter.migratedLegacyData, isFalse);
+
+    await reopened.close();
+    await Hive.close();
+    dir.deleteSync(recursive: true);
+  });
+
+  test('persists sets & reps workout type', () async {
+    final dir = Directory.systemTemp.createTempSync('timer_guy_hive_test');
+
+    Hive.init(dir.path);
+    Hive.resetAdapters();
+    registerAdapters();
+
+    final box = await Hive.openBox<Workout>(workoutBox);
+    await box.add(
+      Workout(
+        name: 'strength',
+        type: WorkoutType.reps,
+        sets: [WorkoutSet(name: 'Push Ups', reps: 12, timeOn: 0, timeOff: 90)],
+      ),
+    );
+    await box.close();
+
+    final reopened = await Hive.openBox<Workout>(workoutBox);
+    final workout = reopened.values.single;
+
+    expect(workout.type, WorkoutType.reps);
+    expect(workout.isReps, isTrue);
+    expect(workout.sets.single.name, 'Push Ups');
+    expect(workout.sets.single.reps, 12);
+    expect(workout.sets.single.timeOff, 90);
 
     await reopened.close();
     await Hive.close();

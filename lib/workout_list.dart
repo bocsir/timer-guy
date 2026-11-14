@@ -6,6 +6,7 @@ import 'package:timer_guy/dance.dart';
 import 'package:timer_guy/hive/hive_boxes.dart';
 import 'package:timer_guy/header.dart';
 import 'package:timer_guy/models/workout.dart';
+import 'package:timer_guy/reps_workout_page.dart';
 import 'package:timer_guy/theme/theme.dart';
 import 'package:timer_guy/widgets/settings_menu_button.dart';
 import 'package:timer_guy/widgets/workout_analytics.dart';
@@ -113,9 +114,12 @@ class WorkoutList extends StatelessWidget {
                                 ],
                               ),
                             ),
-                            onPress: () => Navigator.of(
-                              context,
-                            ).push(MaterialPageRoute(builder: (context) => WorkoutPage(workout: w))),
+                            onPress: () => Navigator.of(context).push(
+                              MaterialPageRoute(
+                                builder: (context) =>
+                                    w.isReps ? RepsWorkoutPage(workout: w) : WorkoutPage(workout: w),
+                              ),
+                            ),
                           ),
                         ),
                       ],

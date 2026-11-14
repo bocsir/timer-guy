@@ -11,6 +11,7 @@ extension HiveRegistrar on HiveInterface {
     registerAdapter(WorkoutAdapter());
     registerAdapter(WorkoutSessionAdapter());
     registerAdapter(WorkoutSetAdapter());
+    registerAdapter(WorkoutTypeAdapter());
   }
 }
 
@@ -19,5 +20,6 @@ extension IsolatedHiveRegistrar on IsolatedHiveInterface {
     registerAdapter(WorkoutAdapter());
     registerAdapter(WorkoutSessionAdapter());
     registerAdapter(WorkoutSetAdapter());
+    registerAdapter(WorkoutTypeAdapter());
   }
 }

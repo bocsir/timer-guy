@@ -1,5 +1,6 @@
 // beep_player_io.dart
 
+import 'dart:async' show Timer;
 import 'dart:math' as math;
 import 'dart:typed_data';
 import 'dart:io' show File;
@@ -55,6 +56,11 @@ class BeepPlayer {
 
   static void playHigh() {
     _highQueue = _play(_highQueue, _highPlayer, _highSource);
+  }
+
+  static void playDouble() {
+    playHigh();
+    Timer(const Duration(milliseconds: 350), playHigh);
   }
 
   static Future<void> _play(

@@ -32,6 +32,15 @@ class BeepPlayer {
 
   static void playHigh() => _play(BeepTone.high);
 
+  static void playDouble() {
+    final context = _ensureContext();
+    unawaited(_unlock(context));
+
+    final now = context.currentTime;
+    _schedule(context, BeepTone.high, now);
+    _schedule(context, BeepTone.high, now + 0.35);
+  }
+
   static web.AudioContext _ensureContext() {
     final existing = _context;
     if (existing != null) return existing;
@@ -68,7 +77,10 @@ class BeepPlayer {
     final context = _ensureContext();
     unawaited(_unlock(context));
 
-    final now = context.currentTime;
+    _schedule(context, tone, context.currentTime);
+  }
+
+  static void _schedule(web.AudioContext context, BeepTone tone, double start) {
     final duration = tone.durationMs / 1000;
     // Short fades so the tone doesn't click when it starts or stops.
     final fade = duration < 0.05 ? duration / 4 : 0.01;
@@ -79,10 +91,10 @@ class BeepPlayer {
 
     final gain = context.createGain();
     gain.gain
-      ..setValueAtTime(0, now)
-      ..linearRampToValueAtTime(_volume, now + fade)
-      ..setValueAtTime(_volume, now + duration - fade)
-      ..linearRampToValueAtTime(0, now + duration);
+      ..setValueAtTime(0, start)
+      ..linearRampToValueAtTime(_volume, start + fade)
+      ..setValueAtTime(_volume, start + duration - fade)
+      ..linearRampToValueAtTime(0, start + duration);
 
     oscillator.connect(gain);
     gain.connect(context.destination);
@@ -92,7 +104,7 @@ class BeepPlayer {
       gain.disconnect();
     }).toJS;
 
-    oscillator.start(now);
-    oscillator.stop(now + duration);
+    oscillator.start(start);
+    oscillator.stop(start + duration);
   }
 }
