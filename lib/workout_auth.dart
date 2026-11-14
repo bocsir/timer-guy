@@ -59,127 +59,138 @@ class _WorkoutAuthState extends State<WorkoutAuth> {
         ),
       ),
 
-      child: SingleChildScrollView(
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          spacing: 16,
-          children: [
-            Form(
-              key: _formKey,
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                spacing: 8,
-                children: [
-                  Text(
-                    widget.isEditing ? 'Edit Workout' : 'Create Workout',
-                    style: typography.xl3Semibold,
-                  ),
-                  FTextFormField(
-                    label: Text('Workout Name', style: typography.lg),
-                    controller: nameController,
-                    validator: _validateRequired,
-                    autovalidateMode: _formSubmitted
-                        ? AutovalidateMode.onUserInteraction
-                        : AutovalidateMode.disabled,
-                  ),
-                  FTextFormField(
-                    label: Text('Description', style: typography.lg),
-                    hint: 'Optional',
-                    controller: descriptionController,
-                    maxLines: 3,
-                    minLines: 2,
-                    textInputAction: TextInputAction.newline,
-                  ),
-                  if (exercises.isNotEmpty)
-                    Text('Exercises', style: typography.lgSemibold),
-                  for (var i = 0; i < exercises.length; i++)
-                    Row(
-                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                      children: [
-                        Expanded(
-                          child: Column(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: [
-                              Text(
-                                exercises[i].name,
-                                style: context.theme.typography.sm,
-                              ),
-                              Text(
-                                _exerciseSummary(exercises[i]),
-                                style: typography.smGrey,
-                              ),
-                              if (exercises[i].description
-                                  case final description?
-                                  when description.isNotEmpty)
-                                Text(
-                                  description,
-                                  maxLines: 2,
-                                  overflow: TextOverflow.ellipsis,
-                                  style: typography.smGrey,
-                                ),
-                            ],
-                          ),
-                        ),
-                        Row(
-                          children: [
-                            Tooltip(
-                              message: 'Duplicate exercise',
-                              child: FButton(
-                                onPress: () => duplicateExercise(i),
-                                style: FButtonStyle.ghost(),
-                                child: Icon(FIcons.copy),
-                              ),
-                            ),
-                            FButton(
-                              onPress: () async {
-                                final updated = await showExerciseAuthSheet(
-                                  i,
-                                  exercises[i],
-                                );
-                                if (updated != null) {
-                                  upsertExercise(i, updated);
-                                }
-                              },
-                              style: FButtonStyle.ghost(),
-                              child: Icon(FIcons.pencil),
-                            ),
-                            FButton(
-                              onPress: () {
-                                setState(() => exercises.removeAt(i));
-                              },
-                              style: FButtonStyle.ghost(),
-                              child: Icon(FIcons.x),
-                            ),
-                          ],
-                        ),
-                      ],
-                    ),
-                  FButton(
-                    style: FButtonStyle.outline(),
-                    onPress: () async {
-                      final index = exercises.length;
-                      final newExercise = await showExerciseAuthSheet(
-                        index,
-                        Exercise(
-                          name: '',
-                          reps: 1,
-                          timeOn: 0,
-                          timeOff: 0,
-                          sets: 3,
-                          type: ExerciseType.interval,
-                        ),
-                      );
-                      if (newExercise != null) {
-                        upsertExercise(index, newExercise);
-                      }
-                    },
-                    child: Text('Add Exercise', style: typography.lg),
-                  ),
-                ],
+      child: ReorderableListView.builder(
+        buildDefaultDragHandles: false,
+        onReorder: _reorderExercises,
+        header: Form(
+          key: _formKey,
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            spacing: 8,
+            children: [
+              Text(
+                widget.isEditing ? 'Edit Workout' : 'Create Workout',
+                style: typography.xl3Semibold,
+              ),
+              FTextFormField(
+                label: Text('Workout Name', style: typography.lg),
+                controller: nameController,
+                validator: _validateRequired,
+                autovalidateMode: _formSubmitted
+                    ? AutovalidateMode.onUserInteraction
+                    : AutovalidateMode.disabled,
+              ),
+              FTextFormField(
+                label: Text('Description', style: typography.lg),
+                hint: 'Optional',
+                controller: descriptionController,
+                maxLines: 3,
+                minLines: 2,
+                textInputAction: TextInputAction.newline,
+              ),
+              if (exercises.isNotEmpty)
+                Text('Exercises', style: typography.lgSemibold),
+            ],
+          ),
+        ),
+        itemCount: exercises.length,
+        itemBuilder: (context, i) => _buildExerciseRow(context, i),
+        footer: Padding(
+          padding: const EdgeInsets.only(top: 16),
+          child: FButton(
+            style: FButtonStyle.outline(),
+            onPress: () async {
+              final index = exercises.length;
+              final newExercise = await showExerciseAuthSheet(
+                index,
+                Exercise(
+                  name: '',
+                  reps: 1,
+                  timeOn: 0,
+                  timeOff: 0,
+                  sets: 3,
+                  type: ExerciseType.interval,
+                ),
+              );
+              if (newExercise != null) {
+                upsertExercise(index, newExercise);
+              }
+            },
+            child: Text('Add Exercise', style: typography.lg),
+          ),
+        ),
+      ),
+    );
+  }
+
+  Widget _buildExerciseRow(BuildContext context, int i) {
+    final typography = context.theme.typography;
+    final colors = context.theme.colors;
+    final exercise = exercises[i];
+
+    return Padding(
+      key: ObjectKey(exercise),
+      padding: const EdgeInsets.only(top: 8),
+      child: Row(
+        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+        children: [
+          ReorderableDragStartListener(
+            index: i,
+            child: Tooltip(
+              message: 'Drag to reorder',
+              child: Padding(
+                padding: const EdgeInsets.only(right: 8, top: 8, bottom: 8),
+                child: Icon(FIcons.gripVertical, color: colors.mutedForeground),
               ),
             ),
-          ],
-        ),
+          ),
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(exercise.name, style: typography.sm),
+                Text(_exerciseSummary(exercise), style: typography.smGrey),
+                if (exercise.description case final description?
+                    when description.isNotEmpty)
+                  Text(
+                    description,
+                    maxLines: 2,
+                    overflow: TextOverflow.ellipsis,
+                    style: typography.smGrey,
+                  ),
+              ],
+            ),
+          ),
+          Row(
+            children: [
+              Tooltip(
+                message: 'Duplicate exercise',
+                child: FButton(
+                  onPress: () => duplicateExercise(i),
+                  style: FButtonStyle.ghost(),
+                  child: Icon(FIcons.copy),
+                ),
+              ),
+              FButton(
+                onPress: () async {
+                  final updated = await showExerciseAuthSheet(i, exercise);
+                  if (updated != null) {
+                    upsertExercise(i, updated);
+                  }
+                },
+                style: FButtonStyle.ghost(),
+                child: Icon(FIcons.pencil),
+              ),
+              FButton(
+                onPress: () {
+                  setState(() => exercises.removeAt(i));
+                },
+                style: FButtonStyle.ghost(),
+                child: Icon(FIcons.x),
+              ),
+            ],
+          ),
+        ],
       ),
     );
   }
@@ -224,6 +235,16 @@ class _WorkoutAuthState extends State<WorkoutAuth> {
   void duplicateExercise(int index) {
     setState(() {
       exercises.insert(index + 1, exercises[index].copyWith());
+    });
+  }
+
+  void _reorderExercises(int oldIndex, int newIndex) {
+    setState(() {
+      if (newIndex > oldIndex) {
+        newIndex -= 1;
+      }
+      final exercise = exercises.removeAt(oldIndex);
+      exercises.insert(newIndex, exercise);
     });
   }
 
