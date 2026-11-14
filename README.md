@@ -11,15 +11,18 @@ Name tbd
 
 GitHub Actions builds both targets on every push to `main`:
 
-- **Web** — `.github/workflows/deploy-pages.yml` builds the web app and commits the
-  output to `docs/`, which GitHub Pages serves at
-  <https://bocsir.github.io/timer-guy/>.
+- **Web** — `.github/workflows/deploy-pages.yml` builds the web app and deploys it
+  to GitHub Pages at <https://bocsir.github.io/timer-guy/>. The build output is
+  deployed as a Pages artifact, so no commits are pushed back to `main`.
 - **Android** — `.github/workflows/build-android.yml` builds a release APK and
   publishes it to the [latest Android release](https://github.com/bocsir/timer-guy/releases/tag/android-latest).
   The APK is also available as a workflow artifact.
 
 Both workflows can be run manually from the Actions tab. Pushing a `v*` tag
 creates a versioned Android release instead of updating `android-latest`.
+
+For web deploys, the repository's **Settings → Pages → Source** must be set to
+**GitHub Actions**. `docs/` is now ignored and used only for local builds.
 
 ### Android signing
 

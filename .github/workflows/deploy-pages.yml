@@ -4,12 +4,13 @@ on:
   push:
     branches: [main]
     paths-ignore:
-      - "docs/**"
       - "**.md"
   workflow_dispatch:
 
 permissions:
-  contents: write
+  contents: read
+  pages: write
+  id-token: write
 
 concurrency:
   group: pages-deploy
@@ -19,10 +20,12 @@ jobs:
   deploy:
     runs-on: ubuntu-latest
 
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+
     steps:
       - uses: actions/checkout@v6
-        with:
-          fetch-depth: 0
 
       - uses: subosito/flutter-action@v2
         with:
@@ -40,29 +43,12 @@ jobs:
             --release \
             --base-href=/timer-guy/
 
-      - name: Publish build to docs/
-        run: |
-          git config user.name "github-actions[bot]"
-          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+      - uses: actions/configure-pages@v6
 
-          find docs -mindepth 1 -maxdepth 1 -exec rm -rf -- {} +
-          cp -a build/web/. docs/
+      - uses: actions/upload-pages-artifact@v5
+        with:
+          path: build/web
 
-          git add docs
-          if git diff --staged --quiet; then
-            echo "No changes to deploy."
-            exit 0
-          fi
-
-          git commit -m "deploy to pages"
-
-          # The branch may have moved while the web build was running.
-          for attempt in 1 2 3; do
-            if git push origin HEAD:main; then
-              exit 0
-            fi
-            git pull --rebase origin main
-          done
-
-          echo "Failed to push the Pages build." >&2
-          exit 1
+      - name: Deploy to GitHub Pages
+        id: deployment
+        uses: actions/deploy-pages@v5

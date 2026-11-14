@@ -2,43 +2,21 @@
 
 set -e
 
+# Builds the web app into docs/ for local preview.
+# Actual deployment to GitHub Pages is done by CI (.github/workflows/deploy-pages.yml);
+# this script no longer commits anything.
+
 BUILD_DIR="build/web"
 DEPLOY_DIR="docs"
-COMMIT_MSG="deploy to pages"
 BASE_HREF="/timer-guy/"
 
-build_flutter_web() {
-    echo "Building web app..."
+echo "Building web app..."
+rm -rf "$BUILD_DIR"
 
-    rm -rf $BUILD_DIR
+flutter build web --wasm --base-href="$BASE_HREF" --release
 
-    if ! flutter build web --wasm \
-        --base-href=$BASE_HREF \
-        --release; then
-        echo "Build failed :("
-        exit 1
-    fi
-}
+echo "Copying build to $DEPLOY_DIR/..."
+rm -rf "${DEPLOY_DIR:?}/"*
+cp -r "$BUILD_DIR"/* "$DEPLOY_DIR"
 
-deploy_to_pages() {
-    echo "Deploying to pages..."
-
-    rm -rf "${DEPLOY_DIR:?}/"*
-
-    if ! cp -r "$BUILD_DIR"/* "$DEPLOY_DIR"; then
-        echo "Failed to copy build files :("
-        exit 1
-    fi
-
-    git add .
-    if git diff --staged --quiet; then
-        echo "No changes to deploy :()"
-        exit 0
-    fi
-
-    git commit -m "$COMMIT_MSG" && git push    
-    echo "Deployment successful!"
-}
-
-build_flutter_web
-deploy_to_pages
+echo "Done. Preview with: cd $DEPLOY_DIR && python3 -m http.server"
