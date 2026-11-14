@@ -45,6 +45,11 @@ String workoutToYaml(Workout workout) {
       ..writeln('  - name: ${_scalar(exercise.name)}')
       ..writeln('    type: ${exercise.type.name}');
 
+    final exerciseDescription = exercise.description;
+    if (exerciseDescription != null && exerciseDescription.trim().isNotEmpty) {
+      buffer.writeln('    description: ${_scalar(exerciseDescription)}');
+    }
+
     if (exercise.isInterval) {
       buffer
         ..writeln('    reps: ${exercise.reps}')
@@ -127,6 +132,10 @@ Exercise _exerciseFromNode(dynamic node, int index, String workoutLabel) {
 
   final name = _requiredString(node, const ['name'], label);
   final type = _exerciseType(node, label);
+  final rawDescription = _optionalString(node, const ['description'], label);
+  final description = rawDescription == null || rawDescription.trim().isEmpty
+      ? null
+      : rawDescription.trim();
   final reps = _requiredInt(node, const ['reps'], label);
   if (reps < 1) {
     throw WorkoutYamlException('$label: "reps" must be at least 1.');
@@ -149,6 +158,7 @@ Exercise _exerciseFromNode(dynamic node, int index, String workoutLabel) {
       timeOn: timeOn,
       timeOff: timeOff,
       type: type,
+      description: description,
     );
   }
 
@@ -164,6 +174,7 @@ Exercise _exerciseFromNode(dynamic node, int index, String workoutLabel) {
     timeOff: timeOff,
     sets: sets,
     type: type,
+    description: description,
   );
 }
 

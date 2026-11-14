@@ -16,6 +16,7 @@ void main() {
           timeOff: 90,
           sets: 3,
           type: ExerciseType.reps,
+          description: 'Keep your elbows close to your body',
         ),
         Exercise(
           name: 'Plank',
@@ -40,6 +41,7 @@ void main() {
     expect(pushUps.sets, 3);
     expect(pushUps.timeOn, 0);
     expect(pushUps.timeOff, 90);
+    expect(pushUps.description, 'Keep your elbows close to your body');
 
     final plank = decoded.exercises.last;
     expect(plank.name, 'Plank');

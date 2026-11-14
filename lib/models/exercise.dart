@@ -45,6 +45,10 @@ class Exercise {
   @HiveField(5)
   final ExerciseType type;
 
+  /// Optional free-form notes or instructions shown alongside the exercise.
+  @HiveField(6)
+  final String? description;
+
   Exercise({
     required this.name,
     required this.reps,
@@ -52,6 +56,7 @@ class Exercise {
     required this.timeOff,
     required this.type,
     this.sets = 1,
+    this.description,
   });
 
   bool get isInterval => type == ExerciseType.interval;
@@ -70,6 +75,7 @@ class Exercise {
     int? timeOff,
     int? sets,
     ExerciseType? type,
+    String? description,
   }) {
     return Exercise(
       name: name ?? this.name,
@@ -78,6 +84,7 @@ class Exercise {
       timeOff: timeOff ?? this.timeOff,
       sets: sets ?? this.sets,
       type: type ?? this.type,
+      description: description ?? this.description,
     );
   }
 }

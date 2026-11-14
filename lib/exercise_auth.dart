@@ -26,6 +26,7 @@ class _ExerciseAuthState extends State<ExerciseAuth> {
   late int repCount;
   late int setCount;
   final nameController = TextEditingController();
+  final descriptionController = TextEditingController();
   late final FPickerController workDurationController;
   late final FPickerController restDurationController;
   final _formKey = GlobalKey<FormState>();
@@ -39,6 +40,7 @@ class _ExerciseAuthState extends State<ExerciseAuth> {
     type = widget.exercise.type;
     _typeController = FMultiValueNotifier.radio(type);
     nameController.text = widget.exercise.name;
+    descriptionController.text = widget.exercise.description ?? '';
     repCount = widget.exercise.reps < 1 ? 1 : widget.exercise.reps;
     setCount = widget.exercise.sets < 1 ? 1 : widget.exercise.sets;
 
@@ -63,6 +65,7 @@ class _ExerciseAuthState extends State<ExerciseAuth> {
     workDurationController.dispose();
     restDurationController.dispose();
     nameController.dispose();
+    descriptionController.dispose();
     _typeController.dispose();
     super.dispose();
   }
@@ -99,6 +102,19 @@ class _ExerciseAuthState extends State<ExerciseAuth> {
                       autovalidateMode: _localFormSubmitted
                           ? AutovalidateMode.onUserInteraction
                           : AutovalidateMode.disabled,
+                    ),
+                    FTextFormField(
+                      label: Text(
+                        'Description',
+                        style: typography.lg.copyWith(
+                          fontWeight: FontWeight.normal,
+                        ),
+                      ),
+                      hint: 'Optional',
+                      controller: descriptionController,
+                      maxLines: 3,
+                      minLines: 2,
+                      textInputAction: TextInputAction.newline,
                     ),
                     Padding(
                       padding: const EdgeInsets.only(top: 16),
@@ -344,6 +360,7 @@ class _ExerciseAuthState extends State<ExerciseAuth> {
   Exercise _createExercise() {
     final workDuration = workDurationController.value;
     final restDuration = restDurationController.value;
+    final description = descriptionController.text.trim();
 
     return Exercise(
       name: nameController.text.trim(),
@@ -354,6 +371,7 @@ class _ExerciseAuthState extends State<ExerciseAuth> {
           : 0,
       timeOff: (restDuration[0] % 60) * 60 + (restDuration[1] % 60),
       type: type,
+      description: description.isEmpty ? null : description,
     );
   }
 
@@ -370,12 +388,17 @@ class _ExerciseAuthState extends State<ExerciseAuth> {
       return false;
     }
 
-    if (_validateTimeSelection(restDurationController.value) != null) {
+    if (_needsRestTime &&
+        _validateTimeSelection(restDurationController.value) != null) {
       return false;
     }
 
     return true;
   }
+
+  /// Rest is only used between reps for interval exercises, so a single-rep
+  /// interval has no rest phase and does not need a rest time.
+  bool get _needsRestTime => !_isInterval || repCount > 1;
 
   String? _validateRequired(String? value) {
     if (value == null || value.trim().isEmpty) {
@@ -423,7 +446,8 @@ class _ExerciseAuthState extends State<ExerciseAuth> {
   }
 
   bool _shouldShowRestDurationError() {
-    return _localFormSubmitted &&
+    return _needsRestTime &&
+        _localFormSubmitted &&
         _validateTimeSelection(restDurationController.value) != null;
   }
 

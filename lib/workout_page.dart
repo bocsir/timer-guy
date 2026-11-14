@@ -287,6 +287,13 @@ class WorkoutPageState extends State<WorkoutPage>
           textAlign: TextAlign.center,
           style: typography.xl2.copyWith(fontWeight: FontWeight.bold),
         ),
+        if (exercise.description case final description?
+            when description.isNotEmpty)
+          Text(
+            description,
+            textAlign: TextAlign.center,
+            style: typography.sm.copyWith(color: colors.mutedForeground),
+          ),
         Text(
           subtitle,
           style: typography.sm.copyWith(color: colors.mutedForeground),
@@ -377,6 +384,15 @@ class WorkoutPageState extends State<WorkoutPage>
                   textAlign: TextAlign.center,
                   style: typography.xl3,
                 ),
+                if (exercise.description case final description?
+                    when description.isNotEmpty)
+                  Text(
+                    description,
+                    textAlign: TextAlign.center,
+                    style: typography.sm.copyWith(
+                      color: colors.mutedForeground,
+                    ),
+                  ),
                 Text('${exercise.reps} reps', style: typography.xl3Semibold),
                 Text(
                   'Set ${phase.setIndex + 1} of ${exercise.sets}',

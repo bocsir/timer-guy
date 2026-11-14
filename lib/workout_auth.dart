@@ -108,6 +108,15 @@ class _WorkoutAuthState extends State<WorkoutAuth> {
                                 _exerciseSummary(exercises[i]),
                                 style: typography.smGrey,
                               ),
+                              if (exercises[i].description
+                                  case final description?
+                                  when description.isNotEmpty)
+                                Text(
+                                  description,
+                                  maxLines: 2,
+                                  overflow: TextOverflow.ellipsis,
+                                  style: typography.smGrey,
+                                ),
                             ],
                           ),
                         ),
