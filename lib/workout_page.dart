@@ -193,6 +193,9 @@ class WorkoutPageState extends State<WorkoutPage>
                     child: ListenableBuilder(
                       listenable: status,
                       builder: (context, child) {
+                        final isManual =
+                            !_complete && _phase.kind == _PhaseKind.manual;
+
                         return Column(
                           mainAxisAlignment: MainAxisAlignment.spaceBetween,
                           children: [
@@ -202,9 +205,12 @@ class WorkoutPageState extends State<WorkoutPage>
                                 exercise: _exercise,
                               ),
                             Expanded(
-                              child: Center(child: _buildCenter(context)),
+                              child: isManual
+                                  ? _buildManualCenter(context)
+                                  : Center(child: _buildCenter(context)),
                             ),
-                            _buildExerciseNavigation(context),
+                            if (!isManual && !_complete)
+                              _buildExerciseNavigation(context),
                           ],
                         );
                       },
@@ -260,47 +266,7 @@ class WorkoutPageState extends State<WorkoutPage>
     final exercise = _exercise;
 
     if (phase.kind == _PhaseKind.manual) {
-      return Column(
-        mainAxisSize: MainAxisSize.min,
-        spacing: 12,
-        children: [
-          Text(
-            exercise.name,
-            textAlign: TextAlign.center,
-            style: typography.xl3Semibold,
-          ),
-          Text(
-            '${exercise.reps} reps',
-            style: typography.xl2.copyWith(color: colors.mutedForeground),
-          ),
-          Text(
-            'Set ${phase.setIndex + 1} of ${exercise.sets}',
-            style: typography.lgSemibold.copyWith(color: colors.accent),
-          ),
-          const SizedBox(height: 8),
-          DecoratedBox(
-            decoration: BoxDecoration(
-              border: BoxBorder.all(),
-              borderRadius: BorderRadius.circular(16),
-              color: colors.accent,
-            ),
-            child: Padding(
-              padding: const EdgeInsets.all(8),
-              child: FButton(
-                style: FButtonStyle.ghost(),
-                onPress: _onDonePressed,
-                child: Text(
-                  'Done',
-                  style: typography.xl2.copyWith(
-                    fontWeight: FontWeight.bold,
-                    color: colors.background,
-                  ),
-                ),
-              ),
-            ),
-          ),
-        ],
-      );
+      return _buildManualCenter(context);
     }
 
     final subtitle = switch (phase.kind) {
@@ -325,22 +291,7 @@ class WorkoutPageState extends State<WorkoutPage>
           subtitle,
           style: typography.sm.copyWith(color: colors.mutedForeground),
         ),
-        Row(
-          mainAxisAlignment: MainAxisAlignment.center,
-          crossAxisAlignment: CrossAxisAlignment.baseline,
-          textBaseline: TextBaseline.values.first,
-          spacing: 4,
-          children: [
-            Text(
-              currTime.toStringAsFixed(1).split('.')[0],
-              style: typography.xl8,
-            ),
-            Text(
-              currTime.toStringAsFixed(1).split('.')[1][0],
-              style: typography.xl6,
-            ),
-          ],
-        ),
+        _buildTimerText(),
         if (status.value == WorkoutStatus.notStarted)
           Text(
             'Press play to start',
@@ -376,6 +327,100 @@ class WorkoutPageState extends State<WorkoutPage>
             style: typography.lg.copyWith(fontWeight: FontWeight.bold),
           ),
       ],
+    );
+  }
+
+  /// Displays the countdown as minutes and seconds, with the tenths digit
+  /// de-emphasized so long durations don't read as a wall of seconds.
+  Widget _buildTimerText() {
+    final typography = context.theme.typography;
+    final totalTenths = (currTime.clamp(0.0, double.infinity) * 10).round();
+    final minutes = totalTenths ~/ 600;
+    final seconds = (totalTenths % 600) ~/ 10;
+    final tenths = totalTenths % 10;
+
+    return Row(
+      mainAxisAlignment: MainAxisAlignment.center,
+      crossAxisAlignment: CrossAxisAlignment.baseline,
+      textBaseline: TextBaseline.alphabetic,
+      children: [
+        Text('$minutes', style: typography.xl8),
+        // A slightly smaller colon keeps it from taking up a full 96px
+        // monospace cell, which otherwise leaves a large gap around it.
+        Text(':', style: typography.xl5),
+        Text(seconds.toString().padLeft(2, '0'), style: typography.xl8),
+        const SizedBox(width: 4),
+        Text('$tenths', style: typography.xl6),
+      ],
+    );
+  }
+
+  /// Sets & reps exercises are done at the user's own pace, so the Done button
+  /// sits at the bottom of the card with the exercise navigation above it.
+  Widget _buildManualCenter(BuildContext context) {
+    final typography = context.theme.typography;
+    final colors = context.theme.colors;
+    final exercise = _exercise;
+    final phase = _phase;
+
+    return Padding(
+      padding: const EdgeInsets.symmetric(vertical: 16),
+      child: Column(
+        children: [
+          Expanded(
+            child: Column(
+              mainAxisAlignment: MainAxisAlignment.center,
+              spacing: 12,
+              children: [
+                Text(
+                  exercise.name,
+                  textAlign: TextAlign.center,
+                  style: typography.xl3,
+                ),
+                Text('${exercise.reps} reps', style: typography.xl3Semibold),
+                Text(
+                  'Set ${phase.setIndex + 1} of ${exercise.sets}',
+                  style: typography.lgSemibold.copyWith(color: colors.accent),
+                ),
+              ],
+            ),
+          ),
+          Column(
+            mainAxisSize: MainAxisSize.min,
+            spacing: 16,
+            children: [
+              _buildExerciseNavigation(context),
+              _buildDoneButton(context),
+            ],
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildDoneButton(BuildContext context) {
+    final colors = context.theme.colors;
+
+    return DecoratedBox(
+      decoration: BoxDecoration(
+        border: BoxBorder.all(),
+        borderRadius: BorderRadius.circular(16),
+        color: colors.accent,
+      ),
+      child: Padding(
+        padding: const EdgeInsets.all(8),
+        child: FButton(
+          style: FButtonStyle.ghost(),
+          onPress: _onDonePressed,
+          child: Text(
+            'Start rest timer',
+            style: context.theme.typography.xl2.copyWith(
+              fontWeight: FontWeight.bold,
+              color: context.theme.colors.background,
+            ),
+          ),
+        ),
+      ),
     );
   }
 

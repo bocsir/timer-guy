@@ -113,6 +113,14 @@ class _WorkoutAuthState extends State<WorkoutAuth> {
                         ),
                         Row(
                           children: [
+                            Tooltip(
+                              message: 'Duplicate exercise',
+                              child: FButton(
+                                onPress: () => duplicateExercise(i),
+                                style: FButtonStyle.ghost(),
+                                child: Icon(FIcons.copy),
+                              ),
+                            ),
                             FButton(
                               onPress: () async {
                                 final updated = await showExerciseAuthSheet(
@@ -199,6 +207,14 @@ class _WorkoutAuthState extends State<WorkoutAuth> {
       } else {
         exercises[index] = newExercise;
       }
+    });
+  }
+
+  /// Inserts a copy of [index] directly after the original so it can be tweaked
+  /// without rebuilding it from scratch.
+  void duplicateExercise(int index) {
+    setState(() {
+      exercises.insert(index + 1, exercises[index].copyWith());
     });
   }
 

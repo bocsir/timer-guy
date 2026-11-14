@@ -17,58 +17,68 @@ class WorkingRestingStatus extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final workingLabel = 'Working';
     final workingDetail = exercise.isReps
         ? '${exercise.reps} reps'
-        : '${exercise.timeOn}s';
+        : _formatDuration(exercise.timeOn);
 
     return ConstrainedBox(
       constraints: BoxConstraints(maxWidth: 400),
       child: Row(
         mainAxisAlignment: MainAxisAlignment.spaceBetween,
         children: [
-          Column(
-            children: [
-              Text(
-                workingLabel,
-                style: context.theme.typography.xlSemibold.copyWith(
-                  color: status == WorkoutStatus.working
-                      ? context.theme.colors.accent
-                      : context.theme.colors.mutedForeground,
-                ),
-              ),
-              Text(
-                '($workingDetail)',
-                style: context.theme.typography.base.copyWith(
-                  color: status == WorkoutStatus.working
-                      ? context.theme.colors.accent
-                      : context.theme.colors.mutedForeground,
-                ),
-              ),
-            ],
+          _buildStatus(
+            context,
+            label: 'Working',
+            detail: workingDetail,
+            active: status == WorkoutStatus.working,
           ),
-          Column(
-            children: [
-              Text(
-                'Resting',
-                style: context.theme.typography.xlSemibold.copyWith(
-                  color: status == WorkoutStatus.resting
-                      ? context.theme.colors.accent
-                      : context.theme.colors.mutedForeground,
-                ),
-              ),
-              Text(
-                '(${exercise.timeOff}s)',
-                style: context.theme.typography.base.copyWith(
-                  color: status == WorkoutStatus.resting
-                      ? context.theme.colors.accent
-                      : context.theme.colors.mutedForeground,
-                ),
-              ),
-            ],
+          _buildStatus(
+            context,
+            label: 'Resting',
+            detail: _formatDuration(exercise.timeOff),
+            active: status == WorkoutStatus.resting,
           ),
         ],
       ),
+    );
+  }
+
+  String _formatDuration(int seconds) {
+    final minutes = seconds ~/ 60;
+    final remainingSeconds = seconds % 60;
+    if (minutes == 0) return '${remainingSeconds}s';
+    return '$minutes:${remainingSeconds.toString().padLeft(2, '0')}';
+  }
+
+  Widget _buildStatus(
+    BuildContext context, {
+    required String label,
+    required String detail,
+    required bool active,
+  }) {
+    final typography = context.theme.typography;
+    final colors = context.theme.colors;
+    final color = active ? colors.accent : colors.mutedForeground;
+
+    // The style (and therefore the space the text occupies) stays the same for
+    // both states. Only the visual scale changes, so activating a status can't
+    // shift the surrounding layout.
+    final labelStyle = typography.lgSemibold.copyWith(color: color);
+
+    return Column(
+      children: [
+        AnimatedScale(
+          scale: active ? 1.2 : 1.0,
+          duration: const Duration(milliseconds: 150),
+          curve: Curves.easeOut,
+          child: AnimatedDefaultTextStyle(
+            duration: const Duration(milliseconds: 150),
+            style: labelStyle,
+            child: Text(label),
+          ),
+        ),
+        Text('($detail)', style: typography.base.copyWith(color: color)),
+      ],
     );
   }
 }
