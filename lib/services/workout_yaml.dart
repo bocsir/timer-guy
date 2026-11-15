@@ -137,9 +137,13 @@ void _writeWorkout(
 
     if (exercise.isInterval) {
       buffer
+        ..writeln('$exerciseIndent  sets: ${exercise.sets}')
         ..writeln('$exerciseIndent  reps: ${exercise.reps}')
         ..writeln('$exerciseIndent  time_on: ${exercise.timeOn}')
-        ..writeln('$exerciseIndent  time_off: ${exercise.timeOff}');
+        ..writeln('$exerciseIndent  time_off: ${exercise.timeOff}')
+        ..writeln(
+          '$exerciseIndent  rest_between_sets: ${exercise.restBetweenSets}',
+        );
     } else {
       buffer
         ..writeln('$exerciseIndent  sets: ${exercise.sets}')
@@ -201,10 +205,27 @@ Exercise _exerciseFromNode(dynamic node, int index, String workoutLabel) {
     throw WorkoutYamlException('$label: "time_off" cannot be negative.');
   }
 
+  final sets = _optionalInt(node, const ['sets'], label) ?? 1;
+  if (sets < 1) {
+    throw WorkoutYamlException('$label: "sets" must be at least 1.');
+  }
+
   if (type == ExerciseType.interval) {
     final timeOn = _optionalInt(node, const ['time_on', 'timeOn'], label) ?? 0;
     if (timeOn < 0) {
       throw WorkoutYamlException('$label: "time_on" cannot be negative.');
+    }
+
+    final restBetweenSets =
+        _optionalInt(node, const [
+          'rest_between_sets',
+          'restBetweenSets',
+        ], label) ??
+        0;
+    if (restBetweenSets < 0) {
+      throw WorkoutYamlException(
+        '$label: "rest_between_sets" cannot be negative.',
+      );
     }
 
     return Exercise(
@@ -212,14 +233,11 @@ Exercise _exerciseFromNode(dynamic node, int index, String workoutLabel) {
       reps: reps,
       timeOn: timeOn,
       timeOff: timeOff,
+      sets: sets,
+      restBetweenSets: restBetweenSets,
       type: type,
       description: description,
     );
-  }
-
-  final sets = _optionalInt(node, const ['sets'], label) ?? 1;
-  if (sets < 1) {
-    throw WorkoutYamlException('$label: "sets" must be at least 1.');
   }
 
   return Exercise(

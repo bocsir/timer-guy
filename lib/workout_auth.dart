@@ -204,9 +204,14 @@ class _WorkoutAuthState extends State<WorkoutAuth> {
 
   String _exerciseSummary(Exercise exercise) {
     if (exercise.isInterval) {
-      return 'Interval · ${_formatDuration(exercise.timeOn)} work · '
-          '${_formatDuration(exercise.timeOff)} rest · '
-          '${exercise.reps} ${exercise.reps == 1 ? 'rep' : 'reps'}';
+      final setRest = exercise.sets > 1 && exercise.restBetweenSets > 0
+          ? ' · ${_formatDuration(exercise.restBetweenSets)} between sets'
+          : '';
+      return 'Interval · ${exercise.sets} '
+          '${exercise.sets == 1 ? 'set' : 'sets'} × '
+          '${exercise.reps} ${exercise.reps == 1 ? 'rep' : 'reps'} · '
+          '${_formatDuration(exercise.timeOn)} work · '
+          '${_formatDuration(exercise.timeOff)} rest$setRest';
     }
 
     return '${exercise.sets} ${exercise.sets == 1 ? 'set' : 'sets'} × '

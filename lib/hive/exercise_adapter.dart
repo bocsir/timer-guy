@@ -4,7 +4,8 @@
 // still contain records in one of the old layouts:
 //
 // Current:
-//   0: name, 1: reps, 2: timeOn, 3: timeOff, 4: sets, 5: type, 6: description
+//   0: name, 1: reps, 2: timeOn, 3: timeOff, 4: sets, 5: type, 6: description,
+//   7: restBetweenSets
 //
 // Previous:
 //   0: name, 1: reps, 2: timeOn, 3: timeOff
@@ -39,6 +40,7 @@ class MigratingExerciseAdapter extends ExerciseAdapter {
         sets: (fields[4] as num?)?.toInt() ?? 1,
         type: fields[5] as ExerciseType,
         description: fields[6] as String?,
+        restBetweenSets: (fields[7] as num?)?.toInt() ?? 0,
       );
     }
 

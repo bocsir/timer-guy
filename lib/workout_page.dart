@@ -60,6 +60,25 @@ class WorkoutPageState extends State<WorkoutPage>
   Exercise get _exercise => _phase.exercise;
   bool get _isTimedPhase => _phase.kind != _PhaseKind.manual;
 
+  /// The rest duration to show in the work/rest status.
+  ///
+  /// During interval work this switches to the between-set rest on the last rep
+  /// of a non-final set. Otherwise the exercise's standard rest is used.
+  int? get _displayedRestDuration {
+    final phase = _phase;
+    if (phase.kind == _PhaseKind.rest) return phase.duration;
+
+    final exercise = phase.exercise;
+    if (phase.kind == _PhaseKind.work &&
+        exercise.isInterval &&
+        phase.repIndex + 1 >= exercise.reps &&
+        phase.setIndex + 1 < exercise.sets) {
+      return exercise.restBetweenSets;
+    }
+
+    return null;
+  }
+
   @override
   void initState() {
     super.initState();
@@ -203,6 +222,7 @@ class WorkoutPageState extends State<WorkoutPage>
                               WorkingRestingStatus(
                                 status: status.value,
                                 exercise: _exercise,
+                                restDuration: _displayedRestDuration,
                               ),
                             Expanded(
                               child: isManual
@@ -269,12 +289,20 @@ class WorkoutPageState extends State<WorkoutPage>
       return _buildManualCenter(context);
     }
 
+    final showsSets = exercise.isInterval && exercise.sets > 1;
+    final setLabel = 'Set ${phase.setIndex + 1} of ${exercise.sets} · ';
     final subtitle = switch (phase.kind) {
-      _PhaseKind.prepare => 'Rep 1 of ${exercise.reps}',
-      _PhaseKind.work => 'Rep ${phase.repIndex + 1} of ${exercise.reps}',
-      _PhaseKind.rest when exercise.isReps =>
+      _PhaseKind.prepare =>
+        '${showsSets ? 'Set 1 of ${exercise.sets} · ' : ''}'
+            'Rep 1 of ${exercise.reps}',
+      _PhaseKind.work =>
+        '${showsSets ? setLabel : ''}'
+            'Rep ${phase.repIndex + 1} of ${exercise.reps}',
+      _PhaseKind.rest when exercise.isReps || phase.betweenSets =>
         'After set ${phase.setIndex + 1} of ${exercise.sets}',
-      _PhaseKind.rest => 'After rep ${phase.repIndex + 1} of ${exercise.reps}',
+      _PhaseKind.rest =>
+        '${showsSets ? setLabel : ''}'
+            'After rep ${phase.repIndex + 1} of ${exercise.reps}',
       _PhaseKind.manual => '',
     };
 
@@ -569,6 +597,7 @@ class WorkoutPageState extends State<WorkoutPage>
 
       if (exercise.isInterval) {
         final reps = exercise.reps < 1 ? 1 : exercise.reps;
+        final sets = exercise.sets < 1 ? 1 : exercise.sets;
         phases.add(
           _Phase(
             kind: _PhaseKind.prepare,
@@ -578,27 +607,46 @@ class WorkoutPageState extends State<WorkoutPage>
           ),
         );
 
-        for (var rep = 0; rep < reps; rep++) {
-          phases.add(
-            _Phase(
-              kind: _PhaseKind.work,
-              exerciseIndex: exerciseIndex,
-              exercise: exercise,
-              duration: exercise.timeOn,
-              repIndex: rep,
-            ),
-          );
-
-          if (rep < reps - 1) {
+        for (var set = 0; set < sets; set++) {
+          for (var rep = 0; rep < reps; rep++) {
             phases.add(
               _Phase(
-                kind: _PhaseKind.rest,
+                kind: _PhaseKind.work,
                 exerciseIndex: exerciseIndex,
                 exercise: exercise,
-                duration: exercise.timeOff,
+                duration: exercise.timeOn,
                 repIndex: rep,
+                setIndex: set,
               ),
             );
+
+            final isLastRepOfSet = rep == reps - 1;
+            final isLastSet = set == sets - 1;
+
+            if (!isLastRepOfSet) {
+              phases.add(
+                _Phase(
+                  kind: _PhaseKind.rest,
+                  exerciseIndex: exerciseIndex,
+                  exercise: exercise,
+                  duration: exercise.timeOff,
+                  repIndex: rep,
+                  setIndex: set,
+                ),
+              );
+            } else if (!isLastSet && exercise.restBetweenSets > 0) {
+              phases.add(
+                _Phase(
+                  kind: _PhaseKind.rest,
+                  exerciseIndex: exerciseIndex,
+                  exercise: exercise,
+                  duration: exercise.restBetweenSets,
+                  repIndex: rep,
+                  setIndex: set,
+                  betweenSets: true,
+                ),
+              );
+            }
           }
         }
       } else {
@@ -729,7 +777,7 @@ class WorkoutPageState extends State<WorkoutPage>
       case _PhaseKind.work:
         BeepPlayer.playHigh();
       case _PhaseKind.rest:
-        if (phase.exercise.isReps) {
+        if (phase.exercise.isReps || phase.betweenSets) {
           BeepPlayer.playDouble();
         } else {
           BeepPlayer.playHigh();
@@ -877,6 +925,7 @@ class _Phase {
     required this.duration,
     this.repIndex = 0,
     this.setIndex = 0,
+    this.betweenSets = false,
   });
 
   final _PhaseKind kind;
@@ -885,4 +934,7 @@ class _Phase {
   final int duration;
   final int repIndex;
   final int setIndex;
+
+  /// Whether this rest phase sits between two sets of an interval exercise.
+  final bool betweenSets;
 }

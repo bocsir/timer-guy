@@ -9,10 +9,18 @@ class WorkingRestingStatus extends StatelessWidget {
   final WorkoutStatus status;
   final Exercise exercise;
 
+  /// The duration of the rest phase currently running, when known.
+  ///
+  /// Interval exercises can rest either between reps or between sets, so the
+  /// timer passes the active phase's duration. When null, [Exercise.timeOff]
+  /// is shown.
+  final int? restDuration;
+
   const WorkingRestingStatus({
     super.key,
     required this.status,
     required this.exercise,
+    this.restDuration,
   });
 
   @override
@@ -35,7 +43,7 @@ class WorkingRestingStatus extends StatelessWidget {
           _buildStatus(
             context,
             label: 'Resting',
-            detail: _formatDuration(exercise.timeOff),
+            detail: _formatDuration(restDuration ?? exercise.timeOff),
             active: status == WorkoutStatus.resting,
           ),
         ],

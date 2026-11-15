@@ -24,13 +24,14 @@ class ExerciseAdapter extends TypeAdapter<Exercise> {
       type: fields[5] as ExerciseType,
       sets: fields[4] == null ? 1 : (fields[4] as num).toInt(),
       description: fields[6] as String?,
+      restBetweenSets: fields[7] == null ? 0 : (fields[7] as num).toInt(),
     );
   }
 
   @override
   void write(BinaryWriter writer, Exercise obj) {
     writer
-      ..writeByte(7)
+      ..writeByte(8)
       ..writeByte(0)
       ..write(obj.name)
       ..writeByte(1)
@@ -44,7 +45,9 @@ class ExerciseAdapter extends TypeAdapter<Exercise> {
       ..writeByte(5)
       ..write(obj.type)
       ..writeByte(6)
-      ..write(obj.description);
+      ..write(obj.description)
+      ..writeByte(7)
+      ..write(obj.restBetweenSets);
   }
 
   @override

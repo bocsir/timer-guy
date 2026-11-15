@@ -348,6 +348,8 @@ void main() {
             reps: 4,
             timeOn: 30,
             timeOff: 15,
+            sets: 2,
+            restBetweenSets: 30,
             type: ExerciseType.interval,
           ),
           Exercise(
@@ -368,14 +370,15 @@ void main() {
 
     expect(workout.exercises, hasLength(2));
     expect(workout.exercises.first.isInterval, isTrue);
-    expect(workout.exercises.first.sets, 1);
+    expect(workout.exercises.first.sets, 2);
+    expect(workout.exercises.first.restBetweenSets, 30);
     expect(workout.exercises.last.isReps, isTrue);
     expect(workout.exercises.last.name, 'Push Ups');
     expect(workout.exercises.last.reps, 12);
     expect(workout.exercises.last.sets, 3);
     expect(workout.exercises.last.timeOff, 90);
-    expect(workout.totalSets, 4);
-    expect(workout.totalReps, 4 + 12 * 3);
+    expect(workout.totalSets, 5);
+    expect(workout.totalReps, 4 * 2 + 12 * 3);
 
     await reopened.close();
     await Hive.close();

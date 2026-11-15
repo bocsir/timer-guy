@@ -23,6 +23,8 @@ void main() {
           reps: 4,
           timeOn: 30,
           timeOff: 15,
+          sets: 2,
+          restBetweenSets: 45,
           type: ExerciseType.interval,
         ),
       ],
@@ -47,9 +49,10 @@ void main() {
     expect(plank.name, 'Plank');
     expect(plank.type, ExerciseType.interval);
     expect(plank.reps, 4);
-    expect(plank.sets, 1);
+    expect(plank.sets, 2);
     expect(plank.timeOn, 30);
     expect(plank.timeOff, 15);
+    expect(plank.restBetweenSets, 45);
   });
 
   test('writes an empty exercise list', () {
@@ -75,9 +78,11 @@ void main() {
   exercises:
     - name: Run
       type: interval
+      sets: 2
       reps: 3
       time_on: 60
       time_off: 30
+      rest_between_sets: 120
 ''');
 
     expect(workouts, hasLength(2));
@@ -85,7 +90,9 @@ void main() {
     expect(workouts.first.exercises, isEmpty);
     expect(workouts.last.name, 'Second');
     expect(workouts.last.exercises.single.name, 'Run');
+    expect(workouts.last.exercises.single.sets, 2);
     expect(workouts.last.exercises.single.timeOn, 60);
+    expect(workouts.last.exercises.single.restBetweenSets, 120);
   });
 
   test('round trips multiple workouts through YAML', () {
@@ -112,6 +119,8 @@ void main() {
             reps: 6,
             timeOn: 30,
             timeOff: 60,
+            sets: 3,
+            restBetweenSets: 90,
             type: ExerciseType.interval,
           ),
         ],
@@ -128,8 +137,10 @@ void main() {
     expect(decoded.first.exercises.single.timeOff, 90);
     expect(decoded.last.name, 'Intervals');
     expect(decoded.last.exercises.single.type, ExerciseType.interval);
+    expect(decoded.last.exercises.single.sets, 3);
     expect(decoded.last.exercises.single.timeOn, 30);
     expect(decoded.last.exercises.single.timeOff, 60);
+    expect(decoded.last.exercises.single.restBetweenSets, 90);
   });
 
   test('exports a single workout with the single-workout format', () {
@@ -174,8 +185,10 @@ exercises:
     expect(workout.description, 'Imported from an older file');
     expect(exercise.type, ExerciseType.interval);
     expect(exercise.reps, 4);
+    expect(exercise.sets, 1);
     expect(exercise.timeOn, 30);
     expect(exercise.timeOff, 10);
+    expect(exercise.restBetweenSets, 0);
   });
 
   test('accepts camelCase timing fields', () {

@@ -21,10 +21,10 @@ enum ExerciseType {
 
 /// A single exercise inside a [Workout].
 ///
-/// Interval exercises use [timeOn] as the length of each work interval and
-/// [reps] as the number of intervals per set. Sets & reps exercises use [reps]
-/// as the number of reps per set, [sets] as the number of sets, and [timeOff]
-/// as the rest between sets.
+/// Interval exercises use [timeOn] as the length of each work interval,
+/// [timeOff] as the rest between intervals, and [restBetweenSets] as the rest
+/// between sets. Sets & reps exercises use [reps] as the number of reps per
+/// set, and [timeOff] as the rest between sets.
 @HiveType(typeId: 1)
 class Exercise {
   @HiveField(0)
@@ -49,6 +49,13 @@ class Exercise {
   @HiveField(6)
   final String? description;
 
+  /// Rest between sets, in seconds.
+  ///
+  /// Only used by interval exercises. Sets & reps exercises use [timeOff] as
+  /// the rest between sets.
+  @HiveField(7)
+  final int restBetweenSets;
+
   Exercise({
     required this.name,
     required this.reps,
@@ -57,16 +64,17 @@ class Exercise {
     required this.type,
     this.sets = 1,
     this.description,
+    this.restBetweenSets = 0,
   });
 
   bool get isInterval => type == ExerciseType.interval;
   bool get isReps => type == ExerciseType.reps;
 
   /// Total amount of work in this exercise (reps or timed intervals).
-  int get totalReps => isReps ? reps * sets : reps;
+  int get totalReps => reps * sets;
 
-  /// Number of sets in this exercise. Interval exercises are a single set.
-  int get totalSets => isReps ? sets : 1;
+  /// Number of sets in this exercise.
+  int get totalSets => sets;
 
   Exercise copyWith({
     String? name,
@@ -76,6 +84,7 @@ class Exercise {
     int? sets,
     ExerciseType? type,
     String? description,
+    int? restBetweenSets,
   }) {
     return Exercise(
       name: name ?? this.name,
@@ -85,6 +94,7 @@ class Exercise {
       sets: sets ?? this.sets,
       type: type ?? this.type,
       description: description ?? this.description,
+      restBetweenSets: restBetweenSets ?? this.restBetweenSets,
     );
   }
 }

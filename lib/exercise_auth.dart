@@ -29,6 +29,7 @@ class _ExerciseAuthState extends State<ExerciseAuth> {
   final descriptionController = TextEditingController();
   late final FPickerController workDurationController;
   late final FPickerController restDurationController;
+  late final FPickerController setRestDurationController;
   final _formKey = GlobalKey<FormState>();
   bool _localFormSubmitted = false;
 
@@ -56,14 +57,22 @@ class _ExerciseAuthState extends State<ExerciseAuth> {
       initialIndexes: [restMinutes, restSeconds],
     );
 
+    final setRestMinutes = widget.exercise.restBetweenSets ~/ 60;
+    final setRestSeconds = widget.exercise.restBetweenSets % 60;
+    setRestDurationController = FPickerController(
+      initialIndexes: [setRestMinutes, setRestSeconds],
+    );
+
     workDurationController.addListener(() => setState(() {}));
     restDurationController.addListener(() => setState(() {}));
+    setRestDurationController.addListener(() => setState(() {}));
   }
 
   @override
   void dispose() {
     workDurationController.dispose();
     restDurationController.dispose();
+    setRestDurationController.dispose();
     nameController.dispose();
     descriptionController.dispose();
     _typeController.dispose();
@@ -149,12 +158,33 @@ class _ExerciseAuthState extends State<ExerciseAuth> {
                       ),
                     ),
                     if (_isInterval) ...[
-                      _buildCountStepper(
-                        label: 'Reps',
-                        value: repCount,
-                        onDecrement: () => _updateRepCount(false),
-                        onIncrement: () => _updateRepCount(true),
-                        error: _shouldShowRepCountError() ? '0 Reps?' : null,
+                      Row(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        spacing: 16,
+                        children: [
+                          Expanded(
+                            child: _buildCountStepper(
+                              label: 'Sets',
+                              value: setCount,
+                              onDecrement: () => _updateSetCount(false),
+                              onIncrement: () => _updateSetCount(true),
+                              error: _shouldShowSetCountError()
+                                  ? 'At least 1 set'
+                                  : null,
+                            ),
+                          ),
+                          Expanded(
+                            child: _buildCountStepper(
+                              label: 'Reps per set',
+                              value: repCount,
+                              onDecrement: () => _updateRepCount(false),
+                              onIncrement: () => _updateRepCount(true),
+                              error: _shouldShowRepCountError()
+                                  ? '0 Reps?'
+                                  : null,
+                            ),
+                          ),
+                        ],
                       ),
                       Row(
                         crossAxisAlignment: CrossAxisAlignment.start,
@@ -175,6 +205,11 @@ class _ExerciseAuthState extends State<ExerciseAuth> {
                             ),
                           ),
                         ],
+                      ),
+                      _buildDurationPicker(
+                        label: 'Rest between sets',
+                        controller: setRestDurationController,
+                        width: double.infinity,
                       ),
                       if (_shouldShowWorkDurationError())
                         Text(
@@ -360,16 +395,20 @@ class _ExerciseAuthState extends State<ExerciseAuth> {
   Exercise _createExercise() {
     final workDuration = workDurationController.value;
     final restDuration = restDurationController.value;
+    final setRestDuration = setRestDurationController.value;
     final description = descriptionController.text.trim();
 
     return Exercise(
       name: nameController.text.trim(),
       reps: repCount,
-      sets: _isInterval ? 1 : setCount,
+      sets: setCount,
       timeOn: _isInterval
           ? (workDuration[0] % 60) * 60 + (workDuration[1] % 60)
           : 0,
       timeOff: (restDuration[0] % 60) * 60 + (restDuration[1] % 60),
+      restBetweenSets: _isInterval
+          ? (setRestDuration[0] % 60) * 60 + (setRestDuration[1] % 60)
+          : 0,
       type: type,
       description: description.isEmpty ? null : description,
     );
@@ -381,7 +420,7 @@ class _ExerciseAuthState extends State<ExerciseAuth> {
     }
 
     if (repCount <= 0) return false;
-    if (!_isInterval && setCount <= 0) return false;
+    if (setCount <= 0) return false;
 
     if (_isInterval &&
         _validateTimeSelection(workDurationController.value) != null) {
