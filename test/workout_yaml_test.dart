@@ -88,6 +88,77 @@ void main() {
     expect(workouts.last.exercises.single.timeOn, 60);
   });
 
+  test('round trips multiple workouts through YAML', () {
+    final workouts = [
+      Workout(
+        name: 'Push Day',
+        description: 'Upper body',
+        exercises: [
+          Exercise(
+            name: 'Bench Press',
+            reps: 8,
+            timeOn: 0,
+            timeOff: 90,
+            sets: 4,
+            type: ExerciseType.reps,
+          ),
+        ],
+      ),
+      Workout(
+        name: 'Intervals',
+        exercises: [
+          Exercise(
+            name: 'Sprint',
+            reps: 6,
+            timeOn: 30,
+            timeOff: 60,
+            type: ExerciseType.interval,
+          ),
+        ],
+      ),
+    ];
+
+    final decoded = workoutsFromYaml(workoutsToYaml(workouts));
+
+    expect(decoded, hasLength(2));
+    expect(decoded.first.name, 'Push Day');
+    expect(decoded.first.description, 'Upper body');
+    expect(decoded.first.exercises.single.name, 'Bench Press');
+    expect(decoded.first.exercises.single.sets, 4);
+    expect(decoded.first.exercises.single.timeOff, 90);
+    expect(decoded.last.name, 'Intervals');
+    expect(decoded.last.exercises.single.type, ExerciseType.interval);
+    expect(decoded.last.exercises.single.timeOn, 30);
+    expect(decoded.last.exercises.single.timeOff, 60);
+  });
+
+  test('exports a single workout with the single-workout format', () {
+    final workout = Workout(name: 'Solo', exercises: []);
+
+    expect(workoutsToYaml([workout]), workoutToYaml(workout));
+  });
+
+  test('parses a mapping with a workouts list', () {
+    final workouts = workoutsFromYaml('''
+version: 1
+workouts:
+  - name: First
+    exercises: []
+  - name: Second
+    exercises:
+      - name: Run
+        type: interval
+        reps: 3
+        time_on: 60
+        time_off: 30
+''');
+
+    expect(workouts, hasLength(2));
+    expect(workouts.first.name, 'First');
+    expect(workouts.last.name, 'Second');
+    expect(workouts.last.exercises.single.timeOn, 60);
+  });
+
   test('infers an interval type and accepts numeric strings', () {
     final workout = workoutsFromYaml('''
 name: Legacy

@@ -10,14 +10,17 @@ import 'package:timer_guy/services/workout_yaml.dart';
 class WorkoutFileService {
   const WorkoutFileService._();
 
-  /// Lets the user save [workout] as a YAML file.
+  /// Lets the user save [workouts] as a YAML file.
   ///
   /// Returns true when a file was saved. On the web this triggers a download.
-  static Future<bool> exportWorkout(Workout workout) async {
+  static Future<bool> exportWorkouts(List<Workout> workouts) async {
+    final single = workouts.length == 1 ? workouts.single : null;
     final uri = await FilePicker.saveFile(
-      dialogTitle: 'Export workout',
-      fileName: '${_fileStem(workout.name)}.yaml',
-      bytes: Uint8List.fromList(utf8.encode(workoutToYaml(workout))),
+      dialogTitle: single == null ? 'Export workouts' : 'Export workout',
+      fileName: single == null
+          ? 'workouts.yaml'
+          : '${_fileStem(single.name)}.yaml',
+      bytes: Uint8List.fromList(utf8.encode(workoutsToYaml(workouts))),
       mimeType: 'application/yaml',
     );
 
@@ -29,7 +32,7 @@ class WorkoutFileService {
   /// Returns null when the user cancels the picker.
   static Future<List<Workout>?> importWorkouts() async {
     final file = await FilePicker.pickFile(
-      dialogTitle: 'Import workout',
+      dialogTitle: 'Import workouts',
       type: FileType.custom,
       allowedExtensions: const ['yaml', 'yml'],
     );

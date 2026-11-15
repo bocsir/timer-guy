@@ -13,8 +13,50 @@ import 'package:timer_guy/widgets/workout_yaml_actions.dart';
 import 'package:timer_guy/workout_auth.dart';
 import 'package:timer_guy/workout_page.dart';
 
-class WorkoutList extends StatelessWidget {
+class WorkoutList extends StatefulWidget {
   const WorkoutList({super.key});
+
+  @override
+  State<WorkoutList> createState() => _WorkoutListState();
+}
+
+class _WorkoutListState extends State<WorkoutList> {
+  bool _exporting = false;
+  final Set<dynamic> _selectedKeys = {};
+
+  void _toggleExportMode() {
+    setState(() {
+      _exporting = !_exporting;
+      _selectedKeys.clear();
+    });
+  }
+
+  void _toggleSelected(dynamic key) {
+    setState(() {
+      if (!_selectedKeys.remove(key)) {
+        _selectedKeys.add(key);
+      }
+    });
+  }
+
+  Future<void> _exportWorkouts(Box<Workout> box) async {
+    final workouts = _selectedKeys.isEmpty
+        ? box.values.toList()
+        : box.keys
+              .where(_selectedKeys.contains)
+              .map(box.get)
+              .whereType<Workout>()
+              .toList();
+
+    if (workouts.isEmpty) return;
+    await exportWorkoutsAsYaml(context, workouts);
+  }
+
+  String get _exportButtonLabel {
+    if (_selectedKeys.isEmpty) return 'Export all workouts';
+    if (_selectedKeys.length == 1) return 'Export 1 workout';
+    return 'Export ${_selectedKeys.length} workouts';
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -24,50 +66,97 @@ class WorkoutList extends StatelessWidget {
       valueListenable: box.listenable(),
       builder: (BuildContext context, Box<Workout> box, Widget? _) {
         final workouts = box.values.toList();
+        final keys = box.keys.toList();
+
         return FScaffold(
           header: Header(
             hideBackBtn: true,
-            titleText: 'Timer Guy',
+            titleText: _exporting ? 'Export workouts' : 'Timer Guy',
             trailing: Row(
               mainAxisSize: MainAxisSize.min,
               children: [
-                const SettingsMenuButton(),
-                Builder(
-                  builder: (context) => Tooltip(
-                    message: 'Import workout from YAML',
+                if (_exporting)
+                  Tooltip(
+                    message: 'Cancel export',
                     child: FButton.icon(
                       style: FButtonStyle.ghost(),
-                      onPress: () => importWorkoutsFromYaml(context, box),
+                      onPress: _toggleExportMode,
                       child: Icon(
-                        FIcons.upload,
+                        FIcons.x,
+                        color: context.theme.colors.mutedForeground,
+                        size: 24,
+                      ),
+                    ),
+                  )
+                else ...[
+                  const SettingsMenuButton(),
+                  Builder(
+                    builder: (context) => Tooltip(
+                      message: 'Import workouts from YAML',
+                      child: FButton.icon(
+                        style: FButtonStyle.ghost(),
+                        onPress: () => importWorkoutsFromYaml(context, box),
+                        child: Icon(
+                          FIcons.upload,
+                          color: context.theme.colors.mutedForeground,
+                          size: 24,
+                        ),
+                      ),
+                    ),
+                  ),
+                  Tooltip(
+                    message: 'Export workouts as YAML',
+                    child: FButton.icon(
+                      style: FButtonStyle.ghost(),
+                      onPress: _toggleExportMode,
+                      child: Icon(
+                        FIcons.download,
                         color: context.theme.colors.mutedForeground,
                         size: 24,
                       ),
                     ),
                   ),
-                ),
-                FButton.icon(
-                  style: FButtonStyle.ghost(),
-                  onPress: () => Navigator.of(context).push(
-                    MaterialPageRoute(
-                      builder: (context) => WorkoutAuth(workoutBox: box),
+                  FButton.icon(
+                    style: FButtonStyle.ghost(),
+                    onPress: () => Navigator.of(context).push(
+                      MaterialPageRoute(
+                        builder: (context) => WorkoutAuth(workoutBox: box),
+                      ),
+                    ),
+                    child: Icon(
+                      FIcons.plus,
+                      color: context.theme.colors.accent,
+                      size: 28,
                     ),
                   ),
-                  child: Icon(
-                    FIcons.plus,
-                    color: context.theme.colors.accent,
-                    size: 28,
-                  ),
-                ),
+                ],
               ],
             ),
           ),
           // The dancing guys keep us company at the bottom of the list.
           // heightFactor: 1 keeps the footer sized to the dancers instead of
           // expanding to fill the scaffold (which would squash the list).
-          footer: const Padding(
-            padding: EdgeInsets.all(16),
-            child: Center(heightFactor: 1, child: Dance()),
+          footer: Padding(
+            padding: const EdgeInsets.all(16),
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                if (_exporting) ...[
+                  SizedBox(
+                    width: double.infinity,
+                    child: FButton(
+                      onPress: workouts.isEmpty
+                          ? null
+                          : () => _exportWorkouts(box),
+                      prefix: const Icon(FIcons.download),
+                      child: Text(_exportButtonLabel),
+                    ),
+                  ),
+                  const SizedBox(height: 16),
+                ],
+                const Center(heightFactor: 1, child: Dance()),
+              ],
+            ),
           ),
           // The default footer decoration draws a divider line above it.
           scaffoldStyle: (style) =>
@@ -96,101 +185,8 @@ class WorkoutList extends StatelessWidget {
                     FItemGroup(
                       divider: FItemDivider.full,
                       children: [
-                        ...workouts.map(
-                          (w) => FItem(
-                            title: Text(
-                              w.name,
-                              style: context.theme.typography.baseSemibold,
-                            ),
-                            subtitle:
-                                w.description == null || w.description!.isEmpty
-                                ? null
-                                : Text(
-                                    w.description!,
-                                    style: context.theme.typography.sm.copyWith(
-                                      color:
-                                          context.theme.colors.mutedForeground,
-                                    ),
-                                  ),
-                            details: Text(
-                              '${w.exercises.length} exercises · ${w.totalSets} sets · ${w.totalReps} reps',
-                              style: context.theme.typography.sm.copyWith(
-                                color: context.theme.colors.mutedForeground,
-                              ),
-                            ),
-                            suffix: Padding(
-                              padding: EdgeInsetsGeometry.only(left: 32),
-                              child: Builder(
-                                builder: (context) => Row(
-                                  spacing: 16,
-                                  mainAxisSize: MainAxisSize.min,
-                                  children: [
-                                    Tooltip(
-                                      message: 'View analytics',
-                                      child: FButton.icon(
-                                        style: FButtonStyle.ghost(),
-                                        onPress: () =>
-                                            Navigator.of(context).push(
-                                              MaterialPageRoute(
-                                                builder: (context) =>
-                                                    WorkoutAnalyticsPage(
-                                                      workout: w,
-                                                    ),
-                                              ),
-                                            ),
-                                        child: Icon(
-                                          FIcons.chartBar,
-                                          color: context
-                                              .theme
-                                              .colors
-                                              .mutedForeground,
-                                        ),
-                                      ),
-                                    ),
-                                    Tooltip(
-                                      message: 'Export as YAML',
-                                      child: FButton.icon(
-                                        style: FButtonStyle.ghost(),
-                                        onPress: () =>
-                                            exportWorkoutAsYaml(context, w),
-                                        child: Icon(
-                                          FIcons.download,
-                                          color: context
-                                              .theme
-                                              .colors
-                                              .mutedForeground,
-                                        ),
-                                      ),
-                                    ),
-                                    FButton.icon(
-                                      style: FButtonStyle.ghost(),
-                                      onPress: () => Navigator.of(context).push(
-                                        MaterialPageRoute(
-                                          builder: (context) => WorkoutAuth(
-                                            workoutBox: box,
-                                            workout: w,
-                                          ),
-                                        ),
-                                      ),
-                                      child: Icon(
-                                        FIcons.pencil,
-                                        color: context
-                                            .theme
-                                            .colors
-                                            .mutedForeground,
-                                      ),
-                                    ),
-                                  ],
-                                ),
-                              ),
-                            ),
-                            onPress: () => Navigator.of(context).push(
-                              MaterialPageRoute(
-                                builder: (context) => WorkoutPage(workout: w),
-                              ),
-                            ),
-                          ),
-                        ),
+                        for (var i = 0; i < workouts.length; i++)
+                          _buildWorkoutItem(context, keys[i], workouts[i]),
                       ],
                     ),
                 ],
@@ -199,6 +195,87 @@ class WorkoutList extends StatelessWidget {
           ),
         );
       },
+    );
+  }
+
+  FItem _buildWorkoutItem(BuildContext context, dynamic key, Workout workout) {
+    final selected = _selectedKeys.contains(key);
+    final box = Hive.box<Workout>(workoutBox);
+
+    return FItem(
+      key: ValueKey(key),
+      selected: _exporting && selected,
+      prefix: _exporting
+          ? FCheckbox(
+              value: selected,
+              onChange: (_) => _toggleSelected(key),
+              semanticsLabel: 'Select ${workout.name}',
+            )
+          : null,
+      title: Text(workout.name, style: context.theme.typography.baseSemibold),
+      subtitle: workout.description == null || workout.description!.isEmpty
+          ? null
+          : Text(
+              workout.description!,
+              style: context.theme.typography.sm.copyWith(
+                color: context.theme.colors.mutedForeground,
+              ),
+            ),
+      details: Text(
+        '${workout.exercises.length} exercises · ${workout.totalSets} sets · ${workout.totalReps} reps',
+        style: context.theme.typography.sm.copyWith(
+          color: context.theme.colors.mutedForeground,
+        ),
+      ),
+      suffix: _exporting
+          ? null
+          : Padding(
+              padding: const EdgeInsets.only(left: 32),
+              child: Builder(
+                builder: (context) => Row(
+                  spacing: 16,
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    Tooltip(
+                      message: 'View analytics',
+                      child: FButton.icon(
+                        style: FButtonStyle.ghost(),
+                        onPress: () => Navigator.of(context).push(
+                          MaterialPageRoute(
+                            builder: (context) =>
+                                WorkoutAnalyticsPage(workout: workout),
+                          ),
+                        ),
+                        child: Icon(
+                          FIcons.chartBar,
+                          color: context.theme.colors.mutedForeground,
+                        ),
+                      ),
+                    ),
+                    FButton.icon(
+                      style: FButtonStyle.ghost(),
+                      onPress: () => Navigator.of(context).push(
+                        MaterialPageRoute(
+                          builder: (context) =>
+                              WorkoutAuth(workoutBox: box, workout: workout),
+                        ),
+                      ),
+                      child: Icon(
+                        FIcons.pencil,
+                        color: context.theme.colors.mutedForeground,
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            ),
+      onPress: _exporting
+          ? () => _toggleSelected(key)
+          : () => Navigator.of(context).push(
+              MaterialPageRoute(
+                builder: (context) => WorkoutPage(workout: workout),
+              ),
+            ),
     );
   }
 }

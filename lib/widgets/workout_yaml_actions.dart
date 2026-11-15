@@ -6,21 +6,30 @@ import 'package:timer_guy/models/workout.dart';
 import 'package:timer_guy/services/workout_file_service.dart';
 import 'package:timer_guy/services/workout_yaml.dart';
 
-/// Exports [workout] to a YAML file chosen by the user.
-Future<void> exportWorkoutAsYaml(BuildContext context, Workout workout) async {
+/// Exports [workouts] to a YAML file chosen by the user.
+Future<void> exportWorkoutsAsYaml(
+  BuildContext context,
+  List<Workout> workouts,
+) async {
+  if (workouts.isEmpty) return;
+
   try {
-    final saved = await WorkoutFileService.exportWorkout(workout);
+    final saved = await WorkoutFileService.exportWorkouts(workouts);
     if (!context.mounted || !saved) return;
 
     showFToast(
       context: context,
-      title: Text('Exported "${workout.name}"'),
+      title: Text(
+        workouts.length == 1
+            ? 'Exported "${workouts.single.name}"'
+            : 'Exported ${workouts.length} workouts',
+      ),
       description: const Text('Saved as a YAML file.'),
       icon: const Icon(FIcons.download),
     );
   } catch (error) {
     if (!context.mounted) return;
-    await _showError(context, 'Could not export workout', '$error');
+    await _showError(context, 'Could not export workouts', '$error');
   }
 }
 

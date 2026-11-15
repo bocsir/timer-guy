@@ -26,41 +26,32 @@ class WorkoutYamlException implements Exception {
 String workoutToYaml(Workout workout) {
   final buffer = StringBuffer()
     ..writeln('# Timer Guy workout')
+    ..writeln('version: $workoutYamlVersion');
+  _writeWorkout(buffer, workout);
+  return buffer.toString();
+}
+
+/// Serializes [workouts] to a human-editable YAML document.
+///
+/// A single workout is written using the same format as [workoutToYaml]. Two
+/// or more workouts are written under a top-level `workouts` list, which
+/// [workoutsFromYaml] can read back.
+String workoutsToYaml(List<Workout> workouts) {
+  if (workouts.isEmpty) {
+    throw const WorkoutYamlException('There are no workouts to export.');
+  }
+  if (workouts.length == 1) {
+    return workoutToYaml(workouts.single);
+  }
+
+  final buffer = StringBuffer()
+    ..writeln('# Timer Guy workouts')
     ..writeln('version: $workoutYamlVersion')
-    ..writeln('name: ${_scalar(workout.name)}');
+    ..writeln('workouts:');
 
-  final description = workout.description;
-  if (description != null && description.trim().isNotEmpty) {
-    buffer.writeln('description: ${_scalar(description)}');
-  }
-
-  if (workout.exercises.isEmpty) {
-    buffer.writeln('exercises: []');
-    return buffer.toString();
-  }
-
-  buffer.writeln('exercises:');
-  for (final exercise in workout.exercises) {
-    buffer
-      ..writeln('  - name: ${_scalar(exercise.name)}')
-      ..writeln('    type: ${exercise.type.name}');
-
-    final exerciseDescription = exercise.description;
-    if (exerciseDescription != null && exerciseDescription.trim().isNotEmpty) {
-      buffer.writeln('    description: ${_scalar(exerciseDescription)}');
-    }
-
-    if (exercise.isInterval) {
-      buffer
-        ..writeln('    reps: ${exercise.reps}')
-        ..writeln('    time_on: ${exercise.timeOn}')
-        ..writeln('    time_off: ${exercise.timeOff}');
-    } else {
-      buffer
-        ..writeln('    sets: ${exercise.sets}')
-        ..writeln('    reps: ${exercise.reps}')
-        ..writeln('    time_off: ${exercise.timeOff}');
-    }
+  for (var i = 0; i < workouts.length; i++) {
+    if (i > 0) buffer.writeln();
+    _writeWorkout(buffer, workouts[i], indent: '    ', firstLinePrefix: '  - ');
   }
 
   return buffer.toString();
@@ -68,9 +59,9 @@ String workoutToYaml(Workout workout) {
 
 /// Parses one or more workouts from [source].
 ///
-/// The document can be a single workout mapping or a list of mappings. This
-/// makes it possible to export several workouts by wrapping them in a YAML
-/// list.
+/// The document can be a single workout mapping, a list of mappings, or a
+/// mapping containing a `workouts` list. This makes it possible to import both
+/// single-workout files and files exported with [workoutsToYaml].
 List<Workout> workoutsFromYaml(String source) {
   final dynamic document;
   try {
@@ -83,7 +74,22 @@ List<Workout> workoutsFromYaml(String source) {
     throw const WorkoutYamlException('The file is empty.');
   }
 
-  final nodes = document is List ? document : [document];
+  final List<dynamic> nodes;
+  if (document is Map && document.containsKey('workouts')) {
+    final workouts = document['workouts'];
+    if (workouts == null) {
+      nodes = const [];
+    } else if (workouts is! List) {
+      throw const WorkoutYamlException('"workouts" must be a list.');
+    } else {
+      nodes = workouts;
+    }
+  } else if (document is List) {
+    nodes = document;
+  } else {
+    nodes = [document];
+  }
+
   if (nodes.isEmpty) {
     throw const WorkoutYamlException('The file does not contain any workouts.');
   }
@@ -92,6 +98,55 @@ List<Workout> workoutsFromYaml(String source) {
     for (var i = 0; i < nodes.length; i++)
       _workoutFromNode(nodes[i], nodes.length > 1 ? i + 1 : null),
   ];
+}
+
+void _writeWorkout(
+  StringBuffer buffer,
+  Workout workout, {
+  String indent = '',
+  String firstLinePrefix = '',
+}) {
+  buffer.writeln(
+    '${firstLinePrefix.isEmpty ? indent : firstLinePrefix}'
+    'name: ${_scalar(workout.name)}',
+  );
+
+  final description = workout.description;
+  if (description != null && description.trim().isNotEmpty) {
+    buffer.writeln('${indent}description: ${_scalar(description)}');
+  }
+
+  if (workout.exercises.isEmpty) {
+    buffer.writeln('${indent}exercises: []');
+    return;
+  }
+
+  buffer.writeln('${indent}exercises:');
+  for (final exercise in workout.exercises) {
+    final exerciseIndent = '$indent  ';
+    buffer
+      ..writeln('$exerciseIndent- name: ${_scalar(exercise.name)}')
+      ..writeln('$exerciseIndent  type: ${exercise.type.name}');
+
+    final exerciseDescription = exercise.description;
+    if (exerciseDescription != null && exerciseDescription.trim().isNotEmpty) {
+      buffer.writeln(
+        '$exerciseIndent  description: ${_scalar(exerciseDescription)}',
+      );
+    }
+
+    if (exercise.isInterval) {
+      buffer
+        ..writeln('$exerciseIndent  reps: ${exercise.reps}')
+        ..writeln('$exerciseIndent  time_on: ${exercise.timeOn}')
+        ..writeln('$exerciseIndent  time_off: ${exercise.timeOff}');
+    } else {
+      buffer
+        ..writeln('$exerciseIndent  sets: ${exercise.sets}')
+        ..writeln('$exerciseIndent  reps: ${exercise.reps}')
+        ..writeln('$exerciseIndent  time_off: ${exercise.timeOff}');
+    }
+  }
 }
 
 Workout _workoutFromNode(dynamic node, int? number) {
