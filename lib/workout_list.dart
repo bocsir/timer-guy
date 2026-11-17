@@ -89,32 +89,9 @@ class _WorkoutListState extends State<WorkoutList> {
                     ),
                   )
                 else ...[
-                  const SettingsMenuButton(),
-                  Builder(
-                    builder: (context) => Tooltip(
-                      message: 'Import workouts from YAML',
-                      child: FButton.icon(
-                        style: FButtonStyle.ghost(),
-                        onPress: () => importWorkoutsFromYaml(context, box),
-                        child: Icon(
-                          FIcons.upload,
-                          color: context.theme.colors.mutedForeground,
-                          size: 24,
-                        ),
-                      ),
-                    ),
-                  ),
-                  Tooltip(
-                    message: 'Export workouts as YAML',
-                    child: FButton.icon(
-                      style: FButtonStyle.ghost(),
-                      onPress: _toggleExportMode,
-                      child: Icon(
-                        FIcons.download,
-                        color: context.theme.colors.mutedForeground,
-                        size: 24,
-                      ),
-                    ),
+                  SettingsMenuButton(
+                    onImport: () => importWorkoutsFromYaml(context, box),
+                    onExport: _toggleExportMode,
                   ),
                   FButton.icon(
                     style: FButtonStyle.ghost(),

@@ -24,15 +24,12 @@ Future<void> main() async {
 
   // Load the persisted theme preference and save future changes.
   final settings = await Hive.openBox<bool>(settingsBox);
-  appThemeMode.value = (settings.get(darkModeKey, defaultValue: true) ?? true)
-      ? ThemeMode.dark
-      : ThemeMode.light;
+  appThemeMode.value = (settings.get(darkModeKey, defaultValue: true) ?? true) ? ThemeMode.dark : ThemeMode.light;
   appThemeMode.addListener(() {
     settings.put(darkModeKey, appThemeMode.value == ThemeMode.dark);
   });
 
-  animatedBackgroundEnabled.value =
-      settings.get(animatedBackgroundKey, defaultValue: true) ?? true;
+  animatedBackgroundEnabled.value = settings.get(animatedBackgroundKey, defaultValue: true) ?? true;
   animatedBackgroundEnabled.addListener(() {
     settings.put(animatedBackgroundKey, animatedBackgroundEnabled.value);
   });
@@ -40,11 +37,8 @@ Future<void> main() async {
   // Rewrite records read with the old schema in the current format so the
   // migration only has to run once. See MigratingWorkoutAdapter.read and
   // MigratingExerciseAdapter.read.
-  if (MigratingWorkoutAdapter.migratedLegacyData ||
-      MigratingExerciseAdapter.migratedLegacyData) {
-    await box.putAll({
-      for (final entry in box.toMap().entries) entry.key: entry.value,
-    });
+  if (MigratingWorkoutAdapter.migratedLegacyData || MigratingExerciseAdapter.migratedLegacyData) {
+    await box.putAll({for (final entry in box.toMap().entries) entry.key: entry.value});
     // Drop the now-unused frames written with the old schema.
     await box.compact();
     MigratingWorkoutAdapter.migratedLegacyData = false;
@@ -67,9 +61,7 @@ class MyApp extends StatelessWidget {
       builder: (context, mode, __) {
         final theme = mode == ThemeMode.light ? zincLight : zincDark;
         final materialTheme = theme.toApproximateMaterialTheme().copyWith(
-          textTheme: theme.toApproximateMaterialTheme().textTheme.apply(
-            fontFamily: 'IBMPlexMono',
-          ),
+          textTheme: theme.toApproximateMaterialTheme().textTheme.apply(fontFamily: 'IBMPlexMono'),
         );
 
         return MaterialApp(

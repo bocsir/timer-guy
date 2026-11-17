@@ -3,8 +3,10 @@ import 'package:flutter/material.dart';
 import 'package:forui/forui.dart';
 import 'package:hive_ce_flutter/hive_flutter.dart';
 import 'package:timer_guy/models/workout.dart';
+import 'package:timer_guy/services/workout_file_drop.dart';
 import 'package:timer_guy/services/workout_file_service.dart';
 import 'package:timer_guy/services/workout_yaml.dart';
+import 'package:timer_guy/widgets/import_workouts_dialog.dart';
 
 /// Exports [workouts] to a YAML file chosen by the user.
 Future<void> exportWorkoutsAsYaml(
@@ -39,7 +41,9 @@ Future<void> importWorkoutsFromYaml(
   Box<Workout> box,
 ) async {
   try {
-    final workouts = await WorkoutFileService.importWorkouts();
+    final workouts = workoutFileDropSupported
+        ? await showImportWorkoutsDialog(context)
+        : await WorkoutFileService.importWorkouts();
     if (workouts == null) return;
     if (workouts.isEmpty) {
       throw const WorkoutYamlException(

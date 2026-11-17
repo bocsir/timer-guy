@@ -38,9 +38,14 @@ class WorkoutFileService {
     );
     if (file == null) return null;
 
+    return workoutsFromBytes(await file.readAsBytes());
+  }
+
+  /// Parses workouts from the contents of a YAML file.
+  static List<Workout> workoutsFromBytes(Uint8List bytes) {
     final String source;
     try {
-      source = utf8.decode(await file.readAsBytes());
+      source = utf8.decode(bytes);
     } on FormatException {
       throw const WorkoutYamlException(
         'The selected file is not valid UTF-8 text.',
